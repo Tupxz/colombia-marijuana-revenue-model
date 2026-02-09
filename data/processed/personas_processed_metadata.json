@@ -1,0 +1,32 @@
+{
+  "rows": 169346,
+  "columns": 12,
+  "dtypes": {
+    "sexo": "int64",
+    "edad": "int64",
+    "parentesco": "int64",
+    "padre": "int64",
+    "madre": "int64",
+    "consentimiento": "float64",
+    "resultado": "float64",
+    "directorio": "int64",
+    "secuencia_encuesta": "int64",
+    "secuencia_p": "int64",
+    "orden": "int64",
+    "per_seleccionada": "float64"
+  },
+  "null_counts": {
+    "sexo": 0,
+    "edad": 0,
+    "parentesco": 0,
+    "padre": 0,
+    "madre": 0,
+    "consentimiento": 119590,
+    "resultado": 119590,
+    "directorio": 0,
+    "secuencia_encuesta": 0,
+    "secuencia_p": 0,
+    "orden": 0,
+    "per_seleccionada": 119590
+  }
+}
