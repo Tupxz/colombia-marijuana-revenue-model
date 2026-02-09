@@ -1,1 +1,62 @@
+\documentclass[aspectratio=169, 12pt]{beamer}
+
+% ======================
+% PAQUETES
+% ======================
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{listings}
+
+% ======================
+% TEMA Y COLORES
+% ======================
+\usetheme{Madrid}
+\usecolortheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{frametitle}[default][center]
+
+% Colores personalizados
+\definecolor{eafit}{RGB}{0, 51, 102}
+\definecolor{lightgray}{RGB}{240, 240, 240}
+\setbeamercolor{frametitle}{bg=eafit, fg=white}
+\setbeamercolor{section in head/foot}{bg=eafit, fg=white}
+
+% ======================
+% INFO GENERAL
+% ======================
+\title{El IVA del Dealer}
+\subtitle{Modelado de Recaudos Tributarios bajo Escenarios de Legalización de Cannabis en Colombia}
+
+\author[Tupaz, Quintero, Rodrigues]{
+Santiago Tupaz, Moisés Quintero, Vanessa Rodrigues
+}
+
+\institute[EAFIT - UNAL]{
+Universidad EAFIT, Programa de Economía \\
+Universidad Nacional de Colombia, Programa de Estadística \\[0.3cm]
+{\small Profesora Supervisora: Paula María Almonacid Hurtado}
+}
+
+\date{9 de febrero de 2026}
+
+% ======================
+% DOCUMENTO
+% ======================
+\begin{document}
+
+\input{sections/00_front_page}
+\input{sections/01_motivacion}
+\input{sections/02_pregunta}
+\input{sections/03_metodologia}
+\input{sections/04_resultados}
+\input{sections/05_conclusiones}
+
+\end{document}
 
