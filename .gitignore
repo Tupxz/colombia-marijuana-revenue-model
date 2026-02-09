@@ -218,3 +218,4 @@ __marimo__/
 *.lot
 *.fls
 *.fdb_latexmk
+*.gz
