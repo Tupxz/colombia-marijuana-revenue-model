@@ -11,6 +11,7 @@
 \usepackage{hyperref}
 \usepackage{natbib}
 \usepackage{abstract}
+\usepackage{booktabs}
 
 \onehalfspacing
 
@@ -21,7 +22,7 @@
 {\small $^{2}$ Universidad Nacional de Colombia, Programa de Estadística, Sede Medellín} \\[1cm]
 {\small \textbf{Profesora Supervisora:} Paula María Almonacid Hurtado, Universidad EAFIT}}
 
-\date{\small Febrero 9, 2026}
+\date{\small Febrero 10, 2026}
 
 \begin{document}
 
@@ -56,16 +57,16 @@
 
     {\normalsize
     Medellín, Colombia\\
-    9 de febrero de 2026
+    10 de febrero de 2026
     }
 
     \vfill
 \end{titlepage}
 
 \begin{abstract}
-Este artículo examina cómo podría proyectarse la estructura del recaudo tributario del Estado colombiano bajo distintos escenarios de legalización y regulación de la distribución de marihuana. Utilizando técnicas de ciencia de datos y análisis econométrico, construimos un modelo predictivo que integra variables sociodemográficas, datos de encuestas nacionales y proyecciones fiscales. Los resultados proporcionan evidencia cuantitativa para la formulación de políticas públicas en el contexto de la reforma tributaria y regulación de mercados alternativos.
+Este artículo examina cómo podría proyectarse la estructura del recaudo tributario del Estado colombiano bajo distintos escenarios de legalización y regulación de la distribución de marihuana. Utilizando técnicas de ciencia de datos y análisis econométrico, construimos un modelo predictivo que integra variables sociodemográficas de encuestas nacionales con supuestos de regulación tributaria. Los resultados proporcionan evidencia cuantitativa para la formulación de políticas públicas en el contexto de la reforma tributaria y regulación de mercados alternativos en Colombia.
 
-\textit{Palabras clave}: recaudo tributario, legalización de drogas, predicción, ciencia de datos, política fiscal
+\textit{Palabras clave}: recaudo tributario, legalización de cannabis, ciencia de datos, política fiscal, modelado de escenarios
 \end{abstract}
 
 \newpage
@@ -76,16 +77,199 @@ Este artículo examina cómo podría proyectarse la estructura del recaudo tribu
 
 \section{Introducción}
 
-La legalización de sustancias controladas representa una transformación significativa en la política pública, con implicaciones fiscales, sociales y económicas profundas. El caso de la marihuana en Colombia ofrece un contexto particularmente relevante, dado el historial del país en relación con economías ilegales relacionadas con drogas y la creciente consideración de marcos regulatorios alternativos.
+\subsection{Contexto Global y Relevancia}
 
-Este estudio aborda una pregunta fundamental para la formulación de políticas públicas: \textit{¿Cómo podría estructurarse el recaudo tributario del Estado colombiano bajo distintos escenarios de legalización de la distribución de marihuana?}
+La legalización de sustancias controladas representa una transformación significativa en la política pública, con profundas implicaciones fiscales, sociales y económicas. A nivel mundial, más de 40 países han legalizado cannabis en alguna forma, generando ingresos tributarios considerables. En Estados Unidos, jurisdicciones como Colorado y Washington han recaudado más de 4,000 millones de dólares desde la legalización, demostrando el potencial fiscal de estos mercados regulados.
 
-Nuestro enfoque combina técnicas de ciencia de datos, análisis econométrico y modelado de escenarios para proporcionar proyecciones cuantitativas que contribuyan al debate de política fiscal y regulatoria. El análisis integra datos sociodemográficos, información de encuestas nacionales y variables macroeconómicas relevantes.
+Colombia, por su parte, enfrenta un contexto único: históricamente vinculada a economías ilícitas relacionadas con drogas, la regulación de la distribución de marihuana representa una oportunidad para transformar estructuras económicas informales en fuentes formales de recaudo. La creciente consideración de marcos regulatorios alternativos abre la puerta a un análisis cuantitativo de escenarios tributarios.
 
-\subsection{Motivación}
+\subsection{Pregunta de Investigación}
 
-\subsection{Objetivos}
+\textbf{¿Cómo podría estructurarse el recaudo tributario del Estado colombiano bajo distintos escenarios de legalización de la distribución de marihuana?}
 
-\subsection{Estructura del documento}
+La ``estructura del recaudo tributario'' se define como la participación porcentual de cada fuente de ingreso (impuestos a la renta, IVA, impuestos específicos, etc.) dentro del total recaudado por el Estado en un período determinado. Esta pregunta es fundamental porque va más allá de cuantificar ingresos adicionales para comprender cómo se reconfigurarían las proporciones del ingreso fiscal total bajo diferentes marcos regulatorios.
+
+\subsection{Importancia y Motivación}
+
+Desde una perspectiva fiscal, la legalización introduciría impuestos específicos al cannabis que constituirían una fuente de recaudo identificable y relevante. La evidencia internacional (Hansen et al., 2020; Dills et al., 2021) muestra que estos ingresos no son marginales ni temporales, sino que tienden a consolidarse a través del tiempo.
+
+Desde una perspectiva económica, anticipar cómo se reconfiguraría la estructura del recaudo resulta clave para:
+\begin{itemize}
+    \item Evaluar sostenibilidad fiscal bajo diferentes diseños tributarios
+    \item Optimizar la asignación del gasto público
+    \item Diseñar estructuras impositivas eficientes
+    \item Contribuir al debate de política pública con evidencia cuantitativa
+\end{itemize}
+
+\section{Marco Teórico y Evidencia Empírica}
+
+\subsection{Experiencias Internacionales}
+
+\textbf{Hansen, Miller y Weber (2020)} estudian los efectos fiscales de la legalización en Washington y Oregón, encontrando que:
+\begin{itemize}
+    \item La apertura de mercados legales genera ajustes inmediatos en ventas formales
+    \item Existe consumo transfronterizo significativo: entre 8.1\% y 11.5\% del recaudo de Washington provenía de consumidores no residentes
+    \item La legalización crea nuevas fuentes de recaudo tributario que no existían bajo prohibición
+\end{itemize}
+
+\textbf{Dills, Goffard y Miron (2021)} analizan los ingresos fiscales en múltiples estados, observando que:
+\begin{itemize}
+    \item Los impuestos específicos al cannabis generan incrementos persistentes y significativos en recaudos estatales
+    \item Estos ingresos continúan creciendo en años posteriores a la legalización
+    \item La magnitud de los ingresos justifica su inclusión explícita en la estructura tributaria
+\end{itemize}
+
+\subsection{Supuestos del Análisis}
+
+El estudio se fundamenta en los siguientes supuestos:
+
+\begin{enumerate}
+    \item \textbf{Shock estructural}: La legalización incrementa el volumen de transacciones visibles en el mercado formal, absorbiendo parte del consumo que canalizaba la informalidad
+    \item \textbf{Movilidad de demanda}: El consumo no depende únicamente del mercado interno sino que responde a diferencias regulatorias y de precios
+    \item \textbf{Impuesto específico identificable}: La legalización introduce un tributo específico al cannabis que constituye una fuente relevante y consolidable
+    \item \textbf{Relación precio-demanda}: La tasa impositiva efectiva influye directamente en el tamaño del mercado legal y en el nivel de recaudo
+\end{enumerate}
+
+\section{Metodología}
+
+\subsection{Datos y Variables}
+
+\textbf{Unidad de Análisis}: El país en un período determinado, con información agregada en frecuencia anual.
+
+\textbf{Variables Objetivo}: La estructura del recaudo tributario, expresada como la participación porcentual de cada fuente dentro del total:
+\begin{equation}
+Y_{k,t} = \frac{\text{Recaudo de la fuente } k \text{ en el período } t}{\text{Recaudo total en el período } t}
+\end{equation}
+
+\textbf{Variables Explicativas}:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Categoría} & \textbf{Variables} \\
+\midrule
+Fiscales & Recaudo total, recaudo por fuente \\
+Legalización & Indicador legal, tasa impositiva, consumo estimado \\
+Macroeconómicas & PIB real, consumo de hogares, inflación \\
+Demográficas & Población, densidad urbana \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Fuentes de Información}
+
+\begin{itemize}
+    \item \textbf{DIAN}: Datos de recaudo tributario
+    \item \textbf{DANE}: Variables macroeconómicas, demográficas y de encuestas nacionales
+    \item \textbf{Encuestas de consumo}: Datos sociodemográficos de 169,346 individuos
+    \item \textbf{Fuentes internacionales}: Información comparativa de legalización en otros países
+\end{itemize}
+
+\subsection{Estrategia Analítica}
+
+El análisis articula el siguiente flujo de trabajo:
+
+\begin{enumerate}
+    \item \textbf{Procesamiento}: Limpieza, normalización y tratamiento de datos faltantes
+    \item \textbf{Análisis exploratorio}: Estadísticas descriptivas y patrones de consumo
+    \item \textbf{Modelado}: Regresión de datos composicionales (fractional logit/probit)
+    \item \textbf{Simulación}: Proyecciones fiscales bajo diferentes escenarios regulatorios
+    \item \textbf{Validación}: Evaluación fuera de muestra del desempeño predictivo
+\end{enumerate}
+
+\subsection{Modelos Predictivos}
+
+Dado que $Y_{k,t}$ es una proporción acotada entre 0 y 1, se emplean modelos de regresión fractional:
+
+\textbf{Fractional Logit}:
+\begin{equation}
+E[Y_{k,t} | X_t] = \frac{\exp(\eta_{k,t})}{1 + \exp(\eta_{k,t})}
+\end{equation}
+
+\textbf{Fractional Probit}:
+\begin{equation}
+E[Y_{k,t} | X_t] = \Phi(\eta_{k,t})
+\end{equation}
+
+donde $\Phi(\cdot)$ es la función de distribución acumulada normal estándar.
+
+Para garantizar coherencia composicional, las predicciones se normalizan:
+\begin{equation}
+\tilde{Y}_{k,t} = \frac{\hat{Y}_{k,t}}{\sum_k \hat{Y}_{k,t}}
+\end{equation}
+
+\subsection{Escenarios Simulados}
+
+Se evalúan tres escenarios de política:
+
+\begin{enumerate}
+    \item \textbf{Escenario Base}: Prohibición (estructura tributaria actual)
+    \item \textbf{Escenario 1}: Legalización amplia con IVA estándar (19\%)
+    \item \textbf{Escenario 2}: Legalización con impuesto especial (25\%)
+    \item \textbf{Escenario 3}: Regulación parcial con múltiples tramos tributarios
+\end{enumerate}
+
+\section{Datos: Primera Descripción}
+
+\subsection{Caracterización del Dataset}
+
+El análisis se basa en una encuesta nacional de 169,346 individuos con información sociodemográfica:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lrr}
+\toprule
+\textbf{Variable} & \textbf{Observaciones} & \textbf{Tasa de Respuesta} \\
+\midrule
+Sexo & 169,346 & 100\% \\
+Edad & 169,346 & 100\% \\
+Parentesco & 169,346 & 100\% \\
+Consentimiento & 49,756 & 29.4\% \\
+Resultado & 49,756 & 29.4\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Interpretación de Datos Faltantes}
+
+Las variables ``Consentimiento'', ``Resultado'' y ``Seleccionada'' presentan 70.6\% de valores faltantes. Esta pauta sugiere que:
+
+\begin{itemize}
+    \item Potencialmente corresponde a un submuestreo intencional dentro de la encuesta
+    \item Los 49,756 casos con respuesta constituyen una submuestra válida
+    \item No necesariamente representa pérdida de información sino un diseño muestral estratificado
+\end{itemize}
+
+La completitud del 100\% en variables demográficas (sexo, edad, parentesco) proporciona una base robusta para segmentación de mercado.
+
+\section{Resultados Preliminares}
+
+Los análisis detallados de predicción, simulación de escenarios y proyecciones fiscales se encuentran en desarrollo. Los próximos pasos incluyen:
+
+\begin{itemize}
+    \item Estimación de modelos de regresión fraccionaria
+    \item Cálculo de elasticidades precio de demanda
+    \item Simulación de ingresos bajo diferentes tasas impositivas
+    \item Análisis de sensibilidad a parámetros clave
+\end{itemize}
+
+\section{Conclusiones}
+
+Este trabajo busca contribuir al debate sobre regulación de mercados de drogas en Colombia con herramientas cuantitativas rigurosas. La pregunta que motiva el análisis---cómo podría estructurarse el recaudo tributario bajo legalización---es fundamental para la formulación informada de política pública.
+
+La integración de datos microeconómicos de encuestas nacionales con simulaciones de escenarios fiscales permite generar proyecciones coherentes y técnicamente robustas, aunque necesariamente contrafactuales. El valor de este ejercicio radica en ofrecer un marco analítico que complemente el debate actual, que suele estar dominado por consideraciones morales o de orden público.
+
+\newpage
+
+\begin{thebibliography}{99}
+
+\bibitem[Hansen et al., 2020]{Hansen2020}
+Hansen, B., Miller, K., \& Weber, C. (2020). Federalism, partial prohibition, and cross-border sales: Evidence from recreational marijuana. \textit{Journal of Public Economics}, 187, 104159.
+
+\bibitem[Dills et al., 2021]{Dills2021}
+Dills, A., Goffard, S., \& Miron, J. (2021). The effect of marijuana legalization on state tax revenue. \textit{Journal of Law and Economics}, 64(3), 423--451.
+
+\end{thebibliography}
 
 \end{document}

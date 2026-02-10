@@ -2,11 +2,57 @@
 \section{Metodología}
 
 \begin{frame}
-\frametitle{Enfoque Metodológico}
+\frametitle{Flujo de Trabajo}
 \begin{enumerate}
-    \item \textbf{Procesamiento de datos}: Encuestas nacionales y datos sociodemográficos
-    \item \textbf{Análisis exploratorio}: Identificación de patrones y relaciones
-    \item \textbf{Modelado predictivo}: Construcción de modelos econométricos
-    \item \textbf{Simulación de escenarios}: Proyecciones fiscales bajo distintos marcos regulatorios
+    \item \textbf{Recolección de datos}: Encuestas nacionales (DANE), datos sociodemográficos
+    \item \textbf{Procesamiento}: Limpieza, normalización, tratamiento de valores faltantes
+    \item \textbf{Análisis exploratorio}: Estadísticas descriptivas, perfiles de consumidor
+    \item \textbf{Modelado}: Regresión logística, árboles de decisión, modelos predictivos
+    \item \textbf{Simulación de escenarios}: Proyecciones fiscales con diferentes parámetros
 \end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Técnicas de Análisis}
+\begin{columns}
+\column{0.5\textwidth}
+\textbf{Estadística:}
+\begin{itemize}
+    \item Análisis descriptivo
+    \item Correlación y causalidad
+    \item Pruebas de hipótesis
+\end{itemize}
+
+\column{0.5\textwidth}
+\textbf{Machine Learning:}
+\begin{itemize}
+    \item Clasificación
+    \item Modelado predictivo
+    \item Segmentación
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}
+\frametitle{Fuentes de Datos}
+\begin{itemize}
+    \item \textbf{Encuestas Nacionales}: Datos sociodemográficos de hogares (personas.csv)
+    \item \textbf{Variables de interés}: 
+    \begin{itemize}
+        \item Sexo, edad, parentesco
+        \item Consentimiento informado
+        \item Resultados de encuesta
+    \end{itemize}
+    \item \textbf{Dataset}: 169,346 observaciones | 12 variables
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Escenarios Simulados}
+\begin{itemize}
+    \item \textbf{Escenario 1}: Legalización amplia con IVA estándar (19\%)
+    \item \textbf{Escenario 2}: Legalización con impuesto especial (25\%)
+    \item \textbf{Escenario 3}: Regulación parcial con múltiples tramos
+    \item \textbf{Variables de sensibilidad}: Elasticidad precio, penetración de mercado
+\end{itemize}
 \end{frame}
