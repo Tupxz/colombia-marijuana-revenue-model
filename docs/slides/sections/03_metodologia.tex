@@ -2,57 +2,149 @@
 \section{Metodología}
 
 \begin{frame}
-\frametitle{Flujo de Trabajo}
-\begin{enumerate}
-    \item \textbf{Recolección de datos}: Encuestas nacionales (DANE), datos sociodemográficos
-    \item \textbf{Procesamiento}: Limpieza, normalización, tratamiento de valores faltantes
-    \item \textbf{Análisis exploratorio}: Estadísticas descriptivas, perfiles de consumidor
-    \item \textbf{Modelado}: Regresión logística, árboles de decisión, modelos predictivos
-    \item \textbf{Simulación de escenarios}: Proyecciones fiscales con diferentes parámetros
-\end{enumerate}
-\end{frame}
-
-\begin{frame}
-\frametitle{Técnicas de Análisis}
-\begin{columns}
-\column{0.5\textwidth}
-\textbf{Estadística:}
+\frametitle{Datos y Fuentes}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\textbf{Base Disponible}
 \begin{itemize}
-    \item Análisis descriptivo
-    \item Correlación y causalidad
-    \item Pruebas de hipótesis
+\item 169,346 individuos
+\item Encuesta Nacional (DANE)
+\item 12 variables sociodemográficas
+\item Múltiples capítulos por explorar
 \end{itemize}
 
-\column{0.5\textwidth}
-\textbf{Machine Learning:}
+\column{0.48\textwidth}
+\textbf{Por Integrar}
 \begin{itemize}
-    \item Clasificación
-    \item Modelado predictivo
-    \item Segmentación
+\item DIAN (recaudos)
+\item DANE (macro)
+\item Capítulos adicionales
+\item Análisis exploratorio
 \end{itemize}
 \end{columns}
 \end{frame}
 
 \begin{frame}
-\frametitle{Fuentes de Datos}
+\frametitle{Unidad de Análisis}
+\begin{center}
+\Large
+\textbf{Colombia en períodos anuales/semestrales}
+
+\vspace{0.5cm}
+Enfoque macroeconómico sobre estructura de recaudos
+\end{center}
+
+\vspace{0.5cm}
+\textit{Variable objetivo}: Participación de cada fuente tributaria en el total
+\end{frame}
+
+\begin{frame}
+\frametitle{Variable Objetivo: Estructura del Recaudo}
+
+\textbf{Definición formal}:
+$$Y_{k,t} = \frac{\text{Recaudo fuente } k}{\text{Recaudo total}}$$
+
+\textbf{Características clave}:
 \begin{itemize}
-    \item \textbf{Encuestas Nacionales}: Datos sociodemográficos de hogares (personas.csv)
-    \item \textbf{Variables de interés}: 
-    \begin{itemize}
-        \item Sexo, edad, parentesco
-        \item Consentimiento informado
-        \item Resultados de encuesta
-    \end{itemize}
-    \item \textbf{Dataset}: 169,346 observaciones | 12 variables
+\item \textbf{Composicional}: Las participaciones suman 1
+\item \textbf{Acotada}: $Y_{k,t} \in [0,1]$ para cada fuente
+\item \textbf{Escenario-dependiente}: Impuesto a cannabis solo en legalización
+\item \textbf{Temporal}: Evolución de la estructura fiscal
 \end{itemize}
 \end{frame}
 
 \begin{frame}
-\frametitle{Escenarios Simulados}
+\frametitle{Estrategia: Fases del Análisis}
+
+\begin{enumerate}
+\item \textbf{Exploración}: Descubrimiento de naturaleza de datos
+\item \textbf{Selección}: Variables relevantes de capítulos DANE
+\item \textbf{Procesamiento}: Limpieza y normalización
+\item \textbf{Análisis descriptivo}: Patrones demográficos
+\item \textbf{Modelado}: Machine Learning + Benchmark
+\item \textbf{Simulación}: Proyecciones bajo escenarios
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Enfoque: Machine Learning Exploratorio}
+
+\textbf{Principio rector}:
+\textit{Primero conocer la naturaleza de los datos}
+
 \begin{itemize}
-    \item \textbf{Escenario 1}: Legalización amplia con IVA estándar (19\%)
-    \item \textbf{Escenario 2}: Legalización con impuesto especial (25\%)
-    \item \textbf{Escenario 3}: Regulación parcial con múltiples tramos
-    \item \textbf{Variables de sensibilidad}: Elasticidad precio, penetración de mercado
+\item Modelo específico: A especificar según descubrimiento
+\item Flexibilidad: Adaptarse a patrones observados
+\item No-linealidades: Capturar relaciones complejas
+\item Validación rigurosa: Fuera de muestra temporal
 \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Modelo Benchmark}
+
+\textbf{Probit Ordenado con Ceros Inflados}
+
+\begin{itemize}
+\item Maneja datos acotados en [0,1]
+\item Captura características de datos composicionales
+\item Referencia para evaluar modelos de ML
+\item Interpretabilidad probabilística clara
+\end{itemize}
+
+\vspace{0.3cm}
+\textit{Estrategia}: Comparación rigurosa ML vs. benchmark
+\end{frame}
+
+\begin{frame}
+\frametitle{Supuestos Fundamentales}
+\begin{enumerate}
+\item \textbf{Shock estructural}: Legalización aumenta transacciones formales
+
+\item \textbf{Movilidad de demanda}: Mercado legal afectado por regulación y precios
+
+\item \textbf{Fuente tributaria}: Impuesto cannabis es identificable y persistente
+
+\item \textbf{Transmisión de efectos}: Cambios en consumo se reflejan en estructura de recaudos
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Escenarios de Simulación}
+
+\begin{columns}[T]
+\column{0.5\textwidth}
+\textbf{Escenario Base}
+Prohibición mantenida
+
+\vspace{0.3cm}
+\textbf{Escenario 1}
+Legalización + IVA 19\%
+
+\column{0.5\textwidth}
+\textbf{Escenario 2}
+Legalización + Impuesto 25\%
+
+\vspace{0.3cm}
+\textbf{Escenario 3}
+Regulación parcial + Tramos múltiples
+\end{columns}
+
+\vspace{0.3cm}
+\textit{Variables de sensibilidad}: Elasticidades, tasas de penetración
+\end{frame}
+
+\begin{frame}
+\frametitle{Evaluación del Modelo}
+\textbf{Métricas de desempeño:}
+
+\begin{itemize}
+\item \textbf{MAE/RMSE}: Error medio absoluto y cuadrático
+\item \textbf{Validación OOS}: Desempeño fuera de muestra temporal
+\item \textbf{Coherencia composicional}: Participaciones $\sum Y_k = 1$
+\item \textbf{Estabilidad}: Robustez a cambios en especificación
+\end{itemize}
+
+\vspace{0.3cm}
+\textit{Próxima fase}: Resultados preliminares tras exploración
 \end{frame}

@@ -132,72 +132,96 @@ El estudio se fundamenta en los siguientes supuestos:
 
 \section{Metodología}
 
-\subsection{Datos y Variables}
+\subsection{Datos y Fuentes de Información}
 
-\textbf{Unidad de Análisis}: El país en un período determinado, con información agregada en frecuencia anual.
+\textbf{Base de Datos Principal}: Encuesta Nacional de Consumo de Sustancias (DANE)
+\begin{itemize}
+    \item Observaciones actuales: 169,346 individuos con características sociodemográficas
+    \item Capítulos disponibles en la encuesta DANE a explorar para seleccionar variables relevantes
+    \item Proceso de descubrimiento de datos para identificar variables que se acoplen a la investigación
+\end{itemize}
 
-\textbf{Variables Objetivo}: La estructura del recaudo tributario, expresada como la participación porcentual de cada fuente dentro del total:
+\textbf{Variables Complementarias por Integrar}:
+\begin{itemize}
+    \item \textbf{DIAN}: Datos de recaudo tributario por fuente
+    \item \textbf{DANE}: Variables macroeconómicas (PIB, inflación, consumo de hogares)
+    \item \textbf{Múltiples capítulos de la encuesta}: Por explorar para segmentación de mercado
+\end{itemize}
+
+\subsection{Variable Objetivo}
+
+\textbf{Unidad de Análisis}: Colombia en períodos anuales o semestrales, con enfoque macroeconómico.
+
+\textbf{Definición Formal}:
+La variable objetivo es la \textbf{estructura del recaudo tributario}, definida como la participación porcentual de cada fuente tributaria dentro del total recaudado por el Estado en un período determinado:
+
 \begin{equation}
-Y_{k,t} = \frac{\text{Recaudo de la fuente } k \text{ en el período } t}{\text{Recaudo total en el período } t}
+Y_{k,t} = \frac{\text{Recaudo de la fuente } k \text{ en período } t}{\text{Recaudo total en período } t}
 \end{equation}
 
-\textbf{Variables Explicativas}:
-
-\begin{table}[h]
-\centering
-\begin{tabular}{ll}
-\toprule
-\textbf{Categoría} & \textbf{Variables} \\
-\midrule
-Fiscales & Recaudo total, recaudo por fuente \\
-Legalización & Indicador legal, tasa impositiva, consumo estimado \\
-Macroeconómicas & PIB real, consumo de hogares, inflación \\
-Demográficas & Población, densidad urbana \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Fuentes de Información}
-
+\textbf{Características}:
 \begin{itemize}
-    \item \textbf{DIAN}: Datos de recaudo tributario
-    \item \textbf{DANE}: Variables macroeconómicas, demográficas y de encuestas nacionales
-    \item \textbf{Encuestas de consumo}: Datos sociodemográficos de 169,346 individuos
-    \item \textbf{Fuentes internacionales}: Información comparativa de legalización en otros países
+    \item \textbf{Variable composicional}: Las participaciones suman 1 en cada período
+    \item \textbf{Acotada}: $Y_{k,t} \in [0,1]$ para cada fuente
+    \item \textbf{Dependiente del escenario}: El impuesto específico al cannabis aparece solo en escenarios de legalización
+    \item \textbf{Evolución temporal}: Permite analizar cómo se reconfigura la estructura del recaudo a través del tiempo
 \end{itemize}
 
 \subsection{Estrategia Analítica}
 
-El análisis articula el siguiente flujo de trabajo:
+El análisis se estructura en fases:
 
 \begin{enumerate}
-    \item \textbf{Procesamiento}: Limpieza, normalización y tratamiento de datos faltantes
-    \item \textbf{Análisis exploratorio}: Estadísticas descriptivas y patrones de consumo
-    \item \textbf{Modelado}: Regresión de datos composicionales (fractional logit/probit)
-    \item \textbf{Simulación}: Proyecciones fiscales bajo diferentes escenarios regulatorios
-    \item \textbf{Validación}: Evaluación fuera de muestra del desempeño predictivo
+    \item \textbf{Exploración de datos}: Conocimiento profundo de la naturaleza de los datos disponibles
+    \begin{itemize}
+        \item Revisión de múltiples capítulos de la encuesta DANE
+        \item Selección de variables que se acoplen a la pregunta de investigación
+        \item Análisis de calidad, completitud y patrones en los datos
+    \end{itemize}
+    
+    \item \textbf{Procesamiento}: Limpieza, normalización y tratamiento de valores faltantes
+    
+    \item \textbf{Análisis exploratorio}: Estadísticas descriptivas, segmentación demográfica, patrones de comportamiento
+    
+    \item \textbf{Modelado}: Desarrollo de modelo de machine learning a ser especificado según naturaleza de los datos
+    \begin{itemize}
+        \item Enfoque adaptativo: El algoritmo específico dependerá de características de los datos
+        \item Benchmark: Probit ordenado con ceros inflados como modelo de referencia
+    \end{itemize}
+    
+    \item \textbf{Simulación de escenarios}: Proyecciones fiscales bajo diferentes marcos regulatorios
+    
+    \item \textbf{Validación}: Evaluación del desempeño predictivo fuera de muestra
 \end{enumerate}
 
-\subsection{Modelos Predictivos}
+\subsection{Enfoque de Modelado}
 
-Dado que $Y_{k,t}$ es una proporción acotada entre 0 y 1, se emplean modelos de regresión fractional:
+Dada la naturaleza composicional de la variable objetivo y la necesidad de comprender primero los datos, adoptamos un enfoque flexible:
 
-\textbf{Fractional Logit}:
-\begin{equation}
-E[Y_{k,t} | X_t] = \frac{\exp(\eta_{k,t})}{1 + \exp(\eta_{k,t})}
-\end{equation}
+\textbf{Modelo Benchmark}: Probit ordenado con ceros inflados
+\begin{itemize}
+    \item Maneja variables acotadas entre 0 y 1
+    \item Permite capturar características especiales de datos composicionales
+    \item Proporciona punto de referencia para evaluar modelos alternativos
+\end{itemize}
 
-\textbf{Fractional Probit}:
-\begin{equation}
-E[Y_{k,t} | X_t] = \Phi(\eta_{k,t})
-\end{equation}
+\textbf{Modelos de Machine Learning}:
+\begin{itemize}
+    \item Se especificarán después del análisis exploratorio profundo
+    \item Flexibilidad para adaptarse a patrones específicos en los datos
+    \item Potencial para capturar no-linealidades y interacciones complejas
+\end{itemize}
 
-donde $\Phi(\cdot)$ es la función de distribución acumulada normal estándar.
+\subsection{Escenarios de Simulación}
 
-Para garantizar coherencia composicional, las predicciones se normalizan:
-\begin{equation}
-\tilde{Y}_{k,t} = \frac{\hat{Y}_{k,t}}{\sum_k \hat{Y}_{k,t}}
-\end{equation}
+Se evaluarán proyecciones fiscales bajo los siguientes marcos:
+
+\begin{enumerate}
+    \item \textbf{Escenario Base}: Prohibición mantenida (estructura tributaria actual)
+    \item \textbf{Escenario 1}: Legalización amplia con IVA estándar (19\%)
+    \item \textbf{Escenario 2}: Legalización con impuesto especial (25\%)
+    \item \textbf{Escenario 3}: Regulación parcial con múltiples tramos impositivos
+\end{enumerate}
 
 \subsection{Escenarios Simulados}
 
