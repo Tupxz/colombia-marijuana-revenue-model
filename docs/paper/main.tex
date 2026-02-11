@@ -186,7 +186,7 @@ El análisis se estructura en fases:
     \item \textbf{Modelado}: Desarrollo de modelo de machine learning a ser especificado según naturaleza de los datos
     \begin{itemize}
         \item Enfoque adaptativo: El algoritmo específico dependerá de características de los datos
-        \item Benchmark: Probit ordenado con ceros inflados como modelo de referencia
+        \item Benchmark: Logit fraccionado como modelo de referencia
     \end{itemize}
     
     \item \textbf{Simulación de escenarios}: Proyecciones fiscales bajo diferentes marcos regulatorios
@@ -198,10 +198,10 @@ El análisis se estructura en fases:
 
 Dada la naturaleza composicional de la variable objetivo y la necesidad de comprender primero los datos, adoptamos un enfoque flexible:
 
-\textbf{Modelo Benchmark}: Probit ordenado con ceros inflados
+\textbf{Modelo Benchmark}: Logit fraccionado
 \begin{itemize}
     \item Maneja variables acotadas entre 0 y 1
-    \item Permite capturar características especiales de datos composicionales
+    \item Especificación: $E[Y_{k,t}|X] = \frac{\exp(\eta)}{1 + \exp(\eta)}$
     \item Proporciona punto de referencia para evaluar modelos alternativos
 \end{itemize}
 

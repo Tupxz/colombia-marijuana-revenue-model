@@ -25,65 +25,42 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Unidad de Análisis}
-\begin{center}
-\Large
-\textbf{Colombia en períodos anuales/semestrales}
+\frametitle{Variable Objetivo}
 
-\vspace{0.5cm}
-Enfoque macroeconómico sobre estructura de recaudos
-\end{center}
+\textbf{Unidad de Análisis}: Colombia en períodos anuales/semestrales
 
-\vspace{0.5cm}
-\textit{Variable objetivo}: Participación de cada fuente tributaria en el total
-\end{frame}
-
-\begin{frame}
-\frametitle{Variable Objetivo: Estructura del Recaudo}
-
-\textbf{Definición formal}:
+\textbf{Definición}:
 $$Y_{k,t} = \frac{\text{Recaudo fuente } k}{\text{Recaudo total}}$$
 
-\textbf{Características clave}:
+\textbf{Características}:
 \begin{itemize}
 \item \textbf{Composicional}: Las participaciones suman 1
 \item \textbf{Acotada}: $Y_{k,t} \in [0,1]$ para cada fuente
 \item \textbf{Escenario-dependiente}: Impuesto a cannabis solo en legalización
-
 \end{itemize}
 \end{frame}
 
 \begin{frame}
-\frametitle{Estrategia: Fases del Análisis}
+\frametitle{Estrategia Analítica}
+
+\textbf{Principio rector}: Primero conocer la naturaleza de los datos
 
 \begin{enumerate}
-\item \textbf{Exploración}: Descubrimiento de naturaleza de datos
-\item \textbf{Selección}: Variables relevantes de capítulos DANE
+\item \textbf{Exploración}: Descubrimiento y selección de variables
 \item \textbf{Procesamiento}: Limpieza y normalización
 \item \textbf{Análisis descriptivo}: Patrones demográficos
-\item \textbf{Modelado}: Machine Learning + Benchmark
+\item \textbf{Modelado}: Machine Learning + Benchmark probit inflado
 \item \textbf{Simulación}: Proyecciones bajo escenarios
 \end{enumerate}
-\end{frame}
 
-\begin{frame}
-\frametitle{Enfoque: Machine Learning Exploratorio}
-
-\textbf{Principio rector}:
-\textit{Primero conocer la naturaleza de los datos}
-
-\begin{itemize}
-\item Modelo específico: A especificar según descubrimiento
-\item Flexibilidad: Adaptarse a patrones observados
-\item No-linealidades: Capturar relaciones complejas
-\item Validación rigurosa: Fuera de muestra temporal
-\end{itemize}
+\vspace{0.2cm}
+\textit{Flexibilidad}: Modelo específico ML a especificar según hallazgos
 \end{frame}
 
 \begin{frame}
 \frametitle{Modelo Benchmark}
 
-\textbf{Probit Ordenado con Ceros Inflados}
+\textbf{Logit Fraccionado}
 
 \begin{itemize}
 \item Maneja datos acotados en [0,1]
@@ -93,7 +70,7 @@ $$Y_{k,t} = \frac{\text{Recaudo fuente } k}{\text{Recaudo total}}$$
 \end{itemize}
 
 \vspace{0.3cm}
-\textit{Estrategia}: Comparación rigurosa ML vs. benchmark
+\textit{Especificación}: $E[Y_{k,t}|X] = \frac{\exp(\eta)}{1 + \exp(\eta)}$
 \end{frame}
 
 \begin{frame}
@@ -136,15 +113,11 @@ Regulación parcial + Tramos múltiples
 
 \begin{frame}
 \frametitle{Evaluación del Modelo}
-\textbf{Métricas de desempeño:}
 
 \begin{itemize}
 \item \textbf{MAE/RMSE}: Error medio absoluto y cuadrático
-\item \textbf{Validación OOS}: Desempeño fuera de muestra temporal
+\item \textbf{Validación temporal}: Desempeño fuera de muestra
 \item \textbf{Coherencia composicional}: Participaciones $\sum Y_k = 1$
-\item \textbf{Estabilidad}: Robustez a cambios en especificación
+\item \textbf{Robustez}: Estabilidad ante cambios de especificación
 \end{itemize}
-
-\vspace{0.3cm}
-\textit{Próxima fase}: Resultados preliminares tras exploración
 \end{frame}
