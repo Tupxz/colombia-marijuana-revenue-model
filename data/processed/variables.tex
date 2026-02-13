@@ -1,0 +1,105 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[margin=1in]{geometry}
+
+\title{Variables de Interés - Investigación sobre Recaudo Tributario}
+\author{Ciencia de los Datos - Universidad EAFIT}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Variables de Interés}
+
+\subsection*{1. Variables Demográficas}
+
+\begin{enumerate}
+    \item \textbf{Sexo} (sexo): Categoría binaria (1 = Masculino, 2 = Femenino)
+    \item \textbf{Edad} (edad): Variable continua en años
+    \item \textbf{Parentesco} (parentesco): Relación con el jefe del hogar
+\end{enumerate}
+
+\subsection*{2. Variables de Estructura Familiar}
+
+\begin{enumerate}
+    \item \textbf{Padre} (padre): Presencia del padre en el hogar (1 = Sí, 2 = No, 3 = No aplica)
+    \item \textbf{Madre} (madre): Presencia de la madre en el hogar (1 = Sí, 2 = No, 3 = No aplica)
+\end{enumerate}
+
+\subsection*{3. Variables de Participación en la Encuesta}
+
+\begin{enumerate}
+    \item \textbf{Consentimiento} (consentimiento): Consentimiento informado para participar
+    \item \textbf{Resultado} (resultado): Resultado de la entrevista (1 = Completada, 0 = Incompleta)
+    \item \textbf{Persona Seleccionada} (per\_seleccionada): Indicador si fue seleccionado para responder (1 = Sí)
+\end{enumerate}
+
+\subsection*{4. Variables de Identificación Administrativa}
+
+\begin{enumerate}
+    \item \textbf{Directorio} (directorio): Identificador del hogar
+    \item \textbf{Secuencia de Encuesta} (secuencia\_encuesta): Número secuencial de la encuesta
+    \item \textbf{Secuencia de Pregunta} (secuencia\_p): Número de la pregunta en la encuesta
+    \item \textbf{Orden} (orden): Orden de la persona en el hogar
+\end{enumerate}
+
+\subsection*{5. Variables sobre Consumo de Sustancias}
+
+\begin{enumerate}
+    \item \textbf{Consumo de Marihuana en últimos 12 meses} (C\_02): Sí/No
+    \item \textbf{Consumo de Marihuana en últimos 30 días} (C\_05): Sí/No
+    \item \textbf{Frecuencia de consumo en 12 meses} (C\_03): Una vez, algunas veces, mensual, semanal, diario
+    \item \textbf{Cantidad consumida al mes} (C\_08): Gramos de marihuana consumidos
+    \item \textbf{Gasto en marihuana últimos 30 días} (C\_09\_VALOR): Valor monetario en pesos
+    \item \textbf{Precio por gramo} (C\_09\_VALOR): Conocimiento del precio unitario
+    \item \textbf{Formas de consumo} (C\_04\_A a C\_04\_D): Fumada, inhalada, inyectada, etc.
+    \item \textbf{Cómo fue obtenida} (C\_10\_A a C\_10\_H): Internet, redes sociales, expendios, amigos, domicilio
+\end{enumerate}
+
+\subsection*{6. Variables sobre Empleo y Trabajo}
+
+\begin{enumerate}
+    \item \textbf{Accidentes laborales} (R\_01): Incidentes en últimos 12 meses
+    \item \textbf{Consumo durante accidente} (R\_02): Sustancias consumidas previas al incidente
+    \item \textbf{Días faltados} (R\_03): Inasistencia en últimos 30 días
+    \item \textbf{Consumo en horario laboral} (R\_08\_A a R\_08\_D): Cigarrillo, alcohol, marihuana, cocaína
+    \item \textbf{Rendimiento laboral} (R\_09): Impacto del consumo en desempeño
+\end{enumerate}
+
+\subsection*{7. Variables sobre Educación, Orientación Sexual e Identidad}
+
+\begin{enumerate}
+    \item \textbf{Nivel educativo} (D2\_05): Ninguno, preescolar, primaria, secundaria, media, técnica, universitaria, postgrado
+    \item \textbf{Orientación sexual} (D2\_06): Heterosexual, gay/lesbiana, bisexual, otra
+    \item \textbf{Identidad de género} (D2\_07): Masculino, femenino, transgénero, otro
+\end{enumerate}
+
+\subsection*{Variables Adicionales a Descargar/Construir}
+
+Para completar el análisis sobre recaudo tributario y legalización de marihuana, se requieren:
+
+\begin{enumerate}
+    \item \textbf{Ingresos del hogar}: Datos de DANE sobre ingresos por decil de población
+    \item \textbf{Estrato socioeconómico}: Variable disponible en datos (estrato)
+    \item \textbf{Tasas impositivas actuales}: Estructura tributaria de Colombia (DIAN)
+    \item \textbf{Escenarios de legalización}: Parámetros de regulación, impuestos y distribución
+    \item \textbf{PIB y variables macroeconómicas}: Contexto económico nacional
+    \item \textbf{Datos de población}: Proyecciones demográficas del DANE
+    \item \textbf{Precios de mercado ilegal}: Comparación con precios bajo legalización
+    \item \textbf{Tasas de tributación potencial}: Escenarios de impuestos en legales
+\end{enumerate}
+
+\subsection*{Notas Metodológicas}
+
+\begin{itemize}
+    \item Las variables actualmente disponibles en \texttt{personas\_processed.csv} provienen de datos de hogares encuestados
+    \item Se deben integrar con datos de fuentes externas (DIAN, DANE) para el análisis tributario
+    \item La limpieza y normalización se realiza mediante el script \texttt{01\_processing.py}
+    \item Los metadatos de procesamiento se encuentran en \texttt{personas\_processed\_metadata.json}
+\end{itemize}
+
+\end{document}
