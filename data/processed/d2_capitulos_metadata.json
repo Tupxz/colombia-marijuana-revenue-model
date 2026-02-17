@@ -1,0 +1,30 @@
+{
+  "rows": 49756,
+  "columns": 11,
+  "dtypes": {
+    "d2_01": "int64",
+    "d2_03": "int64",
+    "d2_04": "int64",
+    "d2_05": "int64",
+    "d2_05_a": "int64",
+    "d2_06": "float64",
+    "d2_07": "float64",
+    "directorio": "int64",
+    "secuencia_encuesta": "int64",
+    "secuencia_p": "int64",
+    "orden": "int64"
+  },
+  "null_counts": {
+    "d2_01": 0,
+    "d2_03": 0,
+    "d2_04": 0,
+    "d2_05": 0,
+    "d2_05_a": 0,
+    "d2_06": 3559,
+    "d2_07": 3559,
+    "directorio": 0,
+    "secuencia_encuesta": 0,
+    "secuencia_p": 0,
+    "orden": 0
+  }
+}
