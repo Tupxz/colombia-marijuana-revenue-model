@@ -2,359 +2,161 @@
 
 **Predicción del Recaudo Tributario bajo Escenarios de Legalización de Marihuana en Colombia**
 
----
-
-## 📋 Overview
-
-Este proyecto analiza la estructura del **recaudo tributario del Estado colombiano** bajo distintos escenarios de **legalización de la marihuana**. Utilizando **Python**, desarrollamos un pipeline reproducible para:
-
-1. **Limpiar y transformar** datos de múltiples fuentes (DANE, Banco de la República, DIAN)
-2. **Analizar exploratorio** de series temporales fiscales y macroeconómicas
-3. **Construir modelos** predictivos de ingresos tributarios
-4. **Simular escenarios** de legalización con diferentes parámetros
-5. **Evaluar sensibilidad** de proyecciones a variaciones en supuestos clave
-
-**Curso:** Ciencia de Datos – 5° semestre  
-**Universidad:** EAFIT  
-**Semestre:** 2026-I  
-**Profesor:** Paula María Almonacid Hurtado
+*Curso: Ciencia de Datos – 5° semestre | Universidad: EAFIT | Semestre: 2026-I*
 
 ---
 
-## 🎯 Pregunta de Investigación
+## 📋 Descripción
 
-> ¿Cómo podría predecirse la estructura del recaudo tributario del Estado colombiano bajo distintos escenarios de legalización de la distribución de la marihuana?
+Análisis del **recaudo tributario colombiano** bajo escenarios de legalización de marihuana. Pipeline reproducible que integra datos del DANE, Banco de la República y DIAN para:
+
+- Limpiar y transformar múltiples fuentes
+- Análisis exploratorio de series temporales
+- Modelos predictivos de ingresos tributarios
+- Simulación de escenarios de legalización
+- Evaluación de sensibilidad
+
+**Pregunta de investigación:** ¿Cómo predecir la estructura del recaudo tributario bajo distintos escenarios de legalización de marihuana?
+
+---
+
+## 🚀 Instalación Rápida
+
+### 1. Entorno Virtual
+
+```bash
+git clone https://github.com/Tupxz/colombia-marijuana-revenue-model.git
+cd colombia-marijuana-revenue-model
+
+python3 -m venv .venv
+source .venv/bin/activate        # macOS/Linux
+# .venv\Scripts\activate          # Windows
+```
+
+### 2. Instalar Paquete
+
+```bash
+# Instalación básica
+pip install -e .
+
+# Con herramientas de desarrollo (recomendado)
+pip install -e ".[dev]"
+
+# Con Jupyter (para notebooks)
+pip install -e ".[jupyter]"
+
+# Todo
+pip install -e ".[all]"
+```
+
+### 3. Verificar Instalación
+
+```bash
+python -c "import cannabis_tax; print(f'✅ Paquete {cannabis_tax.__version__}')"
+python -m cannabis_tax.cli --help
+```
+
+---
+
+## 📋 Comandos CLI
+
+```bash
+# Pipeline completo
+python -m cannabis_tax.cli pipeline
+
+# Pasos individuales
+python -m cannabis_tax.cli process        # Procesar datos
+python -m cannabis_tax.cli analyze        # Análisis EDA
+python -m cannabis_tax.cli model          # Entrenar modelos
+python -m cannabis_tax.cli scenarios -s 5 # Simular escenarios
+python -m cannabis_tax.cli evaluate       # Evaluar
+python -m cannabis_tax.cli viz            # Visualizar
+
+# Con verbose logging
+python -m cannabis_tax.cli pipeline --verbose
+```
 
 ---
 
 ## 📁 Estructura del Proyecto
 
 ```
-.
-├── configs/                    # Archivos de configuración YAML
-│   ├── base.yaml              # Config general del proyecto
-│   ├── scenarios.yaml         # Definición de escenarios
-│   └── features.yaml          # Especificación de variables
-│
-├── data/                       # Datos (raw → interim → processed)
-│   ├── raw/                   # Datos originales sin modificar
-│   ├── interim/               # Datos intermedios en transformación
-│   ├── processed/             # Datos finales limpios
-│   ├── external/              # Datos de fuentes externas (APIs, etc.)
-│   └── README.md              # Diccionario y política de datos
-│
-├── src/cannabis_tax/          # Código fuente (paquete Python)
-│   ├── __init__.py
-│   ├── cli.py                 # Interfaz de línea de comandos (CLI)
-│   ├── core/                  # Módulos centrales
-│   │   ├── config.py          # Gestor de configuración
-│   │   ├── paths.py           # Gestor de rutas
-│   │   └── logging.py         # Logging centralizado
-│   ├── io/                    # Input/Output: ingestión de datos
-│   │   ├── ingest_sources.py  # Cargar datos de fuentes
-│   │   └── trends.py          # Procesamiento de series temporales
-│   ├── cleaning/              # Limpieza de datos
-│   │   └── clean.py           # Script principal de limpieza
-│   ├── features/              # Feature engineering
-│   │   ├── build_features.py  # Crear variables derivadas
-│   │   └── diagnostics.py     # Análisis de calidad de datos
-│   ├── models/                # Modelos predictivos
-│   │   ├── benchmark.py       # Modelos baseline
-│   │   ├── ml.py              # Modelos ML (regresión, ARIMA, etc.)
-│   │   └── evaluate.py        # Evaluación y métricas
-│   ├── scenarios/             # Simulación de escenarios
-│   │   ├── simulate.py        # Simulación de escenarios
-│   │   └── sensitivity.py     # Análisis de sensibilidad
-│   └── viz/                   # Visualización
-│       └── plots.py           # Funciones de graficación
-│
-├── reports/                    # Reportes y documentación
-│   ├── paper.tex              # Paper académico
-│   ├── paper.pdf              # PDF compilado
-│   ├── references.bib         # Referencias bibliográficas
-│   ├── figures/               # Figuras para documentos
-│   └── slides/                # Presentación en Beamer
-│
-├── notebooks/                  # Notebooks Jupyter (exploración)
-│   ├── 01_eda_tax_revenue.ipynb
-│   ├── 02_scenario_analysis.ipynb
-│   └── README.md
-│
-├── runs/                       # Resultados de ejecuciones
-│   ├── 2026-03-03__initial/   # Run de referencia
-│   └── README.md              # Convención de ejecuciones
-│
-├── tests/                      # Tests automatizados (pytest)
-│   ├── unit/
-│   └── integration/
-│
-├── README.md                   # Este archivo
-├── requirements.txt            # Dependencias Python
-├── LICENSE                     # Licencia del proyecto
-└── .gitignore                  # Archivos ignorados por Git
+src/cannabis_tax/          Código productivo (paquete Python)
+├── cli.py                 Interfaz de línea de comandos
+├── core/                  Logging, paths, configuración
+├── io/                    Ingestión de datos
+├── cleaning/              Limpieza de datos
+├── features/              Feature engineering
+├── models/                Benchmarks y modelos ML
+├── scenarios/             Simulación de escenarios
+└── viz/                   Visualizaciones
+
+configs/                   Archivos YAML de configuración
+data/
+├── raw/                   Datos originales (no editar)
+├── processed/             Datos procesados limpios
+└── README.md              Diccionario de datos
+
+reports/                   Documentación académica
+├── paper.tex / paper.pdf  Artículo principal
+├── slides/                Presentación Beamer
+└── figures/               Figuras estáticas
+
+runs/                      Resultados de ejecuciones (timestamped)
+tests/                     Suite de pruebas (pytest)
+notebooks/                 Exploración (Jupyter)
 ```
 
 ---
 
-## 🚀 Quick Start
-
-### 1. Clonar y configurar entorno
+## 🧪 Testing y Desarrollo
 
 ```bash
-# Clonar repositorio
-git clone https://github.com/Tupxz/colombia-marijuana-revenue-model.git
-cd colombia-marijuana-revenue-model
-
-# Crear entorno virtual
-python3 -m venv .venv
-source .venv/bin/activate  # En Windows: .venv\Scripts\activate
-```
-
-### 2. Instalar paquete en modo editable
-
-```bash
-# Instalar cannabis_tax en modo desarrollo (-e = editable)
-# Incluye todas las dependencias del proyecto
-pip install -e .
-
-# Opcional: instalar con dependencias de desarrollo
-pip install -e ".[dev]"
-
-# Opcional: instalar con Jupyter para notebooks
-pip install -e ".[jupyter]"
-
-# Opcional: instalar TODO (dev + jupyter)
-pip install -e ".[all]"
-```
-
-### 3. Verificar instalación
-
-```bash
-# Verificar que el módulo se importa correctamente
-python -c "import cannabis_tax; print(f'cannabis_tax {cannabis_tax.__version__} ✅')"
-
-# Ver ayuda del CLI
-python -m cannabis_tax.cli --help
-```
-
-### 4. Ejecutar pipeline
-
-```bash
-# Ejecutar pipeline completo (default)
-python -m cannabis_tax.cli
-
-# O ejecutar pasos específicos:
-python -m cannabis_tax.cli process        # Procesar datos
-python -m cannabis_taxi.cli analyze       # Análisis exploratorio
-python -m cannabis_tax.cli scenarios --scenarios 5  # Simular 5 escenarios
-python -m cannabis_tax.cli viz            # Generar gráficos
-
-# Con verbose logging
-python -m cannabis_tax.cli pipeline --verbose
-```
-
-### 5. Ejecutar tests
-
-```bash
-# Todos los tests
-pytest
+# Ejecutar tests
+pytest tests/ -v
 
 # Con cobertura
 pytest --cov=cannabis_tax --cov-report=html
 
-# Tests específicos
-pytest tests/unit/test_core.py -v
+# Formatear código
+black src/ tests/
+
+# Verificar estilo
+flake8 src/
+mypy src/
 ```
-
----
-
-## 📦 Instalación en Diferentes Contextos
-
-### Para desarrolladores (local)
-```bash
-pip install -e ".[dev]"
-```
-Permite: editar código, correr tests, usar linter/formatter.
-
-### Para usuarios finales
-```bash
-pip install .
-```
-Solo instala dependencias de producción.
-
-### Para CI/CD (GitHub Actions)
-```bash
-pip install -e ".[dev]"
-pytest --cov
-```
-
----
-
-## 🔧 Comandos CLI
-
-| Comando | Descripción |
-|---------|------------|
-| `python -m cannabis_tax.cli` | Ejecutar pipeline completo |
-| `python -m cannabis_tax.cli --help` | Ver ayuda general |
-| `python -m cannabis_tax.cli process` | Procesar datos raw → processed |
-| `python -m cannabis_tax.cli analyze` | Análisis exploratorio |
-| `python -m cannabis_tax.cli model` | Entrenar modelos |
-| `python -m cannabis_tax.cli scenarios -s 5` | Simular 5 escenarios |
-| `python -m cannabis_tax.cli evaluate` | Evaluar modelos |
-| `python -m cannabis_tax.cli viz` | Generar visualizaciones |
-
----
-
-## 📋 Dependencias
-
-### Producción (instaladas por defecto)
-- **pandas** — Manipulación de DataFrames
-- **numpy** — Cálculos numéricos
-- **pyyaml** — Lectura de configuración
-- **matplotlib** — Visualizaciones
-- **scikit-learn** — ML y métricas
-
-### Desarrollo (opcional con `[dev]`)
-- **pytest** — Framework de testing
-- **black** — Formateador de código
-- **flake8** — Linter
-- **mypy** — Type checking
-
-Ver `pyproject.toml` para versiones específicas.
 
 ---
 
 ## 📊 Datos
 
-### Fuentes Principales
+**Fuentes:** DANE (Encuestas, Capítulos Fiscales), Banco de la República (Series Macroeconómicas), DIAN (Estadísticas Tributarias).
 
-| Fuente | Tipo | Frecuencia | Archivos |
-|--------|------|-----------|----------|
-| **DANE** | Encuestas, Capítulos Fiscales | Anual | `d_capitulos.csv`, `personas.csv`, etc. |
-| **Banco de la República** | Series Macroeconómicas | Anual/Trimestral | `PIBBanrep.xlsx`, `TRM_limpia_copia.csv` |
-| **IPC** | Índice de Precios | Mensual | `IPC_limpio_copia.xlsx` |
-
-### Estructura de Carpetas de Datos
-
-- **`data/raw/`**: Datos originales sin modificar (NUNCA editar aquí)
-- **`data/interim/`**: Transformaciones intermedias
-- **`data/processed/`**: Datasets finales limpios + metadatos JSON
-- **`data/external/`**: Datos de APIs o fuentes externas (reservado)
-
-**Ver [`data/README.md`](data/README.md) para detalles completos.**
+**Diccionario de datos y política de gestión:** Ver [`data/README.md`](data/README.md)
 
 ---
 
-## 🔧 Configuración
+## 📝 Notas de Refactorización
 
-### Archivos de Configuración
+Este repositorio fue refactorizado el 3 de marzo de 2026 hacia una arquitectura modular y reproducible:
 
-Los parámetros del proyecto se definen en YAML:
+- Migración `scripts/` → `src/cannabis_tax/` (PEP 420 layout)
+- Reorganización `docs/` → `reports/`
+- Implementación `pyproject.toml` (PEP 517/518)
+- Consolidación de configuraciones YAML
+- Testing con pytest, code quality con black/flake8/mypy
 
-- **`configs/base.yaml`**: Configuración general (rutas, logging, etc.)
-- **`configs/scenarios.yaml`**: Escenarios de legalización (parámetros de simulación)
-- **`configs/features.yaml`**: Definición de variables y features
-
-### Ejemplo: Crear un nuevo escenario
-
-Editar `configs/scenarios.yaml`:
-
-```yaml
-scenarios:
-  custom_scenario:
-    name: "Mi Escenario Personalizado"
-    parameters:
-      annual_volume_tons: 600
-      unit_price_pesos: 11000
-      tax_rate: 0.22
-```
-
-Luego: `python -m src.cannabis_tax.cli scenarios`
+Esto permite instalación editable (`pip install -e .`), reproducibilidad garantizada y mantenibilidad a largo plazo.
 
 ---
 
-## 📈 Metodología
+## 📦 Dependencias Principales
 
-### Pipeline de Análisis
+**Producción:** pandas, numpy, pyyaml, matplotlib, scikit-learn  
+**Desarrollo:** pytest, black, flake8, mypy, isort  
+**Jupyter:** jupyter, jupyterlab (opcional)
 
-```
-raw data → clean & transform → EDA → feature engineering
-    ↓
-features → model selection → train/validate → evaluation
-    ↓
-scenarios → sensitivity analysis → visualization
-    ↓
-reports & papers
-```
-
-### Modelos Utilizados
-
-- **Benchmarks:** Naive Forecast, Seasonal Naive
-- **Regresión:** Linear Regression, Ridge, Lasso
-- **Series Temporales:** ARIMA (por implementar)
-- **Avanzados:** Random Forest, XGBoost (por implementar)
-
-### Validación
-
-- Validación cruzada (k-fold, default k=5)
-- Métricas: MAE, RMSE, MAPE, R²
-- Backtesting en datos históricos
-
----
-
-## 📚 Variables Principales
-
-### Fiscales
-- **Recaudo tributario total** (COP)
-- **Capítulos de impuestos:** Directos (D), Indirectos (G), Contribuciones (K)
-- **Impuestos específicos por fuente**
-
-### Macroeconómicas
-- **PIB** (anual y trimestral, COP)
-- **IPC** (Índice de Precios al Consumidor, base 2018)
-- **TRM** (Tasa Representativa del Mercado, USD/COP)
-- **Población**
-
-### De Legalización
-- **Volumen legal anual** (toneladas)
-- **Precio unitario** (COP/tonelada)
-- **Tasa tributaria efectiva** (%)
-- **Elasticidad de demanda**
-
-**Ver [`configs/features.yaml`](configs/features.yaml) para especificación completa.**
-
----
-
-## 🧪 Testing
-
-```bash
-# Ejecutar todos los tests
-pytest tests/ -v
-
-# Con cobertura
-pytest tests/ --cov=src --cov-report=html
-
-# Tests específicos
-pytest tests/unit/test_models.py -v
-```
-
----
-
-## 📝 Resultados y Entregables
-
-### Ejecuciones (`runs/`)
-Cada ejecución del pipeline genera:
-- Snapshot de configuración usado
-- Logs de ejecución
-- Tablas de resultados (CSV)
-- Figuras de visualización (PNG/PDF)
-
-Ver [`runs/README.md`](runs/README.md) para convención de nombres.
-
-### Documentación (`reports/`)
-- **Paper académico:** `reports/paper.tex` (LaTeX)
-- **Presentación:** `reports/slides/` (Beamer)
-- **Figuras:** `reports/figures/`
+Ver `pyproject.toml` para versiones específicas.
 
 ---
 
@@ -368,91 +170,18 @@ Ver [`runs/README.md`](runs/README.md) para convención de nombres.
 
 ## 📄 Licencia
 
-Este proyecto se distribuye bajo licencia [MIT](LICENSE).  
-Los datos utilizados (DANE, Banco de la República) están bajo licencias públicas (CC-BY-4.0, de dominio público).
+MIT License. Los datos utilizados están bajo licencias públicas (CC-BY-4.0, dominio público).
 
 ---
 
 ## 📚 Referencias Bibliográficas
 
-Ver [`reports/references.bib`](reports/references.bib)
-
-Lecturas recomendadas:
-- Documentación de DANE sobre metodología de encuestas
+Ver `reports/references.bib` para la bibliografía completa. Lecturas recomendadas:
+- Documentación DANE sobre metodología de encuestas
 - Working Papers del Banco de la República
 - Estudios de legalización en Canadá y Uruguay
 - Elasticidad de demanda de bienes pecaminosos (Chaloupka & Warner, 2000)
 
 ---
 
-## 🔗 Enlaces Útiles
-
-- [DANE - Datos Abiertos](https://www.dane.gov.co/)
-- [Banco de la República - Series Estadísticas](https://www.banrep.gov.co/)
-- [DIAN - Estadísticas Tributarias](https://www.dian.gov.co/)
-
----
-
-## ❓ FAQ / Troubleshooting
-
-### ¿Cómo agrego nuevos datos?
-1. Descargar archivo → `data/raw/`
-2. Crear script de limpieza en `src/cannabis_tax/io/`
-3. Guardar resultado procesado en `data/processed/` con metadatos JSON
-4. Actualizar `configs/features.yaml`
-
-### ¿Los datos son muy grandes y no puedo commitearlos?
-- Agregar patrones a `.gitignore` (ej: `data/raw/*.csv`)
-- Usar [Git LFS](https://git-lfs.com/) para archivos grandes
-- Documentar en `data/README.md` cómo descargar datos
-
-### ¿Cómo agrego un nuevo modelo?
-- Implementar en `src/cannabis_tax/models/ml.py` o nuevo módulo
-- Incluir métodos `.fit(X, y)` y `.predict(X)`
-- Crear tests en `tests/unit/test_models.py`
-- Documentar parámetros y supuestos en docstring
-
-### ¿Cómo genero un nuevo reporte?
-- Crear notebook en `notebooks/`
-- Usar rutas relativas con `src.cannabis_tax.core.paths`
-- Exportar figuras a `reports/figures/`
-- Incluir en LaTeX si es documentación oficial
-
----
-
-## 🛠️ Desarrollo
-
-### Estructura de Commits
-
-```bash
-git add <cambios>
-git commit -m "tipo(scope): descripción"
-```
-
-Tipos: `feat`, `fix`, `refactor`, `docs`, `style`, `test`, `chore`
-
-Ejemplo: `feat(models): agregar ARIMA con validación cruzada`
-
-### Branch Workflow
-
-```bash
-# Feature branch
-git checkout -b feature/nueva-funcionalidad
-
-# Después de terminar, PR a main
-```
-
----
-
-## 📞 Soporte
-
-Para preguntas o problemas:
-1. Revisar este README
-2. Consultar docstrings en el código
-3. Abrir un issue en GitHub
-4. Contactar al profesor
-
----
-
-**Última actualización:** 2026-03-03  
-**Versión:** 0.1.0
+**Última actualización:** 2026-03-03 | **Versión:** 0.1.0
