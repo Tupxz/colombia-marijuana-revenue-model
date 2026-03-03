@@ -1,0 +1,97 @@
+# Definición de features y variables del modelo
+# Especifica qué variables se utilizan en análisis y modelado
+
+features:
+  
+  # Variables macroeconómicas
+  macroeconomic:
+    - name: "pib"
+      description: "Producto Interno Bruto"
+      frequency: "annual"
+      source: "DANE / Banco de la República"
+      data_file: "pib_anual.csv"
+      required: true
+    
+    - name: "pib_trimestral"
+      description: "PIB trimestral"
+      frequency: "quarterly"
+      source: "DANE"
+      data_file: "pib_trimestral.csv"
+      required: false
+    
+    - name: "ipc"
+      description: "Índice de Precios al Consumidor"
+      frequency: "monthly"
+      source: "DANE"
+      data_file: "IPC_limpio_copia.xlsx"
+      required: true
+    
+    - name: "trm"
+      description: "Tasa Representativa del Mercado (USD/COP)"
+      frequency: "daily"
+      source: "Banco de la República"
+      data_file: "TRM_limpia_copia.csv"
+      required: false
+  
+  # Variables fiscales
+  fiscal:
+    - name: "tax_collection"
+      description: "Recaudo tributario total"
+      frequency: "annual"
+      source: "DIAN"
+      required: true
+    
+    - name: "tax_chapters"
+      description: "Recaudo por capítulo de impuesto"
+      frequency: "annual"
+      source: "DIAN"
+      components:
+        - "d_capitulos"
+        - "d2_capitulos"
+        - "g_capitulos"
+        - "k_capitulos"
+      required: true
+  
+  # Variables demográficas
+  demographic:
+    - name: "population"
+      description: "Población total"
+      frequency: "annual"
+      source: "DANE"
+      required: true
+    
+    - name: "personas_encuesta"
+      description: "Datos de personas encuestadas"
+      frequency: "survey"
+      source: "DANE"
+      data_file: "personas_processed.csv"
+      required: false
+
+# Configuración de features engineered (derivadas)
+engineered_features:
+  - name: "tax_per_capita"
+    formula: "tax_collection / population"
+    description: "Recaudo tributario por capita"
+  
+  - name: "tax_pib_ratio"
+    formula: "tax_collection / pib"
+    description: "Ratio recaudo sobre PIB"
+  
+  - name: "inflation_rate_yoy"
+    formula: "diff(ipc, periods=12)"
+    description: "Tasa de inflación año a año"
+  
+  - name: "pib_growth_yoy"
+    formula: "pct_change(pib, periods=1)"
+    description: "Tasa de crecimiento del PIB"
+
+# Variables de salida (targets)
+targets:
+  - name: "total_tax_revenue"
+    description: "Recaudo tributario total (COP)"
+    type: "continuous"
+  
+  - name: "estimated_cannabis_tax"
+    description: "Recaudo estimado de legalización de marihuana"
+    type: "continuous"
+    derived: true

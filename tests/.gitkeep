@@ -1,0 +1,43 @@
+# Tests Directory
+
+Placeholder para tests automatizados (unit tests, integration tests, etc.)
+
+## Estructura
+
+```
+tests/
+├── unit/
+│   ├── test_core.py
+│   ├── test_io.py
+│   └── test_models.py
+├── integration/
+│   └── test_pipeline.py
+└── fixtures/
+    └── sample_data.csv
+```
+
+## Ejecutar Tests
+
+```bash
+# Ejecutar todos los tests
+pytest tests/
+
+# Con cobertura
+pytest --cov=src tests/
+
+# Tests específicos
+pytest tests/unit/test_models.py -v
+```
+
+## Configuración
+
+Los tests utilizan `pytest`. Asegúrate de instalar:
+
+```bash
+pip install pytest pytest-cov
+```
+
+---
+
+**Nota:** Esta carpeta está siendo desarrollada gradualmente. 
+Prioridad: Coverage en `src/cannabis_tax/core/` y `src/cannabis_tax/models/`.

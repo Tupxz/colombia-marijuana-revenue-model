@@ -1,0 +1,63 @@
+# Definición de escenarios de legalización
+# Parámetros clave para simular diferentes políticas
+
+scenarios:
+  
+  baseline:
+    name: "Línea Base (Sin Cambios)"
+    description: "Continuación actual sin legalización de marihuana"
+    parameters:
+      legalization_type: "none"
+      annual_volume_tons: 0
+      unit_price_pesos: 10000
+      tax_rate: 0.19
+      elasticity_demand: -0.8
+    years_projection: 10
+  
+  pessimistic:
+    name: "Escenario Pesimista"
+    description: "Legalización limitada con bajo consumo legal"
+    parameters:
+      legalization_type: "partial"
+      annual_volume_tons: 250
+      unit_price_pesos: 8000
+      tax_rate: 0.19
+      elasticity_demand: -1.2
+    years_projection: 10
+  
+  moderate:
+    name: "Escenario Moderado"
+    description: "Legalización con consumo moderado"
+    parameters:
+      legalization_type: "moderate"
+      annual_volume_tons: 500
+      unit_price_pesos: 10000
+      tax_rate: 0.19
+      elasticity_demand: -0.8
+    years_projection: 10
+  
+  optimistic:
+    name: "Escenario Optimista"
+    description: "Legalización completa con consumo elevado"
+    parameters:
+      legalization_type: "full"
+      annual_volume_tons: 1000
+      unit_price_pesos: 12000
+      tax_rate: 0.25
+      elasticity_demand: -0.5
+    years_projection: 10
+
+# Parámetros de sensibilidad
+sensitivity_ranges:
+  annual_volume_tons:
+    min: 100
+    max: 1500
+    step: 100
+  unit_price_pesos:
+    min: 5000
+    max: 15000
+    step: 1000
+  tax_rate:
+    min: 0.10
+    max: 0.35
+    step: 0.05

@@ -1,99 +1,376 @@
-# Predicción del Recaudo Tributario en Colombia
+# Colombia Marijuana Revenue Tax Forecasting Model
 
-**Ciencia de Datos – Programa de Economía**  
-**Universidad EAFIT | 2026-I**  
-
-**Profesora:** Paula María Almonacid Hurtado  
-**Curso:** 5° semestre – Ciencia de Datos  
+**Predicción del Recaudo Tributario bajo Escenarios de Legalización de Marihuana en Colombia**
 
 ---
 
-## 1. Descripción general del proyecto
+## 📋 Overview
 
-Este proyecto analiza la estructura del **recaudo tributario del Estado colombiano** bajo distintos escenarios de **legalización de la marihuana**. El objetivo principal es **modelar y predecir cambios en los ingresos tributarios** considerando diferentes hipótesis de legalización y consumo, utilizando **Python** para limpieza, análisis, modelado y visualización de datos provenientes de múltiples formatos (CSV, Excel, TXT, etc.).  
+Este proyecto analiza la estructura del **recaudo tributario del Estado colombiano** bajo distintos escenarios de **legalización de la marihuana**. Utilizando **Python**, desarrollamos un pipeline reproducible para:
 
-El proyecto se desarrolla de manera **replicable y estructurada**, con entregas semanales y fases definidas a lo largo de 16 semanas.  
+1. **Limpiar y transformar** datos de múltiples fuentes (DANE, Banco de la República, DIAN)
+2. **Analizar exploratorio** de series temporales fiscales y macroeconómicas
+3. **Construir modelos** predictivos de ingresos tributarios
+4. **Simular escenarios** de legalización con diferentes parámetros
+5. **Evaluar sensibilidad** de proyecciones a variaciones en supuestos clave
+
+**Curso:** Ciencia de Datos – 5° semestre  
+**Universidad:** EAFIT  
+**Semestre:** 2026-I  
+**Profesor:** Paula María Almonacid Hurtado
 
 ---
 
-## 2. Pregunta de investigación
+## 🎯 Pregunta de Investigación
 
 > ¿Cómo podría predecirse la estructura del recaudo tributario del Estado colombiano bajo distintos escenarios de legalización de la distribución de la marihuana?
 
 ---
 
-## 3. Variables y datos
+## 📁 Estructura del Proyecto
 
-### Variables principales
-
-- **Recaudo tributario total:** ingresos del Estado por impuestos.  
-- **Escenarios de legalización:** distintos niveles de regulación y distribución de marihuana.  
-- **Variables de control:** población, PIB, consumo estimado de marihuana, entre otros.  
-
-### Frecuencia y periodo
-
-- **Frecuencia:** anual y trimestral, según disponibilidad de datos.  
-- **Periodo de análisis:** determinado según fuentes y calidad de datos, especificado en el documento final.  
-
-### Fuentes de información
-
-- **DIAN** – Dirección de Impuestos y Aduanas Nacionales  
-- **DANE** – Departamento Administrativo Nacional de Estadística  
-- Otros datos públicos de consumo y fiscalidad  
+```
+.
+├── configs/                    # Archivos de configuración YAML
+│   ├── base.yaml              # Config general del proyecto
+│   ├── scenarios.yaml         # Definición de escenarios
+│   └── features.yaml          # Especificación de variables
+│
+├── data/                       # Datos (raw → interim → processed)
+│   ├── raw/                   # Datos originales sin modificar
+│   ├── interim/               # Datos intermedios en transformación
+│   ├── processed/             # Datos finales limpios
+│   ├── external/              # Datos de fuentes externas (APIs, etc.)
+│   └── README.md              # Diccionario y política de datos
+│
+├── src/cannabis_tax/          # Código fuente (paquete Python)
+│   ├── __init__.py
+│   ├── cli.py                 # Interfaz de línea de comandos (CLI)
+│   ├── core/                  # Módulos centrales
+│   │   ├── config.py          # Gestor de configuración
+│   │   ├── paths.py           # Gestor de rutas
+│   │   └── logging.py         # Logging centralizado
+│   ├── io/                    # Input/Output: ingestión de datos
+│   │   ├── ingest_sources.py  # Cargar datos de fuentes
+│   │   └── trends.py          # Procesamiento de series temporales
+│   ├── cleaning/              # Limpieza de datos
+│   │   └── clean.py           # Script principal de limpieza
+│   ├── features/              # Feature engineering
+│   │   ├── build_features.py  # Crear variables derivadas
+│   │   └── diagnostics.py     # Análisis de calidad de datos
+│   ├── models/                # Modelos predictivos
+│   │   ├── benchmark.py       # Modelos baseline
+│   │   ├── ml.py              # Modelos ML (regresión, ARIMA, etc.)
+│   │   └── evaluate.py        # Evaluación y métricas
+│   ├── scenarios/             # Simulación de escenarios
+│   │   ├── simulate.py        # Simulación de escenarios
+│   │   └── sensitivity.py     # Análisis de sensibilidad
+│   └── viz/                   # Visualización
+│       └── plots.py           # Funciones de graficación
+│
+├── reports/                    # Reportes y documentación
+│   ├── paper.tex              # Paper académico
+│   ├── paper.pdf              # PDF compilado
+│   ├── references.bib         # Referencias bibliográficas
+│   ├── figures/               # Figuras para documentos
+│   └── slides/                # Presentación en Beamer
+│
+├── notebooks/                  # Notebooks Jupyter (exploración)
+│   ├── 01_eda_tax_revenue.ipynb
+│   ├── 02_scenario_analysis.ipynb
+│   └── README.md
+│
+├── runs/                       # Resultados de ejecuciones
+│   ├── 2026-03-03__initial/   # Run de referencia
+│   └── README.md              # Convención de ejecuciones
+│
+├── tests/                      # Tests automatizados (pytest)
+│   ├── unit/
+│   └── integration/
+│
+├── README.md                   # Este archivo
+├── requirements.txt            # Dependencias Python
+├── LICENSE                     # Licencia del proyecto
+└── .gitignore                  # Archivos ignorados por Git
+```
 
 ---
 
-## 4. Metodología
+## 🚀 Quick Start
 
-Se emplean **técnicas de ciencia de datos y modelado predictivo** en Python, incluyendo:
+### 1. Clonar y configurar entorno
 
-- Limpieza y transformación de datos (preprocessing).  
-- Análisis exploratorio y visualización.  
-- Modelos de predicción y simulación de ingresos tributarios.  
-- Comparación de escenarios y evaluación de sensibilidad.  
+```bash
+git clone https://github.com/Tupxz/colombia-marijuana-revenue-model.git
+cd colombia-marijuana-revenue-model
 
-Todos los pasos son **reproducibles** mediante scripts organizados en la carpeta `scripts/`.  
+# Crear entorno virtual
+python3 -m venv .venv
+source .venv/bin/activate  # En Windows: .venv\Scripts\activate
+
+# Instalar dependencias
+pip install -r requirements.txt
+```
+
+### 2. Ejecutar pipeline
+
+```bash
+# Ejecutar pipeline completo (default)
+python -m src.cannabis_tax.cli
+
+# O específicamente: procesar datos
+python -m src.cannabis_tax.cli process
+
+# Simular escenarios
+python -m src.cannabis_tax.cli scenarios --scenarios 5
+
+# Ver ayuda
+python -m src.cannabis_tax.cli --help
+```
+
+### 3. Comandos disponibles
+
+| Comando | Descripción |
+|---------|------------|
+| `python -m src.cannabis_tax.cli pipeline` | Ejecutar pipeline completo |
+| `python -m src.cannabis_tax.cli process` | Procesar datos raw → processed |
+| `python -m src.cannabis_tax.cli analyze` | Análisis exploratorio |
+| `python -m src.cannabis_tax.cli model` | Entrenar modelos |
+| `python -m src.cannabis_tax.cli scenarios -s 5` | Simular 5 escenarios |
+| `python -m src.cannabis_tax.cli evaluate` | Evaluar modelos |
+| `python -m src.cannabis_tax.cli viz` | Generar visualizaciones |
 
 ---
 
-## 5. Resultados esperados
+## 📊 Datos
 
-El proyecto permite:
+### Fuentes Principales
 
-- Estimar cómo variaría el recaudo tributario bajo distintos escenarios de legalización.  
-- Analizar el impacto fiscal y económico potencial de la legalización de la marihuana.  
-- Proveer una base replicable para futuros análisis o políticas públicas.  
+| Fuente | Tipo | Frecuencia | Archivos |
+|--------|------|-----------|----------|
+| **DANE** | Encuestas, Capítulos Fiscales | Anual | `d_capitulos.csv`, `personas.csv`, etc. |
+| **Banco de la República** | Series Macroeconómicas | Anual/Trimestral | `PIBBanrep.xlsx`, `TRM_limpia_copia.csv` |
+| **IPC** | Índice de Precios | Mensual | `IPC_limpio_copia.xlsx` |
 
----
+### Estructura de Carpetas de Datos
 
-## 6. Estructura de carpetas
+- **`data/raw/`**: Datos originales sin modificar (NUNCA editar aquí)
+- **`data/interim/`**: Transformaciones intermedias
+- **`data/processed/`**: Datasets finales limpios + metadatos JSON
+- **`data/external/`**: Datos de APIs o fuentes externas (reservado)
 
-/data
-/raw -> Datos originales sin modificar (CSV, Excel, TXT)
-/processed -> Datos limpios y transformados para análisis
-/scripts -> Scripts de Python para limpieza, análisis y modelado
-/outputs -> Resultados finales,documento de texto, gráficos y tablas
-README.md -> Este archivo
-.gitignore -> Archivos ignorados por Git
-
+**Ver [`data/README.md`](data/README.md) para detalles completos.**
 
 ---
 
-## 7. Reproducibilidad
+## 🔧 Configuración
 
-El código incluido permite:
+### Archivos de Configuración
 
-- Cargar datos de diversas fuentes y formatos.  
-- Replicar todos los análisis y simulaciones de ingresos tributarios.  
-- Generar gráficos, tablas y resultados de manera automática.  
+Los parámetros del proyecto se definen en YAML:
+
+- **`configs/base.yaml`**: Configuración general (rutas, logging, etc.)
+- **`configs/scenarios.yaml`**: Escenarios de legalización (parámetros de simulación)
+- **`configs/features.yaml`**: Definición de variables y features
+
+### Ejemplo: Crear un nuevo escenario
+
+Editar `configs/scenarios.yaml`:
+
+```yaml
+scenarios:
+  custom_scenario:
+    name: "Mi Escenario Personalizado"
+    parameters:
+      annual_volume_tons: 600
+      unit_price_pesos: 11000
+      tax_rate: 0.22
+```
+
+Luego: `python -m src.cannabis_tax.cli scenarios`
 
 ---
 
-## 8. Referencias
+## 📈 Metodología
 
-Las fuentes de datos, documentación metodológica y referencias académicas se incluyen en el documento escrito del proyecto, siguiendo normas académicas.
+### Pipeline de Análisis
 
-## Reproducibility
+```
+raw data → clean & transform → EDA → feature engineering
+    ↓
+features → model selection → train/validate → evaluation
+    ↓
+scenarios → sensitivity analysis → visualization
+    ↓
+reports & papers
+```
 
-All results in this project can be reproduced by running the scripts
-in the `/scripts` folder in numerical order.
+### Modelos Utilizados
+
+- **Benchmarks:** Naive Forecast, Seasonal Naive
+- **Regresión:** Linear Regression, Ridge, Lasso
+- **Series Temporales:** ARIMA (por implementar)
+- **Avanzados:** Random Forest, XGBoost (por implementar)
+
+### Validación
+
+- Validación cruzada (k-fold, default k=5)
+- Métricas: MAE, RMSE, MAPE, R²
+- Backtesting en datos históricos
+
+---
+
+## 📚 Variables Principales
+
+### Fiscales
+- **Recaudo tributario total** (COP)
+- **Capítulos de impuestos:** Directos (D), Indirectos (G), Contribuciones (K)
+- **Impuestos específicos por fuente**
+
+### Macroeconómicas
+- **PIB** (anual y trimestral, COP)
+- **IPC** (Índice de Precios al Consumidor, base 2018)
+- **TRM** (Tasa Representativa del Mercado, USD/COP)
+- **Población**
+
+### De Legalización
+- **Volumen legal anual** (toneladas)
+- **Precio unitario** (COP/tonelada)
+- **Tasa tributaria efectiva** (%)
+- **Elasticidad de demanda**
+
+**Ver [`configs/features.yaml`](configs/features.yaml) para especificación completa.**
+
+---
+
+## 🧪 Testing
+
+```bash
+# Ejecutar todos los tests
+pytest tests/ -v
+
+# Con cobertura
+pytest tests/ --cov=src --cov-report=html
+
+# Tests específicos
+pytest tests/unit/test_models.py -v
+```
+
+---
+
+## 📝 Resultados y Entregables
+
+### Ejecuciones (`runs/`)
+Cada ejecución del pipeline genera:
+- Snapshot de configuración usado
+- Logs de ejecución
+- Tablas de resultados (CSV)
+- Figuras de visualización (PNG/PDF)
+
+Ver [`runs/README.md`](runs/README.md) para convención de nombres.
+
+### Documentación (`reports/`)
+- **Paper académico:** `reports/paper.tex` (LaTeX)
+- **Presentación:** `reports/slides/` (Beamer)
+- **Figuras:** `reports/figures/`
+
+---
+
+## 👥 Autores
+
+- **Estudiantes:** Economía 5° semestre, EAFIT, 2026-I
+- **Profesor:** Paula María Almonacid Hurtado
+- **Institución:** Universidad EAFIT
+
+---
+
+## 📄 Licencia
+
+Este proyecto se distribuye bajo licencia [MIT](LICENSE).  
+Los datos utilizados (DANE, Banco de la República) están bajo licencias públicas (CC-BY-4.0, de dominio público).
+
+---
+
+## 📚 Referencias Bibliográficas
+
+Ver [`reports/references.bib`](reports/references.bib)
+
+Lecturas recomendadas:
+- Documentación de DANE sobre metodología de encuestas
+- Working Papers del Banco de la República
+- Estudios de legalización en Canadá y Uruguay
+- Elasticidad de demanda de bienes pecaminosos (Chaloupka & Warner, 2000)
+
+---
+
+## 🔗 Enlaces Útiles
+
+- [DANE - Datos Abiertos](https://www.dane.gov.co/)
+- [Banco de la República - Series Estadísticas](https://www.banrep.gov.co/)
+- [DIAN - Estadísticas Tributarias](https://www.dian.gov.co/)
+
+---
+
+## ❓ FAQ / Troubleshooting
+
+### ¿Cómo agrego nuevos datos?
+1. Descargar archivo → `data/raw/`
+2. Crear script de limpieza en `src/cannabis_tax/io/`
+3. Guardar resultado procesado en `data/processed/` con metadatos JSON
+4. Actualizar `configs/features.yaml`
+
+### ¿Los datos son muy grandes y no puedo commitearlos?
+- Agregar patrones a `.gitignore` (ej: `data/raw/*.csv`)
+- Usar [Git LFS](https://git-lfs.com/) para archivos grandes
+- Documentar en `data/README.md` cómo descargar datos
+
+### ¿Cómo agrego un nuevo modelo?
+- Implementar en `src/cannabis_tax/models/ml.py` o nuevo módulo
+- Incluir métodos `.fit(X, y)` y `.predict(X)`
+- Crear tests en `tests/unit/test_models.py`
+- Documentar parámetros y supuestos en docstring
+
+### ¿Cómo genero un nuevo reporte?
+- Crear notebook en `notebooks/`
+- Usar rutas relativas con `src.cannabis_tax.core.paths`
+- Exportar figuras a `reports/figures/`
+- Incluir en LaTeX si es documentación oficial
+
+---
+
+## 🛠️ Desarrollo
+
+### Estructura de Commits
+
+```bash
+git add <cambios>
+git commit -m "tipo(scope): descripción"
+```
+
+Tipos: `feat`, `fix`, `refactor`, `docs`, `style`, `test`, `chore`
+
+Ejemplo: `feat(models): agregar ARIMA con validación cruzada`
+
+### Branch Workflow
+
+```bash
+# Feature branch
+git checkout -b feature/nueva-funcionalidad
+
+# Después de terminar, PR a main
+```
+
+---
+
+## 📞 Soporte
+
+Para preguntas o problemas:
+1. Revisar este README
+2. Consultar docstrings en el código
+3. Abrir un issue en GitHub
+4. Contactar al profesor
+
+---
+
+**Última actualización:** 2026-03-03  
+**Versión:** 0.1.0

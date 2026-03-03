@@ -1,0 +1,89 @@
+# Notebooks Directory
+
+Lugar para exploración, análisis interactivo y documentación ejecutable.
+
+⚠️ **IMPORTANTE:** Notebooks NO son código de producción.
+El código productivo debe estar en `src/cannabis_tax/`.
+
+## Uso Apropiado
+
+✅ **Sí usar para:**
+- Exploración Exploratoria de Datos (EDA)
+- Prototipado y experimentación
+- Documentación de hallazgos
+- Visualizaciones ad-hoc
+- Tutoriales y documentación ejecutable
+
+❌ **NO usar para:**
+- Lógica de negocio reutilizable
+- Procesamiento en producción
+- Modelos finales
+- Pipeline orquestación
+
+## Estructura Sugerida
+
+```
+notebooks/
+├── 01_eda_tax_revenue.ipynb
+├── 02_eda_macroeconomic.ipynb
+├── 03_prototype_models.ipynb
+├── 04_scenario_analysis.ipynb
+└── README.md
+```
+
+## Convención de Nombres
+
+- Prefijo numérico: `01_`, `02_`, etc. (para ordenamiento)
+- Nombre descriptivo: `eda_tax_revenue`, `model_prototype`
+- Extensión: `.ipynb`
+
+## Cómo Iniciar
+
+```bash
+# Iniciar Jupyter Lab
+jupyter lab notebooks/
+
+# O Jupyter Notebook (clásico)
+jupyter notebook notebooks/
+```
+
+## Reproducibilidad
+
+Para que notebooks sean reproducibles:
+
+1. **Usar rutas relativas** (nunca hardcoded)
+   ```python
+   from src.cannabis_tax.core.paths import paths
+   df = pd.read_csv(paths.data_processed / "personas_processed.csv")
+   ```
+
+2. **Documentar dependencias** en celda al inicio:
+   ```python
+   # Dependencias: pandas, numpy, matplotlib, scikit-learn
+   # Versiones: ver requirements.txt
+   ```
+
+3. **Usar seeds para reproducibilidad**:
+   ```python
+   import numpy as np
+   np.random.seed(42)
+   ```
+
+## Conversión a Script
+
+Si un notebook tiene lógica reutilizable:
+
+```bash
+# Convertir a .py
+jupyter nbconvert --to script notebook.ipynb
+
+# O extraer manualmente al código en src/
+```
+
+---
+
+Todos los notebooks deben ser **limpios** antes de hacer commit (sin células de ejecución):
+
+```bash
+jupyter nbconvert --clear-output notebook.ipynb --inplace
+```

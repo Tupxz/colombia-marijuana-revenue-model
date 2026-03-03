@@ -1,0 +1,45 @@
+# Configuración base del proyecto
+# Colombia Marijuana Revenue Tax Forecasting Model
+
+project:
+  name: "Colombia Marijuana Revenue Model"
+  version: "0.1.0"
+  description: "Predicción de recaudo tributario bajo escenarios de legalización"
+  authors:
+    - "EAFIT Data Science Program"
+    - "Economía 5° Semestre"
+
+# Rutas de datos
+data:
+  raw_dir: "data/raw/"
+  interim_dir: "data/interim/"
+  processed_dir: "data/processed/"
+  external_dir: "data/external/"
+
+# Parámetros de procesamiento
+processing:
+  encoding: "utf-8"
+  na_values: ["NA", "N/A", "null", ""]
+  date_format: "%Y-%m-%d"
+  
+# Logging
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(name)-20s | %(levelname)-8s | %(message)s"
+  console: true
+  file: "runs/$(date +%Y-%m-%d_%H-%M-%S)_execution.log"
+
+# Modelado
+modeling:
+  test_size: 0.2
+  cv_folds: 5
+  random_state: 42
+
+# Escenarios por defecto
+scenarios:
+  baseline:
+    description: "Escenario sin cambios (línea base)"
+  pessimistic:
+    description: "Baja legalización, baja recaudación"
+  optimistic:
+    description: "Legalización completa, máxima recaudación"
