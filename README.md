@@ -101,44 +101,126 @@ Este proyecto analiza la estructura del **recaudo tributario del Estado colombia
 ### 1. Clonar y configurar entorno
 
 ```bash
+# Clonar repositorio
 git clone https://github.com/Tupxz/colombia-marijuana-revenue-model.git
 cd colombia-marijuana-revenue-model
 
 # Crear entorno virtual
 python3 -m venv .venv
 source .venv/bin/activate  # En Windows: .venv\Scripts\activate
-
-# Instalar dependencias
-pip install -r requirements.txt
 ```
 
-### 2. Ejecutar pipeline
+### 2. Instalar paquete en modo editable
+
+```bash
+# Instalar cannabis_tax en modo desarrollo (-e = editable)
+# Incluye todas las dependencias del proyecto
+pip install -e .
+
+# Opcional: instalar con dependencias de desarrollo
+pip install -e ".[dev]"
+
+# Opcional: instalar con Jupyter para notebooks
+pip install -e ".[jupyter]"
+
+# Opcional: instalar TODO (dev + jupyter)
+pip install -e ".[all]"
+```
+
+### 3. Verificar instalación
+
+```bash
+# Verificar que el módulo se importa correctamente
+python -c "import cannabis_tax; print(f'cannabis_tax {cannabis_tax.__version__} ✅')"
+
+# Ver ayuda del CLI
+python -m cannabis_tax.cli --help
+```
+
+### 4. Ejecutar pipeline
 
 ```bash
 # Ejecutar pipeline completo (default)
-python -m src.cannabis_tax.cli
+python -m cannabis_tax.cli
 
-# O específicamente: procesar datos
-python -m src.cannabis_tax.cli process
+# O ejecutar pasos específicos:
+python -m cannabis_tax.cli process        # Procesar datos
+python -m cannabis_taxi.cli analyze       # Análisis exploratorio
+python -m cannabis_tax.cli scenarios --scenarios 5  # Simular 5 escenarios
+python -m cannabis_tax.cli viz            # Generar gráficos
 
-# Simular escenarios
-python -m src.cannabis_tax.cli scenarios --scenarios 5
-
-# Ver ayuda
-python -m src.cannabis_tax.cli --help
+# Con verbose logging
+python -m cannabis_tax.cli pipeline --verbose
 ```
 
-### 3. Comandos disponibles
+### 5. Ejecutar tests
+
+```bash
+# Todos los tests
+pytest
+
+# Con cobertura
+pytest --cov=cannabis_tax --cov-report=html
+
+# Tests específicos
+pytest tests/unit/test_core.py -v
+```
+
+---
+
+## 📦 Instalación en Diferentes Contextos
+
+### Para desarrolladores (local)
+```bash
+pip install -e ".[dev]"
+```
+Permite: editar código, correr tests, usar linter/formatter.
+
+### Para usuarios finales
+```bash
+pip install .
+```
+Solo instala dependencias de producción.
+
+### Para CI/CD (GitHub Actions)
+```bash
+pip install -e ".[dev]"
+pytest --cov
+```
+
+---
+
+## 🔧 Comandos CLI
 
 | Comando | Descripción |
 |---------|------------|
-| `python -m src.cannabis_tax.cli pipeline` | Ejecutar pipeline completo |
-| `python -m src.cannabis_tax.cli process` | Procesar datos raw → processed |
-| `python -m src.cannabis_tax.cli analyze` | Análisis exploratorio |
-| `python -m src.cannabis_tax.cli model` | Entrenar modelos |
-| `python -m src.cannabis_tax.cli scenarios -s 5` | Simular 5 escenarios |
-| `python -m src.cannabis_tax.cli evaluate` | Evaluar modelos |
-| `python -m src.cannabis_tax.cli viz` | Generar visualizaciones |
+| `python -m cannabis_tax.cli` | Ejecutar pipeline completo |
+| `python -m cannabis_tax.cli --help` | Ver ayuda general |
+| `python -m cannabis_tax.cli process` | Procesar datos raw → processed |
+| `python -m cannabis_tax.cli analyze` | Análisis exploratorio |
+| `python -m cannabis_tax.cli model` | Entrenar modelos |
+| `python -m cannabis_tax.cli scenarios -s 5` | Simular 5 escenarios |
+| `python -m cannabis_tax.cli evaluate` | Evaluar modelos |
+| `python -m cannabis_tax.cli viz` | Generar visualizaciones |
+
+---
+
+## 📋 Dependencias
+
+### Producción (instaladas por defecto)
+- **pandas** — Manipulación de DataFrames
+- **numpy** — Cálculos numéricos
+- **pyyaml** — Lectura de configuración
+- **matplotlib** — Visualizaciones
+- **scikit-learn** — ML y métricas
+
+### Desarrollo (opcional con `[dev]`)
+- **pytest** — Framework de testing
+- **black** — Formateador de código
+- **flake8** — Linter
+- **mypy** — Type checking
+
+Ver `pyproject.toml` para versiones específicas.
 
 ---
 

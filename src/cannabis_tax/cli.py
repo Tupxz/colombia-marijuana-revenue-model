@@ -5,7 +5,7 @@ cli.py
 Interfaz de línea de comandos (CLI) para el pipeline de análisis de recaudo tributario.
 
 Orquesta el procesamiento de datos, modelado y análisis de escenarios.
-Uso: python -m src.cannabis_tax.cli [COMANDO] [OPCIONES]
+Uso: python -m cannabis_tax.cli [COMANDO] [OPCIONES]
 
 Comandos disponibles:
   - process    : Procesar y limpiar datos raw
@@ -153,10 +153,10 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Ejemplos de uso:
-  python -m src.cannabis_tax.cli process
-  python -m src.cannabis_tax.cli pipeline
-  python -m src.cannabis_tax.cli scenarios --scenarios 5
-  python -m src.cannabis_tax.cli viz
+  python -m cannabis_tax.cli process
+  python -m cannabis_tax.cli pipeline
+  python -m cannabis_tax.cli scenarios --scenarios 5
+  python -m cannabis_tax.cli viz
         """
     )
     

@@ -1,0 +1,126 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cannabis-tax"
+version = "0.1.0"
+description = "Predicción de recaudo tributario bajo escenarios de legalización de marihuana en Colombia"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "EAFIT Data Science Program", email = "datascience@eafit.edu.co"}
+]
+keywords = [
+    "cannabis",
+    "tax",
+    "revenue",
+    "forecasting",
+    "time-series",
+    "colombia",
+    "economics"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+
+dependencies = [
+    "pandas>=1.5.0",
+    "numpy>=1.23.0",
+    "pyyaml>=6.0",
+    "matplotlib>=3.6.0",
+    "scikit-learn>=1.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "black>=23.0",
+    "flake8>=6.0",
+    "mypy>=1.0",
+    "isort>=5.12",
+]
+jupyter = [
+    "jupyter>=1.0",
+    "jupyterlab>=4.0",
+]
+all = [
+    "cannabis-tax[dev,jupyter]",
+]
+
+[project.urls]
+Homepage = "https://github.com/Tupxz/colombia-marijuana-revenue-model"
+Repository = "https://github.com/Tupxz/colombia-marijuana-revenue-model.git"
+"Bug Tracker" = "https://github.com/Tupxz/colombia-marijuana-revenue-model/issues"
+Documentation = "https://github.com/Tupxz/colombia-marijuana-revenue-model/blob/main/README.md"
+
+[project.scripts]
+cannabis-tax = "cannabis_tax.cli:main"
+
+[tool.setuptools]
+packages = ["cannabis_tax"]
+package-dir = {"" = "src"}
+
+[tool.setuptools.package-data]
+cannabis_tax = ["*.py", "**/*.py"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-v --tb=short --strict-markers"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310', 'py311', 'py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_gitignore = true
+known_first_party = ["cannabis_tax"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["src/cannabis_tax"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
