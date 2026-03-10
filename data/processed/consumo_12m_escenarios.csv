@@ -1,0 +1,4 @@
+baseline_consumidores_12m,baseline_prevalencia_12m,escenario,cambio_pct,consumidores_proyectados_12m,diferencia_absoluta,prevalencia_proyectada_12m
+1719,0.4316926167754897,conservador,0.05,1805,86,0.4532898041185334
+1719,0.4316926167754897,base,0.1,1891,172,0.4748869914615771
+1719,0.4316926167754897,alto,0.2,2063,344,0.5180813661476645

@@ -31,25 +31,24 @@ def setup_logging(
         format_string = "%(asctime)s | %(name)-20s | %(levelname)-8s | %(message)s"
     
     formatter = logging.Formatter(format_string)
-    
-    # Logger raíz
     logger = logging.getLogger("cannabis_tax")
     logger.setLevel(level)
-    
-    # Handler a consola
+
+    logger.handlers.clear()
+    logger.propagate = False
+
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(level)
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
-    
-    # Handler a archivo (opcional)
+
     if log_file:
         log_file.parent.mkdir(parents=True, exist_ok=True)
-        file_handler = logging.FileHandler(log_file, encoding='utf-8')
+        file_handler = logging.FileHandler(log_file, encoding="utf-8")
         file_handler.setLevel(level)
         file_handler.setFormatter(formatter)
         logger.addHandler(file_handler)
-    
+
     return logger
 
 
