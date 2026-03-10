@@ -92,7 +92,6 @@ src/cannabis_tax/          Código productivo (paquete Python)
 └── viz/                   Visualizaciones
 
 configs/                   Archivos YAML de configuración
-
 data/
 ├── raw/                   Datos originales (no editar)
 ├── processed/             Datos procesados limpios
