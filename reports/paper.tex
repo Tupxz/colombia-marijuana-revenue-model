@@ -9,20 +9,20 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage{hyperref}
-\usepackage{natbib}
-\usepackage{abstract}
 \usepackage{booktabs}
+\usepackage{array}
 
 \onehalfspacing
+\renewcommand{\arraystretch}{1.2}
 
-\title{Modelado de Recaudos Tributarios en Mercados Legalizados: Un Análisis Predictivo de la Distribución de Cannabis en Colombia}
+\title{Propensión al Consumo de Marihuana en Colombia:\\ Benchmark MCO y Probit con Datos de Encuesta}
 
-\author{Santiago Tupaz$^{1,2}$ \and Moisés Quintero$^{1}$ \and Vanessa Rodrigues$^{1}$ \\[0.5cm] 
+\author{Santiago Tupaz$^{1,2}$ \and Moisés Quintero$^{1}$ \and Vanessa Rodrigues$^{1}$ \\[0.5cm]
 {\small $^{1}$ Universidad EAFIT, Programa de Economía, Medellín, Colombia} \\
 {\small $^{2}$ Universidad Nacional de Colombia, Programa de Estadística, Sede Medellín} \\[1cm]
 {\small \textbf{Profesora Supervisora:} Paula María Almonacid Hurtado, Universidad EAFIT}}
 
-\date{\small Febrero 10, 2026}
+\date{\small 10 de marzo de 2026}
 
 \begin{document}
 
@@ -34,8 +34,8 @@
     {\normalsize Programa de Economía}\\
     {\normalsize Ciencia de Datos}\\[2cm]
 
-    {\large \textbf{Modelado de Recaudos Tributarios en Mercados Legalizados}}\\[0.5cm]
-    {\small Un Análisis Predictivo de la Distribución de Cannabis en Colombia}\\[2cm]
+    {\large \textbf{Propensión al Consumo de Marihuana en Colombia}}\\[0.5cm]
+    {\small Benchmark MCO y Probit con Datos de Encuesta}\\[2cm]
 
     {\normalsize
     \textbf{Autores:}\\
@@ -57,16 +57,16 @@
 
     {\normalsize
     Medellín, Colombia\\
-    10 de febrero de 2026
+    10 de marzo de 2026
     }
 
     \vfill
 \end{titlepage}
 
 \begin{abstract}
-Este artículo examina cómo podría proyectarse la estructura del recaudo tributario del Estado colombiano bajo distintos escenarios de legalización y regulación de la distribución de marihuana. Utilizando técnicas de ciencia de datos y análisis econométrico, construimos un modelo predictivo que integra variables sociodemográficas de encuestas nacionales con supuestos de regulación tributaria. Los resultados proporcionan evidencia cuantitativa para la formulación de políticas públicas en el contexto de la reforma tributaria y regulación de mercados alternativos en Colombia.
+Este documento presenta la primera fase empírica del proyecto sobre consumo de marihuana en Colombia. El objetivo actual es modelar la propensión a reportar consumo en los últimos 12 meses utilizando información de la Encuesta Nacional de Consumo de Sustancias Psicoactivas y un conjunto básico de controles sociodemográficos. Para ello se construye una base de trabajo unificada a partir de una base limpia de consumo, el registro de personas y el capítulo sociodemográfico D2. Sobre esa base se estiman cuatro especificaciones de benchmark: dos modelos lineales de probabilidad y dos modelos Probit, con y sin información de precio. Los resultados muestran que la restricción por disponibilidad de precio reduce fuertemente la muestra útil, por lo que el coeficiente asociado al precio debe interpretarse solo como evidencia exploratoria. Esta fase deja establecido un benchmark econométrico sólido y una estructura reproducible para las siguientes etapas del proyecto, incluyendo la comparación con modelos de machine learning.
 
-\textit{Palabras clave}: recaudo tributario, legalización de cannabis, ciencia de datos, política fiscal, modelado de escenarios
+\textit{Palabras clave}: marihuana, propensión al consumo, MCO, Probit, benchmark econométrico, Colombia
 \end{abstract}
 
 \newpage
@@ -77,223 +77,227 @@ Este artículo examina cómo podría proyectarse la estructura del recaudo tribu
 
 \section{Introducción}
 
-\subsection{Contexto Global y Relevancia}
+Este trabajo estudia la propensión individual a consumir marihuana en Colombia a partir de información de encuesta. La motivación central del proyecto es construir primero una base empírica clara y reproducible antes de pasar a modelos más complejos y a escenarios de política. En esta fase, el foco está en responder una pregunta simple y operativa: qué factores observables se asocian con la probabilidad de reportar consumo de marihuana en los últimos 12 meses.
 
-La legalización de sustancias controladas representa una transformación significativa en la política pública, con profundas implicaciones fiscales, sociales y económicas. A nivel mundial, más de 40 países han legalizado cannabis en alguna forma, generando ingresos tributarios considerables. En Estados Unidos, jurisdicciones como Colorado y Washington han recaudado más de 4,000 millones de dólares desde la legalización, demostrando el potencial fiscal de estos mercados regulados.
+La primera etapa se organiza alrededor de un benchmark econométrico. En vez de empezar con modelos complejos, se prioriza una estrategia escalonada: construcción de variables, limpieza, análisis exploratorio, estimación de un modelo MCO como referencia y estimación posterior de un modelo Probit para la misma variable dependiente. Esta secuencia permite evaluar calidad de datos, estabilidad de la muestra y sensibilidad de los coeficientes antes de avanzar a la fase de machine learning.
 
-Colombia, por su parte, enfrenta un contexto único: históricamente vinculada a economías ilícitas relacionadas con drogas, la regulación de la distribución de marihuana representa una oportunidad para transformar estructuras económicas informales en fuentes formales de recaudo. La creciente consideración de marcos regulatorios alternativos abre la puerta a un análisis cuantitativo de escenarios tributarios.
+\section{Pregunta de investigación}
 
-\subsection{Pregunta de Investigación}
+La pregunta de trabajo para esta fase es la siguiente:
 
-\textbf{¿Cómo podría estructurarse el recaudo tributario del Estado colombiano bajo distintos escenarios de legalización de la distribución de marihuana?}
+\begin{quote}
+\textbf{¿Qué factores observables se asocian con la probabilidad de consumir marihuana en los últimos 12 meses en Colombia?}
+\end{quote}
 
-La ``estructura del recaudo tributario'' se define como la participación porcentual de cada fuente de ingreso (impuestos a la renta, IVA, impuestos específicos, etc.) dentro del total recaudado por el Estado en un período determinado. Esta pregunta es fundamental porque va más allá de cuantificar ingresos adicionales para comprender cómo se reconfigurarían las proporciones del ingreso fiscal total bajo diferentes marcos regulatorios.
+De manera complementaria, se explora qué ocurre cuando se incorpora información de precio en la especificación. Sin embargo, dado que esa variable está disponible solo para una submuestra reducida, el análisis con precio debe entenderse como una extensión exploratoria y no como una estimación causal concluyente.
 
-\subsection{Importancia y Motivación}
+\section{Datos y construcción de la base}
 
-Desde una perspectiva fiscal, la legalización introduciría impuestos específicos al cannabis que constituirían una fuente de recaudo identificable y relevante. La evidencia internacional (Hansen et al., 2020; Dills et al., 2021) muestra que estos ingresos no son marginales ni temporales, sino que tienden a consolidarse a través del tiempo.
+\subsection{Fuentes de información}
 
-Desde una perspectiva económica, anticipar cómo se reconfiguraría la estructura del recaudo resulta clave para:
-\begin{itemize}
-    \item Evaluar sostenibilidad fiscal bajo diferentes diseños tributarios
-    \item Optimizar la asignación del gasto público
-    \item Diseñar estructuras impositivas eficientes
-    \item Contribuir al debate de política pública con evidencia cuantitativa
-\end{itemize}
+La base final de modelado se construyó integrando tres fuentes principales:
 
-\section{Marco Teórico y Evidencia Empírica}
-
-\subsection{Experiencias Internacionales}
-
-\textbf{Hansen, Miller y Weber (2020)} estudian los efectos fiscales de la legalización en Washington y Oregón, encontrando que:
-\begin{itemize}
-    \item La apertura de mercados legales genera ajustes inmediatos en ventas formales
-    \item Existe consumo transfronterizo significativo: entre 8.1\% y 11.5\% del recaudo de Washington provenía de consumidores no residentes
-    \item La legalización crea nuevas fuentes de recaudo tributario que no existían bajo prohibición
-\end{itemize}
-
-\textbf{Dills, Goffard y Miron (2021)} analizan los ingresos fiscales en múltiples estados, observando que:
-\begin{itemize}
-    \item Los impuestos específicos al cannabis generan incrementos persistentes y significativos en recaudos estatales
-    \item Estos ingresos continúan creciendo en años posteriores a la legalización
-    \item La magnitud de los ingresos justifica su inclusión explícita en la estructura tributaria
-\end{itemize}
-
-\subsection{Supuestos del Análisis}
-
-El estudio se fundamenta en los siguientes supuestos:
-
-\begin{enumerate}
-    \item \textbf{Shock estructural}: La legalización incrementa el volumen de transacciones visibles en el mercado formal, absorbiendo parte del consumo que canalizaba la informalidad
-    \item \textbf{Movilidad de demanda}: El consumo no depende únicamente del mercado interno sino que responde a diferencias regulatorias y de precios
-    \item \textbf{Impuesto específico identificable}: La legalización introduce un tributo específico al cannabis que constituye una fuente relevante y consolidable
-    \item \textbf{Relación precio-demanda}: La tasa impositiva efectiva influye directamente en el tamaño del mercado legal y en el nivel de recaudo
-\end{enumerate}
-
-\section{Metodología}
-
-\subsection{Datos y Fuentes de Información}
-
-\textbf{Base de Datos Principal}: Encuesta Nacional de Consumo de Sustancias (DANE)
-\begin{itemize}
-    \item Observaciones actuales: 169,346 individuos con características sociodemográficas
-    \item Capítulos disponibles en la encuesta DANE a explorar para seleccionar variables relevantes
-    \item Proceso de descubrimiento de datos para identificar variables que se acoplen a la investigación
-\end{itemize}
-
-\textbf{Variables Complementarias por Integrar}:
-\begin{itemize}
-    \item \textbf{DIAN}: Datos de recaudo tributario por fuente
-    \item \textbf{DANE}: Variables macroeconómicas (PIB, inflación, consumo de hogares)
-    \item \textbf{Múltiples capítulos de la encuesta}: Por explorar para segmentación de mercado
-\end{itemize}
-
-\subsection{Variable Objetivo}
-
-\textbf{Unidad de Análisis}: Colombia en períodos anuales o semestrales, con enfoque macroeconómico.
-
-\textbf{Definición Formal}:
-La variable objetivo es la \textbf{estructura del recaudo tributario}, definida como la participación porcentual de cada fuente tributaria dentro del total recaudado por el Estado en un período determinado:
-
-\begin{equation}
-Y_{k,t} = \frac{\text{Recaudo de la fuente } k \text{ en período } t}{\text{Recaudo total en período } t}
-\end{equation}
-
-\textbf{Características}:
-\begin{itemize}
-    \item \textbf{Variable composicional}: Las participaciones suman 1 en cada período
-    \item \textbf{Acotada}: $Y_{k,t} \in [0,1]$ para cada fuente
-    \item \textbf{Dependiente del escenario}: El impuesto específico al cannabis aparece solo en escenarios de legalización
-    \item \textbf{Evolución temporal}: Permite analizar cómo se reconfigura la estructura del recaudo a través del tiempo
-\end{itemize}
-
-\subsection{Estrategia Analítica}
-
-El análisis se estructura en fases:
-
-\begin{enumerate}
-    \item \textbf{Exploración de datos}: Conocimiento profundo de la naturaleza de los datos disponibles
-    \begin{itemize}
-        \item Revisión de múltiples capítulos de la encuesta DANE
-        \item Selección de variables que se acoplen a la pregunta de investigación
-        \item Análisis de calidad, completitud y patrones en los datos
-    \end{itemize}
-    
-    \item \textbf{Procesamiento}: Limpieza, normalización y tratamiento de valores faltantes
-    
-    \item \textbf{Análisis exploratorio}: Estadísticas descriptivas, segmentación demográfica, patrones de comportamiento
-    
-    \item \textbf{Modelado}: Desarrollo de modelo de machine learning a ser especificado según naturaleza de los datos
-    \begin{itemize}
-        \item Enfoque adaptativo: El algoritmo específico dependerá de características de los datos
-        \item Benchmark: Logit fraccionado como modelo de referencia
-    \end{itemize}
-    
-    \item \textbf{Simulación de escenarios}: Proyecciones fiscales bajo diferentes marcos regulatorios
-    
-    \item \textbf{Validación}: Evaluación del desempeño predictivo fuera de muestra
-\end{enumerate}
-
-\subsection{Enfoque de Modelado}
-
-Dada la naturaleza composicional de la variable objetivo y la necesidad de comprender primero los datos, adoptamos un enfoque flexible:
-
-\textbf{Modelo Benchmark}: Logit fraccionado
-\begin{itemize}
-    \item Maneja variables acotadas entre 0 y 1
-    \item Especificación: $E[Y_{k,t}|X] = \frac{\exp(\eta)}{1 + \exp(\eta)}$
-    \item Proporciona punto de referencia para evaluar modelos alternativos
-\end{itemize}
-
-\textbf{Modelos de Machine Learning}:
-\begin{itemize}
-    \item Se especificarán después del análisis exploratorio profundo
-    \item Flexibilidad para adaptarse a patrones específicos en los datos
-    \item Potencial para capturar no-linealidades y interacciones complejas
-\end{itemize}
-
-\subsection{Escenarios de Simulación}
-
-Se evaluarán proyecciones fiscales bajo los siguientes marcos:
-
-\begin{enumerate}
-    \item \textbf{Escenario Base}: Prohibición mantenida (estructura tributaria actual)
-    \item \textbf{Escenario 1}: Legalización amplia con IVA estándar (19\%)
-    \item \textbf{Escenario 2}: Legalización con impuesto especial (25\%)
-    \item \textbf{Escenario 3}: Regulación parcial con múltiples tramos impositivos
-\end{enumerate}
-
-\subsection{Escenarios Simulados}
-
-Se evalúan tres escenarios de política:
-
-\begin{enumerate}
-    \item \textbf{Escenario Base}: Prohibición (estructura tributaria actual)
-    \item \textbf{Escenario 1}: Legalización amplia con IVA estándar (19\%)
-    \item \textbf{Escenario 2}: Legalización con impuesto especial (25\%)
-    \item \textbf{Escenario 3}: Regulación parcial con múltiples tramos tributarios
-\end{enumerate}
-
-\section{Datos: Primera Descripción}
-
-\subsection{Caracterización del Dataset}
-
-El análisis se basa en una encuesta nacional de 169,346 individuos con información sociodemográfica:
-
-\begin{table}[h]
+\begin{table}[h!]
 \centering
+\small
+\begin{tabular}{p{4.2cm} p{6.1cm} p{4.2cm}}
+\toprule
+\textbf{Archivo} & \textbf{Contenido} & \textbf{Llaves} \\
+\midrule
+\parbox[t]{4.2cm}{\texttt{base\_consumo\_drogas}\\\texttt{\_colombia\_limpia.xlsx}}
+& Variables derivadas de consumo, gasto, precio, acceso y actitudes
+& \texttt{id\_hogar}, \texttt{id\_encuesta}, \texttt{id\_persona}, \texttt{orden\_persona} \\
+\texttt{personas\_processed.csv} & Sexo, edad y variables básicas de identificación individual & \texttt{directorio}, \texttt{secuencia\_encuesta}, \texttt{secuencia\_p}, \texttt{orden} \\
+\texttt{d2\_capitulos.csv} & Escolaridad y variables sociodemográficas complementarias & \texttt{directorio}, \texttt{secuencia\_encuesta}, \texttt{secuencia\_p}, \texttt{orden} \\
+\bottomrule
+\end{tabular}
+\caption{Fuentes principales para la base de modelado}
+\label{tab:fuentes}
+\end{table}
+
+La verificación de llaves mostró coincidencia completa entre la base de consumo y las tablas \texttt{personas} y \texttt{d2} para las 3982 observaciones disponibles en la base limpia de consumo. Esa coincidencia permite construir una base integrada sin pérdida adicional en la etapa de merge.
+
+La base integrada conserva por tanto las 3982 observaciones iniciales. Sin embargo, la muestra final para las especificaciones econométricas sin precio se reduce a 3980 porque dos observaciones presentan \texttt{D2\_05 = 9} (\textit{No sabe / No informa}) y quedan fuera al construir la agrupación educativa en tres categorías estables. Esta pérdida es mínima y no altera la interpretación general de los resultados, pero se documenta explícitamente por transparencia y reproducibilidad.
+
+\subsection{Variables priorizadas}
+
+El inventario operativo de variables se construyó a partir del diccionario de datos de la encuesta. Para esta fase se priorizaron las variables estrictamente necesarias para el benchmark:
+
+\begin{table}[h!]
+\centering
+\small
+\begin{tabular}{p{2.6cm} p{1.8cm} p{6.4cm} p{3.4cm}}
+\toprule
+\textbf{Variable limpia} & \textbf{Código} & \textbf{Definición} & \textbf{Uso} \\
+\midrule
+\texttt{consumo\_12m} & \texttt{K\_03} & ¿Ha consumido marihuana en los últimos 12 meses? & Variable dependiente \\
+\texttt{precio\_compra} & \texttt{K\_09}, \texttt{K\_09\_VALOR} & Conocimiento y valor numérico del precio de un cigarrillo o porro de marihuana & Regresor de interés \\
+\texttt{sexo} & \texttt{sexo} & Sexo de la persona & Control demográfico \\
+\texttt{edad} & \texttt{edad} & Edad en años cumplidos & Control demográfico \\
+\texttt{d2\_05} & \texttt{D2\_05} & Nivel educativo más alto alcanzado & Control socioeconómico \\
+\texttt{frecuencia}\\{\_consumo} & \texttt{K\_04} & Frecuencia de consumo en los últimos 12 meses & Variable auxiliar \\
+\texttt{facil\_marihuana} & \texttt{G\_06\_A} & Facilidad para conseguir marihuana & Proxy de acceso \\
+\bottomrule
+\end{tabular}
+\caption{Variables principales integradas desde el inventario operativo}
+\label{tab:variables}
+\end{table}
+
+Además, se dejaron identificadas para una segunda etapa variables de intensidad, como \texttt{cantidad\_consumo} (\texttt{K\_08}) y \texttt{gasto\_valor} (\texttt{K\_07}), que pueden servir para un modelo posterior de consumo intensivo o gasto.
+
+\subsection{Disponibilidad y calidad de datos}
+
+La principal restricción empírica de esta etapa es la disponibilidad desigual de variables. La base completa contiene 3982 observaciones, pero la cobertura efectiva cambia de forma importante según la variable:
+
+\begin{itemize}
+    \item \texttt{consumo\_12m}: 1719 registros no nulos en la base de consumo derivada.
+    \item \texttt{precio\_compra}: 823 registros no nulos en la base derivada original.
+    \item \texttt{cantidad\_consumo}: 1223 registros no nulos.
+    \item \texttt{gasto\_valor}: 1014 registros no nulos.
+    \item \texttt{frecuencia\_consumo}: cobertura completa en las 3982 observaciones.
+\end{itemize}
+
+La variable de precio requiere una aclaración adicional. En la base derivada original, los 823 registros no nulos de \texttt{precio\_compra} se distribuyen entre 603 personas que reportan consumo en los últimos 12 meses y 220 personas que no lo reportan. Luego de depurar códigos especiales y conservar únicamente precios válidos y positivos, la variable usable para el modelo se reduce a 756 observaciones. Finalmente, al exigir además covariables demográficas completas y una categoría educativa válida, la muestra econométrica con precio queda en 755 casos. Esta secuencia muestra que la información de precio no está distribuida aleatoriamente respecto al comportamiento de consumo y que la muestra con precio es una submuestra altamente seleccionada.
+
+En consecuencia, el análisis se organiza en dos niveles de muestra:
+
+\begin{enumerate}
+    \item una muestra amplia sin precio, útil para establecer un benchmark general;
+    \item una muestra restringida con precio, útil para explorar sensibilidad, pero no para sostener conclusiones causales fuertes.
+\end{enumerate}
+
+\subsection{Reglas de limpieza y recodificación}
+
+La construcción de la base final siguió estas reglas:
+
+\begin{enumerate}
+    \item unión de las tres fuentes mediante llaves equivalentes;
+    \item recodificación binaria de \texttt{K\_03} como variable de propensión a consumir;
+    \item limpieza de variables numéricas positivas, eliminando códigos especiales como 8, 9, 98, 99, 998 y 999 cuando aparecen como no respuesta;
+    \item transformación logarítmica del precio cuando la variable es válida y positiva;
+    \item agrupación de educación en tres categorías estables: \textit{baja}, \textit{media} y \textit{superior}.
+\end{enumerate}
+
+La recodificación de la variable dependiente requiere un supuesto explícito. En el cuestionario, \texttt{K\_03} distingue al menos tres respuestas relevantes: 1 (\textit{Sí}), 2 (\textit{No}) y 9 (\textit{No contesta}). En la construcción de \texttt{propension\_12m}, el código 1 se transforma en 1, mientras que el código 2, el código 9 y los faltantes se tratan como 0. En consecuencia, la no respuesta se interpreta de la misma forma que la ausencia de consumo reportado. Este es un supuesto operativo útil para construir el benchmark, pero debe entenderse como una decisión metodológica provisional: si la no respuesta estuviera correlacionada con características observables o no observables de los individuos, podría introducir sesgo en etapas posteriores del análisis.
+
+\section{Estrategia econométrica}
+
+\subsection{Modelo benchmark MCO}
+
+El primer benchmark se estimó con un modelo lineal de probabilidad:
+
+\[
+    y_i = \beta_0 + \beta_1 \log(precio_i) + \beta_2 edad_i + \beta_3 edad_i^2 + \beta_4 mujer_i + \beta_5 educacion_i + u_i
+\]
+
+donde \(y_i\) toma valor 1 si la persona reporta consumo de marihuana en los últimos 12 meses y 0 en caso contrario. Este modelo se usa como benchmark por su interpretación directa y por su utilidad para comparar especificaciones.
+
+\subsection{Modelo Probit}
+
+Como segunda especificación se estimó un modelo Probit con la misma estructura de covariables:
+
+\[
+    Pr(y_i = 1 \mid X_i) = \Phi(\alpha_0 + \alpha_1 \log(precio_i) + \alpha_2 edad_i + \alpha_3 edad_i^2 + \alpha_4 mujer_i + \alpha_5 educacion_i)
+\]
+
+En el reporte comparativo, las columnas del Probit se presentan mediante efectos marginales promedio para que la comparación con el MCO sea más clara.
+
+\subsection{Especificaciones estimadas}
+
+El análisis se estructura sobre dos muestras distintas derivadas de la misma base de modelado.
+
+\begin{enumerate}
+    \item \textbf{Muestra amplia} (\(n=3980\)): incluye todas las observaciones con edad, sexo y educación agrupada disponibles, sin requerir información de precio.
+    \item \textbf{Muestra restringida} (\(n=755\)): corresponde al subconjunto de la muestra amplia para el cual existe además información válida de precio y covariables completas.
+\end{enumerate}
+
+Sobre cada muestra se estiman dos modelos, lo que genera cuatro especificaciones en total:
+
+\begin{enumerate}
+    \item \textbf{MCO completo}: muestra amplia sin precio;
+    \item \textbf{MCO con precio}: muestra restringida con \(\log(precio)\);
+    \item \textbf{Probit completo}: misma muestra amplia sin precio;
+    \item \textbf{Probit con precio}: misma muestra restringida con \(\log(precio)\).
+\end{enumerate}
+
+Esta estructura hace explícita la lógica de dos muestras: por un lado, la asociación general entre variables sociodemográficas y propensión al consumo en la muestra más amplia posible; por otro, la asociación exploratoria entre precio y propensión en una submuestra seleccionada. La comparación entre ambas muestras es importante porque permite separar efectos de especificación de efectos derivados de la pérdida de observaciones.
+
+\section{Resultados de benchmark}
+
+\subsection{Tamaño muestral y ajuste}
+
+La Tabla \ref{tab:fit} resume el número de observaciones y la métrica de ajuste para cada especificación.
+
+\begin{table}[h!]
+\centering
+\caption{Resumen de muestra y ajuste}
+\label{tab:fit}
+\input{tables/propension_fit_summary.tex}
+\end{table}
+
+Los modelos sin precio utilizan 3980 observaciones, mientras que los modelos con precio se reducen a 755. Esta caída de muestra es el principal límite empírico del análisis actual. En otras palabras, el benchmark sin precio describe mejor el patrón general de la muestra, mientras que el benchmark con precio debe leerse como una evidencia mucho más condicionada por selección muestral.
+
+\begin{table}[h!]
+\centering
+\small
+\caption{Cobertura de variables en la base de modelado}
+\label{tab:cobertura}
 \begin{tabular}{lrr}
 \toprule
-\textbf{Variable} & \textbf{Observaciones} & \textbf{Tasa de Respuesta} \\
+Variable & No nulos & \% cobertura sobre 3982 \\
 \midrule
-Sexo & 169,346 & 100\% \\
-Edad & 169,346 & 100\% \\
-Parentesco & 169,346 & 100\% \\
-Consentimiento & 49,756 & 29.4\% \\
-Resultado & 49,756 & 29.4\% \\
+Consumo 12m & 1719 & 43.2 \\
+Precio en base derivada & 823 & 20.7 \\
+Precio válido para modelado & 756 & 19.0 \\
+Edad & 3982 & 100.0 \\
+Sexo & 3982 & 100.0 \\
+Educación agrupable & 3980 & 99.9 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Interpretación de Datos Faltantes}
+\subsection{Coeficientes y efectos marginales}
 
-Las variables ``Consentimiento'', ``Resultado'' y ``Seleccionada'' presentan 70.6\% de valores faltantes. Esta pauta sugiere que:
+La Tabla \ref{tab:benchmark} presenta los coeficientes del MCO y, para el Probit, los efectos marginales promedio.
+
+\begin{table}[h!]
+\centering
+\small
+\caption{Resultados comparados de benchmark}
+\label{tab:benchmark}
+\input{tables/propension_benchmark_table.tex}
+\end{table}
+
+En esta comparación, la categoría de referencia para educación es \textit{baja}, que agrupa \textit{Ninguno}, \textit{Preescolar} y \textit{Básica primaria}. Por lo tanto, los coeficientes reportados para \textit{Educación media} y \textit{Educación superior} deben leerse en relación con ese grupo base.
+
+\subsection{Lectura preliminar}
+
+Los hallazgos más importantes de esta primera fase son los siguientes:
+
+\begin{enumerate}
+    \item En la muestra completa, la variable \textit{Mujer} presenta un coeficiente cercano a \(-0.065\) en MCO y un efecto marginal de \(-0.064\) en Probit. Bajo esta especificación, las mujeres muestran una menor propensión observada a reportar consumo de marihuana en los últimos 12 meses frente a los hombres.
+    \item La edad aparece con signo negativo en la muestra completa tanto en MCO como en Probit, lo que sugiere una menor propensión observada al consumo a medida que aumenta la edad.
+    \item En la muestra restringida con precio, el coeficiente de \(\log(precio)\) es positivo y estadísticamente distinto de cero en ambos modelos, con magnitud cercana a \(0.044\). Este resultado no debe interpretarse como elasticidad causal. La lectura correcta en esta etapa es que, dentro de una submuestra específica y altamente seleccionada, el precio aparece correlacionado con la propensión observada.
+    \item Los coeficientes de educación cambian entre la muestra completa y la muestra con precio. Esto refuerza la idea de que la pérdida de observaciones por disponibilidad de precio altera la composición de la muestra y, con ello, la estabilidad de las estimaciones.
+\end{enumerate}
+
+\section{Reproducibilidad de la fase}
+
+La fase quedó organizada para que el análisis pueda repetirse de forma transparente:
 
 \begin{itemize}
-    \item Potencialmente corresponde a un submuestreo intencional dentro de la encuesta
-    \item Los 49,756 casos con respuesta constituyen una submuestra válida
-    \item No necesariamente representa pérdida de información sino un diseño muestral estratificado
+    \item el inventario operativo de variables quedó documentado en \texttt{data/processed/variables.tex};
+    \item la base de modelado se genera desde funciones en \texttt{src/cannabis\_tax/analysis/modeling.py};
+    \item el análisis exploratorio y el benchmark se ejecutan desde el notebook \texttt{notebooks/01\_eda\_y\_mco\_propension.ipynb};
+    \item las tablas del paper se exportan automáticamente a \texttt{reports/tables/}.
 \end{itemize}
 
-La completitud del 100\% en variables demográficas (sexo, edad, parentesco) proporciona una base robusta para segmentación de mercado.
+Esto deja la primera fase lista para revisión y facilita la transición a la siguiente etapa del proyecto.
 
-\section{Resultados Preliminares}
+\section{Conclusiones y siguiente fase}
 
-Los análisis detallados de predicción, simulación de escenarios y proyecciones fiscales se encuentran en desarrollo. Los próximos pasos incluyen:
+La primera fase ya permite sostener varias conclusiones operativas. Primero, la pregunta de propensión al consumo en los últimos 12 meses está correctamente aterrizada en una variable observada y documentada del capítulo K de la encuesta. Segundo, la integración entre la base limpia de consumo y los módulos sociodemográficos funciona sin pérdida por llaves. Tercero, el benchmark MCO y Probit ya está completamente implementado y ofrece un punto de comparación claro para modelos posteriores.
 
-\begin{itemize}
-    \item Estimación de modelos de regresión fraccionaria
-    \item Cálculo de elasticidades precio de demanda
-    \item Simulación de ingresos bajo diferentes tasas impositivas
-    \item Análisis de sensibilidad a parámetros clave
-\end{itemize}
-
-\section{Conclusiones}
-
-Este trabajo busca contribuir al debate sobre regulación de mercados de drogas en Colombia con herramientas cuantitativas rigurosas. La pregunta que motiva el análisis---cómo podría estructurarse el recaudo tributario bajo legalización---es fundamental para la formulación informada de política pública.
-
-La integración de datos microeconómicos de encuestas nacionales con simulaciones de escenarios fiscales permite generar proyecciones coherentes y técnicamente robustas, aunque necesariamente contrafactuales. El valor de este ejercicio radica en ofrecer un marco analítico que complemente el debate actual, que suele estar dominado por consideraciones morales o de orden público.
-
-\newpage
-
-\begin{thebibliography}{99}
-
-\bibitem[Hansen et al., 2020]{Hansen2020}
-Hansen, B., Miller, K., \& Weber, C. (2020). Federalism, partial prohibition, and cross-border sales: Evidence from recreational marijuana. \textit{Journal of Public Economics}, 187, 104159.
-
-\bibitem[Dills et al., 2021]{Dills2021}
-Dills, A., Goffard, S., \& Miron, J. (2021). The effect of marijuana legalization on state tax revenue. \textit{Journal of Law and Economics}, 64(3), 423--451.
-
-\end{thebibliography}
+Al mismo tiempo, el trabajo deja identificada la principal limitación de la etapa: la baja cobertura de la variable de precio. Por eso, la fase siguiente no debería centrarse en refinar indefinidamente el benchmark, sino en avanzar hacia el componente de machine learning, manteniendo el benchmark econométrico como referencia y evaluando si el desempeño predictivo mejora con modelos más flexibles.
 
 \end{document}

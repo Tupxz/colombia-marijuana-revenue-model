@@ -1,0 +1,99 @@
+\documentclass[12pt, a4paper]{article}
+
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{setspace}
+
+\onehalfspacing
+
+\title{Resultados Iniciales: Benchmark MCO y Probit de Propensión}
+\author{Proyecto de consumo de marihuana en Colombia}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Objetivo}
+
+Esta sección resume los resultados iniciales del modelo de propensión a consumir marihuana en los últimos 12 meses. El objetivo de esta etapa no es identificar un efecto causal definitivo, sino construir un benchmark econométrico sólido que sirva de base para las siguientes fases del análisis.
+
+La variable dependiente es:
+
+\[
+    y_i = 1(\text{la persona } i \text{ reporta consumo de marihuana en los últimos 12 meses})
+\]
+
+\section{Especificación empírica}
+
+Se estimaron cuatro especificaciones:
+
+\begin{enumerate}
+    \item \textbf{MCO completo}: modelo lineal de probabilidad con la muestra más amplia disponible.
+    \item \textbf{MCO con precio}: la misma especificación, pero incluyendo \(\log(precio)\) y restringiendo la muestra a observaciones con información de precio.
+    \item \textbf{Probit completo}: modelo Probit con los mismos controles que el MCO completo.
+    \item \textbf{Probit con precio}: modelo Probit en la muestra restringida con información de precio.
+\end{enumerate}
+
+La especificación base es:
+
+\[
+    y_i = \beta_0 + \beta_1 \log(precio_i) + \beta_2 edad_i + \beta_3 edad_i^2 + \beta_4 mujer_i + \beta_5 educacion_i + u_i
+\]
+
+En las versiones sin precio se omite \(\log(precio_i)\). La variable educativa se agrupa en tres niveles para evitar categorías con muy pocas observaciones: \textit{baja}, \textit{media} y \textit{superior}.
+
+\section{Muestra y ajuste}
+
+La Tabla \ref{tab:fit} resume el número de observaciones y la métrica de ajuste para cada modelo.
+
+\begin{table}[h!]
+\centering
+\caption{Resumen de muestra y ajuste}
+\label{tab:fit}
+\input{tables/propension_fit_summary.tex}
+\end{table}
+
+Los modelos sin precio utilizan 3980 observaciones, mientras que los modelos con precio se reducen a 755. Esta reducción significativa debe leerse como el resultado de un proceso secuencial de depuración de la variable de precio. En la base derivada original existen 823 registros no nulos de \texttt{precio\_compra}. Luego de eliminar códigos especiales y conservar únicamente precios válidos y positivos, la variable usable para el modelado se reduce a 756 observaciones. Finalmente, al exigir además covariables demográficas completas y una categoría educativa válida, la muestra econométrica con precio queda en 755 casos. Por ello, cualquier interpretación del coeficiente de precio debe considerarse exploratoria.
+
+\section{Resultados benchmark}
+
+La Tabla \ref{tab:benchmark} presenta los coeficientes del MCO y, para el Probit, los efectos marginales promedio.
+
+\begin{table}[h!]
+\centering
+\caption{Resultados comparados de benchmark}
+\label{tab:benchmark}
+\input{tables/propension_benchmark_table.tex}
+\end{table}
+
+\section{Lectura preliminar de resultados}
+
+Los principales hallazgos de esta etapa inicial son:
+
+\begin{enumerate}
+    \item En la muestra completa, la variable \textit{mujer} presenta un coeficiente de aproximadamente \(-0.065\) en MCO y un efecto marginal de \(-0.064\) en Probit. Bajo esta especificación de benchmark, esto sugiere una menor propensión observada a reportar consumo en los últimos 12 meses en comparación con los hombres.
+    \item En la muestra completa, la edad muestra una asociación negativa con la propensión de consumo, tanto en MCO como en Probit.
+    \item En la muestra restringida con precio, el coeficiente de \(\log(precio)\) es positivo y estadísticamente distinto de cero en ambos modelos, con magnitud cercana a \(0.044\). Sin embargo, este resultado no debe interpretarse como una elasticidad causal, sino más bien como una correlación dentro de una submuestra altamente seleccionada.
+    \item Los coeficientes de educación difieren entre la muestra completa y la muestra con precio, lo que sugiere que la selección muestral inducida por la falta de información de precio puede estar alterando la composición de la muestra utilizable.
+\end{enumerate}
+
+\section{Estructura del documento}
+
+Con estos resultados es posible escribir una primera sección del documento enfocada exclusivamente en los resultados de benchmark:
+
+\begin{enumerate}
+    \item Descripción breve de la variable dependiente.
+    \item Explicación de las cuatro especificaciones.
+    \item Tabla de muestra y ajuste.
+    \item Tabla de resultados comparados.
+    \item Lectura preliminar, aclarando que el modelo con precio es exploratorio y no causal.
+\end{enumerate}
+
+La conclusión adecuada en esta etapa es que el benchmark econométrico ya está operativo, pero la interpretación económica del precio requiere una limpieza adicional y posiblemente una estrategia más cuidadosa de selección muestral o imputación.
+
+\end{document}

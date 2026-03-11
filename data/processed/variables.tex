@@ -1,0 +1,184 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+
+\title{Inventario Organizado de Variables}
+\author{Proyecto: consumo de marihuana en Colombia}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Objetivo de este archivo}
+
+Este documento organiza las variables que se van a usar en la primera etapa del proyecto.
+El orden de trabajo queda asi:
+
+\begin{enumerate}[leftmargin=*]
+    \item definir variables y construir una base unificada;
+    \item limpiar y recodificar;
+    \item estimar un modelo MCO como benchmark de propension;
+    \item estimar un modelo Probit para la misma variable dependiente.
+\end{enumerate}
+
+La variable objetivo inicial sera la propension a consumir marihuana en los ultimos 12 meses.
+
+\section{Fuentes y llaves de union}
+
+Se identificaron tres fuentes principales:
+
+\begin{longtable}{p{4cm} p{7cm} p{4cm}}
+\toprule
+Archivo & Contenido & Llaves \\
+\midrule
+\endhead
+\texttt{base\_consumo\_drogas\_colombia\_limpia.xlsx} & Variables derivadas de consumo, gasto, precio, acceso y actitudes & \texttt{id\_hogar}, \texttt{id\_encuesta}, \texttt{id\_persona}, \texttt{orden\_persona} \\
+\texttt{personas\_processed.csv} & Sexo, edad y variables basicas de persona & \texttt{directorio}, \texttt{secuencia\_encuesta}, \texttt{secuencia\_p}, \texttt{orden} \\
+\texttt{d2\_capitulos.csv} & Escolaridad y otras caracteristicas sociodemograficas & \texttt{directorio}, \texttt{secuencia\_encuesta}, \texttt{secuencia\_p}, \texttt{orden} \\
+\bottomrule
+\end{longtable}
+
+La verificacion de llaves muestra coincidencia completa entre la base de consumo y las bases
+\texttt{personas} y \texttt{d2} para las 3982 observaciones disponibles en la base de consumo.
+
+\section{Variables priorizadas para el modelo de propension}
+
+\subsection{Variable dependiente}
+
+\begin{longtable}{p{3cm} p{2.2cm} p{6.2cm} p{4.1cm}}
+\toprule
+Variable limpia & Codigo origen & Definicion segun diccionario & Uso propuesto \\
+\midrule
+\endhead
+\texttt{consumo\_12m} & \texttt{K\_03} & ``\`{ }Ha consumido marihuana en los ultimos 12 meses?'' Dominio: 1 Si, 2 No, 9 No contesta. & Variable dependiente para MCO y Probit. Debe recodificarse a binaria. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Variables explicativas principales}
+
+\begin{longtable}{p{3cm} p{2.2cm} p{5.8cm} p{4.5cm}}
+\toprule
+Variable limpia & Codigo origen & Definicion segun diccionario & Rol en el modelo \\
+\midrule
+\endhead
+\texttt{precio\_compra} & \texttt{K\_09}, \texttt{K\_09\_VALOR} & \texttt{K\_09}: ``\`{ }Usted sabe cuanto cuesta un cigarrillo o porro de marihuana?''; \texttt{K\_09\_VALOR}: valor numerico. & Regresor de interes para escenarios de precio. Requiere limpieza fuerte. \\
+\texttt{sexo} & \texttt{sexo} & Sexo. Dominio: 1 Hombre, 2 Mujer. & Control demografico. \\
+\texttt{edad} & \texttt{edad} & ``\`{ }Cuantos anos cumplidos tiene la persona?'' Dominio: 00 a 108. & Control demografico. Se recomienda incluir edad y edad al cuadrado. \\
+\texttt{d2\_05} & \texttt{D2\_05} & Nivel educativo mas alto alcanzado. Dominio: 1 Ninguno, 2 Preescolar, 3 Basica primaria, 4 Basica secundaria, 5 Media, 6 Tecnica/tecnologica, 7 Universitaria, 8 Postgrado, 9 No sabe / No informa. & Control socioeconomico principal. \\
+\texttt{frecuencia\_consumo} & \texttt{K\_04} & ``En los ultimos 12 meses, \`{ }con que frecuencia ha consumido marihuana?'' Dominio: 1 una sola vez, 2 algunas veces en 12 meses, 3 algunas veces mensualmente, 4 algunas veces semanalmente, 5 diariamente, 9 no contesta. & Variable de apoyo. No debe ir en la especificacion base si se interpreta como muy cercana al resultado. \\
+\texttt{facil\_marihuana} & \texttt{G\_06\_A} & Facilidad para conseguir marihuana. Dominio: 1 me seria facil, 2 me seria dificil, 3 no podria conseguir, 9 no sabe. & Proxy de acceso/oferta. \\
+\texttt{consumo\_30d} & \texttt{K\_05} & ``\`{ }Ha consumido marihuana en los ultimos 30 dias?'' Dominio: 1 Si, 2 No, 9 No contesta. & Variable auxiliar para validacion, no para la primera especificacion de propension anual. \\
+\texttt{consumo\_vida} & \texttt{K\_02} & Momento de primera vez de consumo. Dominio: 1 en los ultimos 30 dias, 2 hace mas de 30 dias y menos de 12 meses, 3 hace mas de 12 meses, 9 no contesta. & Variable historica de apoyo; revisar interpretacion antes de usar. \\
+\bottomrule
+\end{longtable}
+
+\subsection{Variables secundarias para una etapa posterior}
+
+\begin{longtable}{p{3cm} p{2.2cm} p{6cm} p{4.2cm}}
+\toprule
+Variable limpia & Codigo origen & Definicion segun diccionario & Comentario \\
+\midrule
+\endhead
+\texttt{cantidad\_consumo} & \texttt{K\_08} & ``En promedio, \`{ }cuantos cigarrillos de marihuana consume usted al mes?'' & Util para un segundo modelo de intensidad, no para la primera etapa. \\
+\texttt{gasto\_valor} & \texttt{K\_07} & ``\`{ }Cuanto gasto usted en marihuana durante los ultimos 30 dias?'' & Alternativa para intensidad o gasto, no para la primera especificacion de propension. \\
+\texttt{gasto\_descripcion} & \texttt{K\_09\_TEXTO} & Valor en letras. & Puede servir para depurar \texttt{precio\_compra} o gasto. \\
+\bottomrule
+\end{longtable}
+
+\section{Disponibilidad de las variables en la base de consumo}
+
+La disponibilidad observada en la base de consumo actual es la siguiente:
+
+\begin{longtable}{p{4cm} r r p{5.5cm}}
+\toprule
+Variable & No nulos & \% faltantes & Comentario \\
+\midrule
+\endhead
+\texttt{consumo\_12m} & 1719 & 56.8 & La codificacion actual parece tener casos con 1 y muchos faltantes; debe validarse contra el cuestionario. \\
+\texttt{precio\_compra} & 823 & 79.3 & Muy incompleta para usarla en toda la muestra. \\
+\texttt{cantidad\_consumo} & 1223 & 69.3 & Reservar para segunda etapa. \\
+\texttt{gasto\_valor} & 1014 & 74.5 & Reservar para segunda etapa. \\
+\texttt{frecuencia\_consumo} & 3982 & 0.0 & Variable completa, pero cercana al comportamiento de consumo. \\
+\texttt{facil\_marihuana} & 436 & 89.1 & Cobertura muy baja; usar con cautela. \\
+\bottomrule
+\end{longtable}
+
+Adicionalmente, \texttt{precio\_compra} no esta presente solo entre consumidores de 12 meses:
+hay 220 casos con precio no nulo entre observaciones hoy recodificables como no consumidoras en 12 meses
+y 603 casos con precio no nulo entre consumidoras de 12 meses.
+Esto sugiere revisar cuidadosamente la logica de saltos y las derivaciones de la base limpia.
+
+\section{Reglas de limpieza propuestas}
+
+\begin{enumerate}[leftmargin=*]
+    \item Unir la base de consumo con \texttt{personas} y \texttt{d2} usando las llaves equivalentes.
+    \item Recodificar variables binarias del cuestionario respetando el diccionario:
+    \begin{itemize}[leftmargin=*]
+        \item 1 = Si
+        \item 2 = No
+        \item 9 = No contesta
+    \end{itemize}
+    \item Revisar si los faltantes en \texttt{consumo\_12m} significan realmente 0 o si deben quedar como NA.
+    \item Tratar codigos especiales en precio y cantidad antes de estimar:
+    por ejemplo 9, 98, 99 u otros valores de no respuesta si aparecen en la base derivada.
+    \item Crear una variable binaria de trabajo:
+    \[
+        y_i = 1(\texttt{consumo\_12m}_i = 1)
+    \]
+    dejando como 0 los casos en que se confirme ``No'' y como NA los no contestados o ambiguos.
+    \item Para modelos con precio, considerar usar \(\log(\texttt{precio\_compra})\) luego de eliminar valores invalidos.
+    \item Para \texttt{d2\_05}, agrupar categorias si la muestra por nivel educativo es pequena.
+\end{enumerate}
+
+\section{Hoja de ruta de modelado}
+
+\subsection{Modelo 1: MCO como benchmark de propension}
+
+Primera especificacion recomendada:
+
+\[
+    y_i = \beta_0 + \beta_1 \log(precio_i) + \beta_2 edad_i + \beta_3 edad_i^2 + \beta_4 sexo_i + \beta_5 educacion_i + u_i
+\]
+
+donde \(y_i\) es una variable binaria de consumo en ultimos 12 meses.
+Este modelo se interpreta como un \textit{linear probability model} y se usa como benchmark simple.
+
+\subsection{Modelo 2: Probit de propension}
+
+Segunda especificacion recomendada:
+
+\[
+    Pr(y_i = 1 \mid X_i) = \Phi(\alpha_0 + \alpha_1 \log(precio_i) + \alpha_2 edad_i + \alpha_3 edad_i^2 + \alpha_4 sexo_i + \alpha_5 educacion_i)
+\]
+
+Este sera el modelo econometrico principal para la primera etapa del proyecto.
+
+\subsection{Nota metodologica importante}
+
+Si \texttt{precio\_compra} sigue siendo demasiado incompleta luego de limpiar, conviene trabajar con dos especificaciones:
+
+\begin{enumerate}[leftmargin=*]
+    \item una especificacion de muestra completa sin precio;
+    \item una especificacion reducida con precio para explorar sensibilidad o elasticidad.
+\end{enumerate}
+
+Eso evita perder demasiada muestra desde el inicio.
+
+\section{Siguiente paso}
+
+Con este inventario, el siguiente paso ya no es discutir nombres de variables sino construir la base final de modelado:
+
+\begin{enumerate}[leftmargin=*]
+    \item merge de archivos;
+    \item recodificacion limpia de \texttt{K\_03}, \texttt{K\_09\_VALOR}, \texttt{sexo}, \texttt{edad} y \texttt{D2\_05};
+    \item tabla descriptiva;
+    \item MCO benchmark;
+    \item Probit.
+\end{enumerate}
+
+\end{document}
