@@ -1,66 +1,70 @@
 # Colombia Marijuana Consumption Model
 
-Proyecto de Ciencia de Datos para responder una pregunta más simple: cómo podría cambiar la cantidad de consumidores de marihuana en Colombia si se legaliza su distribución.
-
-## Qué hay en este repo
-
-- `src/cannabis_tax/`: código principal.
-- `data/raw/`: datos originales.
-- `data/processed/`: datos limpios o transformados.
-- `reports/`: entregables académicos.
-- `runs/`: salidas generadas al ejecutar el pipeline.
-
-## Flujo básico
-
-1. Limpiar y preparar datos.
-2. Tomar la base de consumo.
-3. Estimar consumidores en últimos 12 meses.
-4. Simular escenarios simples de cambio tras legalización.
+Propensión al consumo de marihuana en Colombia: benchmark MCO y Probit con datos de la Encuesta Nacional de Consumo de Sustancias Psicoactivas.
 
 ## Uso rápido
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e .
-python3 -m cannabis_tax.cli question
+pip install -e ".[dev]"
+make test        # correr pruebas
+make validate    # validar target vs raw
+make pipeline    # process → validate → consumption
 ```
 
-Comandos disponibles:
+## Comandos CLI disponibles
 
 ```bash
-python3 -m cannabis_tax.cli process
-python3 -m cannabis_tax.cli consumption
-python3 -m cannabis_tax.cli question
-python3 -m cannabis_tax.cli pipeline
+python3 -m cannabis_tax.cli process      # Limpiar datos raw
+python3 -m cannabis_tax.cli validate     # Validar consistencia del target
+python3 -m cannabis_tax.cli consumption  # Generar escenarios de consumo
+python3 -m cannabis_tax.cli pipeline     # process + validate (estricto) + consumption
+python3 -m cannabis_tax.cli cleanup      # Vista previa de artefactos a limpiar
+python3 -m cannabis_tax.cli cleanup --apply  # Borrar artefactos seguros
 ```
 
-## Estructura simple
+## Estructura
 
 ```text
-data/                Datos
-notebooks/           Exploración
-reports/             Entregables
-runs/                Resultados de ejecución
-src/cannabis_tax/    Código Python
-tests/               Pruebas
+src/cannabis_tax/       Código Python
+  analysis/             Modelado, EDA, consumo, validación
+  cleaning/             Limpieza de datos raw
+  core/                 Rutas, config, logging
+  cli.py                Punto de entrada CLI
+data/
+  raw/                  Datos originales (no editar)
+  processed/            Datos limpios y bases de trabajo
+configs/                Configuración YAML
+notebooks/              Exploración y validación interactiva
+reports/                Entregables académicos (paper, slides, tablas)
+tests/                  Pruebas unitarias
 ```
 
-## Reglas prácticas
+## Datos clave
 
-- No editar archivos dentro de `data/raw/`.
-- Guardar salidas finales en `data/processed/`.
-- Usar `runs/` para resultados temporales o ejecuciones completas.
-- Mantener la lógica del proyecto dentro de `src/cannabis_tax/`.
-- Para la pregunta actual, el archivo clave es `data/processed/base_consumo_drogas_colombia_limpia.xlsx`.
+| Archivo | Qué contiene |
+|---------|-------------|
+| `data/processed/base_consumo_drogas_colombia_limpia.xlsx` | Base limpia de consumo (3982 obs) |
+| `data/raw/k_capitulos.csv` | Capítulo K raw para cross-check |
+| `data/processed/propensity_model_base.csv` | Base de modelado (regenerable) |
+| `reports/paper.tex` | Paper principal |
 
-## Documentos que sí importan
+## Make targets
 
-- Este `README.md` para entender el proyecto.
-- `data/README.md` para saber qué guardar en cada carpeta de datos.
-- `runs/README.md` para entender qué va en las ejecuciones.
-- `reports/paper.tex` y `reports/slides/` para la entrega académica.
+```bash
+make help        # Ver todos los targets
+make test        # Pruebas unitarias
+make test-cov    # Pruebas con cobertura
+make validate    # Validación de target
+make pipeline    # Pipeline completo
+make clean       # Dry-run de limpieza
+make clean-apply # Limpieza real
+make lint        # Verificar formato
+make format      # Auto-formatear
+```
 
 ## Estado actual
 
-La estructura fue reducida para enfocarse en consumo y escenarios simples. El resultado principal de la CLI queda en `data/processed/consumo_12m_escenarios.csv`.
+La primera fase (benchmark econométrico MCO + Probit) está completa.
+Ver `AUDIT_REPORT.md` para hallazgos de la auditoría técnica.

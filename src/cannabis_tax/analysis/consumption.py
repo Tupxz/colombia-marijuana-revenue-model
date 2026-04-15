@@ -6,9 +6,10 @@ from pathlib import Path
 
 import pandas as pd
 
+from ..core.paths import paths
 
-DEFAULT_INPUT = Path("data/processed/base_consumo_drogas_colombia_limpia.xlsx")
-DEFAULT_OUTPUT = Path("data/processed/consumo_12m_escenarios.csv")
+DEFAULT_INPUT = paths.data_processed / "base_consumo_drogas_colombia_limpia.xlsx"
+DEFAULT_OUTPUT = paths.data_processed / "consumo_12m_escenarios.csv"
 
 
 def load_consumption_base(path: Path = DEFAULT_INPUT) -> pd.DataFrame:

@@ -14,18 +14,19 @@ Metadatos: data/processed/*_metadata.json
 from pathlib import Path
 import json
 import logging
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict
 import pandas as pd
 
+try:
+    from ..core.logging import logger as project_logger
 
-# ============================================================================
-# CONFIGURACIÓN DE LOGGING
-# ============================================================================
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)-8s | %(message)s",
-)
+    logger = project_logger.getChild("cleaning")
+except (ImportError, ValueError):
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s | %(levelname)-8s | %(message)s",
+    )
+    logger = logging.getLogger("cannabis_tax.cleaning")
 
 
 # ============================================================================
@@ -38,9 +39,9 @@ def load_csv(path: Path, sep: str = ",") -> pd.DataFrame:
     - path: ruta al archivo CSV
     - sep: separador (por defecto ',')
     """
-    logging.info(f"Cargando CSV: {path.name}")
+    logger.info("Cargando CSV: %s", path.name)
     df = pd.read_csv(path, sep=sep, header=0, low_memory=False)
-    logging.info(f"  → Dimensiones: {df.shape[0]} filas × {df.shape[1]} columnas")
+    logger.info("  -> Dimensiones: %s filas x %s columnas", df.shape[0], df.shape[1])
     return df
 
 
@@ -54,7 +55,7 @@ def normalize_column_names(df: pd.DataFrame) -> pd.DataFrame:
         for col in df.columns
     }
     df = df.rename(columns=new_columns)
-    logging.info(f"  → Columnas normalizadas: {list(df.columns)[:5]}... ({len(df.columns)} total)")
+    logger.info("  -> Columnas normalizadas: %s... (%s total)", list(df.columns)[:5], len(df.columns))
     return df
 
 
@@ -72,10 +73,10 @@ def infer_and_cast_types(df: pd.DataFrame) -> pd.DataFrame:
         if any(keyword in col for keyword in ("fecha", "date", "dob", "nacimiento")):
             try:
                 df[col] = pd.to_datetime(series, errors="coerce", dayfirst=True)
-                logging.debug(f"  → Columna '{col}' parseada como fecha")
+                logger.debug("  -> Columna '%s' parseada como fecha", col)
                 continue
             except Exception:
-                logging.debug(f"  → No se pudo parsear '{col}' como fecha")
+                logger.debug("  -> No se pudo parsear '%s' como fecha", col)
         # Intento de conversión a numérico
         if series.dtype == object:
             # Si la columna tiene mayoría de valores numéricos como strings
@@ -83,7 +84,7 @@ def infer_and_cast_types(df: pd.DataFrame) -> pd.DataFrame:
             digits_ratio = sum(s.strip().replace(".", "", 1).replace(",", "").lstrip("+-").isdigit() for s in sample) / max(len(sample), 1)
             if digits_ratio > 0.6:
                 df[col] = pd.to_numeric(series.str.replace(",", ""), errors="coerce")
-                logging.debug(f"  → Columna '{col}' convertida a numérico")
+                logger.debug("  -> Columna '%s' convertida a numérico", col)
     return df
 
 
@@ -97,12 +98,12 @@ def clean_missing_and_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     before = df.shape[0]
     df = df.dropna(how="all")
     after_dropna = df.shape[0]
-    logging.info(f"  → Filas eliminadas (completamente vacías): {before - after_dropna}")
+    logger.info("  -> Filas eliminadas (completamente vacias): %s", before - after_dropna)
 
     before_dups = df.shape[0]
     df = df.drop_duplicates()
     after_dups = df.shape[0]
-    logging.info(f"  → Filas eliminadas (duplicados exactos): {before_dups - after_dups}")
+    logger.info("  -> Filas eliminadas (duplicados exactos): %s", before_dups - after_dups)
 
     return df
 def generate_metadata(df: pd.DataFrame) -> dict:
@@ -132,12 +133,12 @@ def save_outputs(df: pd.DataFrame, metadata: dict, out_dir: Path, base_name: str
 
     # Guardar CSV sin índice y con codificación utf-8
     df.to_csv(csv_path, index=False, encoding="utf-8")
-    logging.info(f"  → CSV guardado: {csv_path.name}")
+    logger.info("  -> CSV guardado: %s", csv_path.name)
 
     # Guardar metadatos legibles
     with meta_path.open("w", encoding="utf-8") as fh:
         json.dump(metadata, fh, ensure_ascii=False, indent=2)
-    logging.info(f"  → Metadatos guardados: {meta_path.name}")
+    logger.info("  -> Metadatos guardados: %s", meta_path.name)
 
 
 # ============================================================================
@@ -167,14 +168,14 @@ def process_capitulos_dane(
     capitulos_files = ["d_capitulos", "d2_capitulos", "g_capitulos", "k_capitulos"]
     results = {}
     
-    logging.info("=" * 70)
-    logging.info("BLOQUE 1: PROCESAMIENTO DE CAPÍTULOS DANE")
-    logging.info("=" * 70)
+    logger.info("=" * 70)
+    logger.info("BLOQUE 1: PROCESAMIENTO DE CAPITULOS DANE")
+    logger.info("=" * 70)
     
     for cap_name in capitulos_files:
         try:
             input_path = input_dir / f"{cap_name}.csv"
-            logging.info(f"\nProcesando: {cap_name}")
+            logger.info("\nProcesando: %s", cap_name)
             
             # Pipeline de procesamiento
             df = load_csv(input_path, sep=",")
@@ -187,12 +188,12 @@ def process_capitulos_dane(
             save_outputs(df, metadata, output_dir, base_name=cap_name)
             
             results[cap_name] = (df, metadata)
-            logging.info(f"✓ {cap_name} completado\n")
+            logger.info("OK %s completado\n", cap_name)
             
         except FileNotFoundError:
-            logging.error(f"✗ Archivo no encontrado: {cap_name}.csv")
+            logger.error("Archivo no encontrado: %s.csv", cap_name)
         except Exception as e:
-            logging.error(f"✗ Error procesando {cap_name}: {e}")
+            logger.error("Error procesando %s: %s", cap_name, e)
     
     return results
 
@@ -217,12 +218,12 @@ def process_personas(
     
     Returns: (df_procesado, metadata)
     """
-    logging.info("=" * 70)
-    logging.info("BLOQUE 2: PROCESAMIENTO DE DATOS DE PERSONAS")
-    logging.info("=" * 70)
+    logger.info("=" * 70)
+    logger.info("BLOQUE 2: PROCESAMIENTO DE DATOS DE PERSONAS")
+    logger.info("=" * 70)
     
     try:
-        logging.info(f"\nProcesando: personas.csv")
+        logger.info("\nProcesando: personas.csv")
         
         # Pipeline de procesamiento
         df = load_csv(input_path, sep=",")
@@ -234,14 +235,14 @@ def process_personas(
         metadata = generate_metadata(df)
         save_outputs(df, metadata, output_dir, base_name="personas_processed")
         
-        logging.info(f"✓ Personas completado\n")
+        logger.info("OK Personas completado\n")
         return df, metadata
         
     except FileNotFoundError:
-        logging.error(f"✗ Archivo no encontrado: personas.csv")
+        logger.error("Archivo no encontrado: personas.csv")
         raise
     except Exception as e:
-        logging.error(f"✗ Error procesando personas: {e}")
+        logger.error("Error procesando personas: %s", e)
         raise
 
 
@@ -255,26 +256,22 @@ if __name__ == "__main__":
     RAW_DIR = Path("data/raw")
     OUTPUT_DIR = Path("data/processed")
     
-    logging.info("\n")
-    logging.info("╔" + "═" * 68 + "╗")
-    logging.info("║  INICIO DEL PROCESAMIENTO DE DATOS                               ║")
-    logging.info("╚" + "═" * 68 + "╝")
+    logger.info("\n")
+    logger.info("INICIO DEL PROCESAMIENTO DE DATOS")
     
     try:
         # Ejecutar bloques de procesamiento
         capitulos_results = process_capitulos_dane(RAW_DIR, OUTPUT_DIR)
         personas_df, personas_meta = process_personas(Path("data/raw/personas.csv"), OUTPUT_DIR)
         
-        logging.info("\n")
-        logging.info("╔" + "═" * 68 + "╗")
-        logging.info("║  PROCESAMIENTO COMPLETADO EXITOSAMENTE                        ║")
-        logging.info("╚" + "═" * 68 + "╝")
-        logging.info(f"\nResumen:")
-        logging.info(f"  • Capítulos DANE procesados: {len(capitulos_results)}")
-        logging.info(f"  • Personas: {personas_df.shape[0]} filas × {personas_df.shape[1]} columnas")
-        logging.info("\n")
+        logger.info("\n")
+        logger.info("PROCESAMIENTO COMPLETADO EXITOSAMENTE")
+        logger.info("\nResumen:")
+        logger.info("  - Capitulos DANE procesados: %s", len(capitulos_results))
+        logger.info("  - Personas: %s filas x %s columnas", personas_df.shape[0], personas_df.shape[1])
+        logger.info("\n")
         
     except FileNotFoundError as e:
-        logging.error(f"\n✗ Archivo no encontrado: {e}")
+        logger.error("Archivo no encontrado: %s", e)
     except Exception as e:
-        logging.exception(f"\n✗ Error inesperado durante el procesamiento: {e}")
+        logger.exception("Error inesperado durante el procesamiento: %s", e)

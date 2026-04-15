@@ -8,12 +8,15 @@ from typing import Iterable
 import numpy as np
 import pandas as pd
 
+from ..core.logging import logger
 from ..core.paths import paths
+from .validation import validate_consumption_target
 
 BASE_PATH = paths.data_processed / "base_consumo_drogas_colombia_limpia.xlsx"
 PERSONAS_PATH = paths.data_processed / "personas_processed.csv"
 D2_PATH = paths.data_processed / "d2_capitulos.csv"
 MODEL_BASE_PATH = paths.data_processed / "propensity_model_base.csv"
+RAW_K_PATH = paths.data_raw / "k_capitulos.csv"
 
 KEY_COLUMNS = ["directorio", "secuencia_encuesta", "secuencia_p", "orden"]
 INVALID_NUMERIC_CODES = {8, 9, 98, 99, 998, 999}
@@ -132,9 +135,26 @@ def merge_model_sources(
 
 def build_propensity_dataset(
     save_path: Path | None = MODEL_BASE_PATH,
+    validate_target: bool = True,
+    strict_target_validation: bool = False,
+    raw_k_path: Path | None = RAW_K_PATH,
 ) -> pd.DataFrame:
     """Build the working dataset used for EDA and benchmark models."""
     base, personas, d2 = load_model_sources()
+
+    if validate_target:
+        raw_k_df = pd.read_csv(raw_k_path) if raw_k_path and raw_k_path.exists() else None
+        validation_report = validate_consumption_target(base_df=base, raw_k_df=raw_k_df)
+        failed_checks = validation_report.loc[validation_report["status"] == "fail"]
+        if not failed_checks.empty:
+            for row in failed_checks.itertuples(index=False):
+                logger.warning("Validacion de target fallo [%s]: %s", row.check, row.detail)
+            if strict_target_validation:
+                raise ValueError(
+                    "Validacion de target fallida. Ejecuta `cannabis_tax validate` "
+                    "y corrige inconsistencias antes de modelar."
+                )
+
     df = merge_model_sources(base, personas, d2)
 
     df["propension_12m"] = recode_propensity_target(df["consumo_12m"])
@@ -349,9 +369,9 @@ def _latex_header_note() -> str:
         "\\begin{flushleft}\\footnotesize "
         "Nota: la categoría de referencia para educación es Baja. "
         "Las columnas Probit reportan efectos marginales promedio. "
-        "Errores estandar entre parentesis. "
+        "Errores estándar entre paréntesis. "
         "La variable dependiente es una medida binaria de propensión a consumir "
-        "marihuana en los ultimos 12 meses."
+        "marihuana en los últimos 12 meses."
         "\\end{flushleft}\n"
     )
 
