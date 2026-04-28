@@ -22,6 +22,8 @@ try:
 
     logger = project_logger.getChild("cleaning")
 except (ImportError, ValueError):
+    # Fallback cuando clean.py se ejecuta directamente como __main__
+    # (los imports relativos no funcionan fuera del paquete)
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s | %(levelname)-8s | %(message)s",
@@ -106,6 +108,8 @@ def clean_missing_and_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     logger.info("  -> Filas eliminadas (duplicados exactos): %s", before_dups - after_dups)
 
     return df
+
+
 def generate_metadata(df: pd.DataFrame) -> dict:
     """
     Genera un diccionario con metadatos básicos del DataFrame:

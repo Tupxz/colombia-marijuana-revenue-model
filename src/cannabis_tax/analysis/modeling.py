@@ -87,14 +87,12 @@ def recode_propensity_target(series: pd.Series) -> pd.Series:
     """
     Build a working binary target.
 
-    Current assumption:
-    - 1 -> consumes in the last 12 months
-    - 2 -> does not consume
-    - missing -> treated as 0 for the working base
+    Current data encoding:
+    - 1.0 -> consumes in the last 12 months  -> mapped to 1
+    - NaN -> no reported consumption          -> mapped to 0
     """
     binary = pd.Series(np.zeros(len(series)), index=series.index, dtype="int64")
     binary = binary.where(~series.eq(1), 1)
-    binary = binary.where(~series.eq(2), 0)
     return binary
 
 
