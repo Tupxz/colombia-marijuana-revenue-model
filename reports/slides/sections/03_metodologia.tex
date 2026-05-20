@@ -2,122 +2,85 @@
 \section{Metodología}
 
 \begin{frame}
-\frametitle{Datos y Fuentes}
+\frametitle{Datos y fuentes}
 \begin{columns}[T]
 \column{0.48\textwidth}
-\textbf{Base Disponible}
+\textbf{Base integrada}
 \begin{itemize}
-\item 169,346 individuos
-\item Encuesta Nacional (DANE)
-\item 12 variables sociodemográficas
-\item Múltiples capítulos por explorar
+\item \(n=3\,982\) individuos
+\item Base limpia de consumo (ENCSPA)
+\item Módulo \texttt{personas} (sexo, edad)
+\item Módulo \texttt{d2} (educación)
 \end{itemize}
 
 \column{0.48\textwidth}
-\textbf{Por Integrar}
+\textbf{Cobertura clave}
 \begin{itemize}
-\item DIAN (recaudos)
-\item DANE (macro)
-\item Capítulos adicionales
-\item Análisis exploratorio
+\item Edad, sexo, educación: $\sim 100\%$
+\item \texttt{consumo\_12m}: 1\,719 unos
+\item Precio: 823 (submuestra exploratoria)
 \end{itemize}
 \end{columns}
+\vspace{0.3cm}
+\textit{Decisión}: ML sobre la muestra amplia sin precio ($n=3\,980$).
 \end{frame}
 
 \begin{frame}
-\frametitle{Variable Objetivo}
-
-\textbf{Unidad de Análisis}: Colombia en períodos anuales/semestrales
-
-\textbf{Definición}:
-$$Y_{k,t} = \frac{\text{Recaudo fuente } k}{\text{Recaudo total}}$$
-
-\textbf{Características}:
-\begin{itemize}
-\item \textbf{Composicional}: Las participaciones suman 1
-\item \textbf{Acotada}: $Y_{k,t} \in [0,1]$ para cada fuente
-\item \textbf{Escenario-dependiente}: Impuesto a cannabis solo en legalización
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Estrategia Analítica}
-
-\textbf{Principio rector}: Primero conocer la naturaleza de los datos
-
+\frametitle{Pipeline reproducible}
 \begin{enumerate}
-\item \textbf{Exploración}: Descubrimiento y selección de variables
-\item \textbf{Procesamiento}: Limpieza y normalización
-\item \textbf{Análisis descriptivo}: Patrones demográficos
-\item \textbf{Modelado}: Machine Learning + Benchmark probit inflado
-\item \textbf{Simulación}: Proyecciones bajo escenarios
+\item \texttt{python -m cannabis\_tax.cli pipeline}: limpieza, validación y construcción de la base modeladora.
+\item Notebook 01: EDA + benchmark MCO/Probit.
+\item Notebook 03: entrenamiento RF, XGBoost, GBM.
+\item Notebook 05: CV-10, búsqueda de hiperparámetros, selección del modelo final.
+\item Notebook 06: SHAP + robustez + ética.
 \end{enumerate}
-
-\vspace{0.2cm}
-\textit{Flexibilidad}: Modelo específico ML a especificar según hallazgos
+\vspace{0.3cm}
+\textit{Tests}: \texttt{make test} corre la suite unitaria.
 \end{frame}
 
 \begin{frame}
-\frametitle{Modelo Benchmark}
-
-\textbf{Logit Fraccionado}
-
-\begin{itemize}
-\item Maneja datos acotados en [0,1]
-\item Captura características de datos composicionales
-\item Referencia para evaluar modelos de ML
-\item Interpretabilidad probabilística clara
-\end{itemize}
+\frametitle{Benchmark econométrico}
+\textbf{MCO (LPM)}:
+\[
+y_i = \beta_0 + \beta_2 edad_i + \beta_3 edad_i^2 + \beta_4 mujer_i + \beta_5 educacion_i + u_i
+\]
+con errores HC1.
 
 \vspace{0.3cm}
-\textit{Especificación}: $E[Y_{k,t}|X] = \frac{\exp(\eta)}{1 + \exp(\eta)}$
+\textbf{Probit}:
+\[
+\Pr(y_i=1\mid X_i) = \Phi(\alpha_0 + \alpha_2 edad_i + \alpha_3 edad_i^2 + \alpha_4 mujer_i + \alpha_5 educacion_i)
+\]
+con efectos marginales promedio.
+
+\vspace{0.3cm}
+\textit{Roles}: referencia interpretable y punto de comparación.
 \end{frame}
 
 \begin{frame}
-\frametitle{Supuestos Fundamentales}
+\frametitle{Modelos de Machine Learning}
+\begin{itemize}
+    \item \textbf{Random Forest}: \textit{bagging}, 300 árboles, \texttt{max\_depth=7}.
+    \item \textbf{XGBoost}: \textit{boosting} secuencial, ponderado por prevalencia.
+    \item \textbf{Gradient Boosting (sklearn)}: \textit{boosting} conservador, \texttt{max\_depth=3}.
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Reglas de comparación}:
+\begin{itemize}
+    \item Mismo \textit{feature set} que el benchmark (edad, edad², sexo, educación).
+    \item Mismo \texttt{train/test split} estratificado (\texttt{random\_state=42}).
+    \item Métricas: Accuracy, AUC-ROC, F1, CV AUC (5 y 10 folds).
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Validación y selección}
 \begin{enumerate}
-\item \textbf{Shock estructural}: Legalización aumenta transacciones formales
-
-\item \textbf{Movilidad de demanda}: Mercado legal afectado por regulación y precios
-
-\item \textbf{Fuente tributaria}: Impuesto cannabis es identificable y persistente
-
-\item \textbf{Transmisión de efectos}: Cambios en consumo se reflejan en estructura de recaudos
+    \item \textbf{CV-10}: estabilidad y solapamiento entre modelos.
+    \item \textbf{Curvas de aprendizaje}: control de \textit{overfitting}.
+    \item \textbf{\texttt{RandomizedSearchCV}}: 60 combinaciones × 5 folds sobre el GBM.
+    \item \textbf{Criterios}: AUC-ROC, F1, brecha train-validation, plausibilidad económica.
 \end{enumerate}
-\end{frame}
-
-\begin{frame}
-\frametitle{Escenarios de Simulación}
-
-\begin{columns}[T]
-\column{0.5\textwidth}
-\textbf{Escenario Base}
-Prohibición mantenida
-
 \vspace{0.3cm}
-\textbf{Escenario 1}
-Legalización + IVA 19\%
-
-\column{0.5\textwidth}
-\textbf{Escenario 2}
-Legalización + Impuesto 25\%
-
-\vspace{0.3cm}
-\textbf{Escenario 3}
-Regulación parcial + Tramos múltiples
-\end{columns}
-
-\vspace{0.3cm}
-\textit{Variables de sensibilidad}: Elasticidades, tasas de penetración
-\end{frame}
-
-\begin{frame}
-\frametitle{Evaluación del Modelo}
-
-\begin{itemize}
-\item \textbf{MAE/RMSE}: Error medio absoluto y cuadrático
-\item \textbf{Validación temporal}: Desempeño fuera de muestra
-\item \textbf{Coherencia composicional}: Participaciones $\sum Y_k = 1$
-\item \textbf{Robustez}: Estabilidad ante cambios de especificación
-\end{itemize}
+\textit{No se evalúa sólo precisión}: la argumentación pesa tanto como el número.
 \end{frame}

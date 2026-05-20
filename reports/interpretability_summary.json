@@ -1,0 +1,54 @@
+{
+  "gbm_params": {
+    "learning_rate": 0.042203621870357574,
+    "max_depth": 2,
+    "max_features": "log2",
+    "min_samples_leaf": 26,
+    "n_estimators": 157,
+    "subsample": 0.9720067339243328,
+    "random_state": 42
+  },
+  "y_original": {
+    "AUC-ROC (test)": 0.7182387065239761,
+    "Accuracy (test)": 0.6444723618090452,
+    "F1 (test)": 0.5974395448079659,
+    "CV AUC-10fold (mean)": 0.6684538452232125,
+    "CV AUC-10fold (std)": 0.035427146498469536
+  },
+  "y_strict_k03": {
+    "AUC-ROC (test)": 0.6870025540508433,
+    "Accuracy (test)": 0.7022613065326633,
+    "F1 (test)": 0.30498533724340177,
+    "CV AUC-10fold (mean)": 0.6951238139621791,
+    "CV AUC-10fold (std)": 0.030305498992903912
+  },
+  "shap_importance": [
+    {
+      "feature": "edad",
+      "mean_abs_shap": 0.3013113734056648
+    },
+    {
+      "feature": "edad_cuadrado",
+      "mean_abs_shap": 0.25522278297244
+    },
+    {
+      "feature": "sexo_label_Mujer",
+      "mean_abs_shap": 0.11162558185646028
+    },
+    {
+      "feature": "educacion_grupo_Media",
+      "mean_abs_shap": 0.034829147252242225
+    },
+    {
+      "feature": "educacion_grupo_Superior",
+      "mean_abs_shap": 0.024676470948915195
+    }
+  ],
+  "n_train_original": 3184,
+  "n_test_original": 796,
+  "prevalence_original": 0.43165829145728646,
+  "n_train_strict": 3184,
+  "n_test_strict": 796,
+  "prevalence_strict": 0.307035175879397,
+  "n_disagreement_y_vs_k03": 898
+}

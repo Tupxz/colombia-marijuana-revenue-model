@@ -2,33 +2,45 @@
 \section{Pregunta de Investigación}
 
 \begin{frame}
-\frametitle{Pregunta Central}
+\frametitle{Pregunta central}
 \begin{center}
-\Large\textbf{¿Cómo podría estructurarse el recaudo tributario del Estado colombiano bajo distintos escenarios de legalización de la distribución de marihuana?}
+\large
+\textbf{¿Qué factores sociodemográficos observables se asocian con la probabilidad de reportar consumo de marihuana en los últimos doce meses en Colombia, y cuánto mejora la predicción al pasar de un benchmark econométrico a modelos de \textit{machine learning}?}
 \end{center}
-\vspace{1cm}
+\vspace{0.4cm}
 \normalsize
-Subpreguntas específicas:
+Componentes:
 \begin{enumerate}
-    \item ¿Cuál sería la base potencial de contribuyentes por perfil sociodemográfico?
-    \item ¿Qué estructura tributaria maximiza ingresos fiscales?
-    \item ¿Cómo varían los ingresos bajo diferentes marcos regulatorios?
+    \item \textbf{Descriptivo-causal}: signo, magnitud y estabilidad de los predictores.
+    \item \textbf{Predictivo}: ganancia del ML sobre el lineal manteniendo el mismo \textit{feature set}.
 \end{enumerate}
 \end{frame}
 
 \begin{frame}
-\frametitle{Objetivos}
-\textbf{Objetivo General:}
-\begin{itemize}
-    \item Construir un modelo predictivo de recaudos tributarios bajo distintos escenarios de legalización
-\end{itemize}
+\frametitle{Variable objetivo y unidad de análisis}
+\textbf{Variable dependiente:} \(\texttt{propension\_12m}\in\{0,1\}\) — reportó consumo de marihuana en los últimos 12 meses (base limpia, derivada de K\_03 + señales auxiliares).
 
-\vspace{0.5cm}
-\textbf{Objetivos Específicos:}
+\vspace{0.3cm}
+\textbf{Unidad de análisis:} individuo encuestado (ENCSPA).
+
+\vspace{0.3cm}
+\textbf{Tipo de problema:} clasificación binaria.
+
+\vspace{0.4cm}
+\textit{Nota crítica}: la construcción de \texttt{propension\_12m} difiere de \texttt{K\_03} \textit{raw} en 898 casos. Se documenta como limitación y se atiende con un análisis de robustez (Y estricta = K\_03=1).
+\end{frame}
+
+\begin{frame}
+\frametitle{Objetivos}
+\textbf{General:} construir un pipeline reproducible que compare benchmark econométrico y \textit{machine learning} para la propensión al consumo, con interpretabilidad y reflexión ética explícitas.
+
+\vspace{0.4cm}
+\textbf{Específicos:}
 \begin{enumerate}
-    \item Procesar y analizar datos sociodemográficos de encuestas nacionales
-    \item Identificar determinantes de demanda y disposición a pagar
-    \item Simular escenarios fiscales con diferentes tasas y tipos impositivos
-    \item Proyectar ingresos tributarios potenciales
+    \item Integrar y limpiar la base de la ENCSPA con módulos sociodemográficos.
+    \item Estimar benchmark MCO/Probit y modelos ML comparables.
+    \item Validar con CV-10 y tunear hiperparámetros del modelo final.
+    \item Interpretar con valores SHAP y verificar robustez.
+    \item Discutir sesgos, ética y usos legítimos del modelo.
 \end{enumerate}
 \end{frame}

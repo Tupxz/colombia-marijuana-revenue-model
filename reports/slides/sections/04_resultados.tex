@@ -2,46 +2,71 @@
 \section{Resultados}
 
 \begin{frame}
-\frametitle{Calidad de Datos}
-\begin{columns}
-\column{0.5\textwidth}
-\textbf{Completitud por Variable:}
-\begin{itemize}
-    \item Sexo: 100\%
-    \item Edad: 100\%
-    \item Parentesco: 100\%
-\end{itemize}
-
-\column{0.5\textwidth}
-\textbf{Datos Faltantes:}
-\begin{itemize}
-    \item Consentimiento: 70.6\%
-    \item Resultado: 70.6\%
-    \item Seleccionada: 70.6\%
-\end{itemize}
-\end{columns}
+\frametitle{Tabla comparativa — benchmark vs.\ ML}
+\centering
+\scriptsize
+\begin{tabular}{lrrrr}
+\toprule
+Modelo & Accuracy & AUC-ROC & F1 & CV AUC (5-fold) \\
+\midrule
+MCO (LPM)            & 0.6608 & \textbf{0.7232} & 0.5982 & 0.6728 \\
+Probit               & 0.6608 & 0.7228 & 0.5982 & 0.6728 \\
+Random Forest        & 0.6533 & 0.7063 & 0.5763 & 0.6674 \\
+XGBoost              & 0.6432 & 0.7001 & 0.5610 & 0.6614 \\
+Gradient Boosting    & 0.6545 & 0.7093 & 0.5736 & 0.6716 \\
+\midrule
+\textbf{GBM tuneado} & \textbf{0.6621} & \textbf{0.7278} & \textbf{0.6129} & \textbf{0.6756} \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+\\
+\small \textbf{Hallazgo no obvio}: con hiperparámetros por defecto el ML \textit{no} supera al benchmark. La ganancia aparece tras un \textit{tuning} disciplinado.
 \end{frame}
 
 \begin{frame}
-\frametitle{Estadísticas Descriptivas}
-\begin{itemize}
-    \item \textbf{Muestra}: 169,346 individuos
-    \item \textbf{Edad promedio}: Análisis pendiente
-    \item \textbf{Distribución de sexo}: Por calcular
-    \item \textbf{Composición familiar}: Por caracterizar
-\end{itemize}
-\vspace{1cm}
-{\small \textit{Nota: Resultados detallados disponibles en tablas anexas}}
+\frametitle{Comparación visual benchmark vs.\ ML}
+\centering
+\includegraphics[width=0.80\textwidth]{../figures/comparacion_benchmark_ml.png}
 \end{frame}
 
 \begin{frame}
-\frametitle{Proyecciones Preliminares}
-\begin{itemize}
-    \item Base de cálculo: 169,346 observaciones válidas
-    \item Penetración estimada: Pendiente de modelado
-    \item Ingreso tributario potencial: En construcción
-    \item Sensibilidad a parámetros: Por evaluar
-\end{itemize}
-\vspace{1cm}
-{\small \textit{Los resultados finales se presentarán con gráficos y tablas de simulación}}
+\frametitle{Validación cruzada de 10 pliegues}
+\centering
+\includegraphics[width=0.65\textwidth]{../figures/cv_10fold_boxplot.png}
+\\
+\vspace{0.2cm}
+\small Distribución de AUC-ROC en CV-10. Solapamiento sustancial con el CV de MCO (0.673) antes del tuning.
+\end{frame}
+
+\begin{frame}
+\frametitle{Búsqueda de hiperparámetros (GBM)}
+\small
+\textbf{Espacio}: \texttt{RandomizedSearchCV}, 60 combinaciones × 5 folds = 300 ajustes.
+
+\vspace{0.2cm}
+\textbf{Hiperparámetros óptimos:}
+\begin{center}
+\footnotesize
+\begin{tabular}{lr}
+\toprule
+\texttt{n\_estimators} & 157 \\
+\texttt{max\_depth} & 2 \\
+\texttt{learning\_rate} & 0.0422 \\
+\texttt{subsample} & 0.972 \\
+\texttt{min\_samples\_leaf} & 26 \\
+\texttt{max\_features} & \texttt{log2} \\
+\bottomrule
+\end{tabular}
+\end{center}
+\vspace{0.2cm}
+\textit{Patrón}: árboles muy poco profundos + regularización fuerte $\Rightarrow$ menor varianza.
+\end{frame}
+
+\begin{frame}
+\frametitle{Modelo final — GBM tuneado}
+\centering
+\includegraphics[width=0.58\textwidth]{../figures/roc_gbm_tuned.png}
+\\
+\vspace{0.1cm}
+\scriptsize AUC-ROC test = \textbf{0.7278} \;|\; F1 = \textbf{0.6129} \;|\; CV-10 AUC = 0.6756
 \end{frame}

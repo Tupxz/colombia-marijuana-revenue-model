@@ -1,0 +1,53 @@
+% Ética, sesgos y limitaciones
+\section{Ética e implicaciones}
+
+\begin{frame}
+\frametitle{Sesgos del dato}
+\begin{itemize}
+    \item \textbf{Autoreporte y deseabilidad social}: el modelo aprende propensión a \emph{reportar}, no a \emph{consumir}. Subreporte correlacionado con percepción de riesgo legal.
+    \item \textbf{Sesgo de selección por precio}: la submuestra con precio ($n\approx 755$) está sesgada hacia personas más expuestas al mercado.
+    \item \textbf{Sesgo de medición en Y}: discrepancia documentada \texttt{consumo\_12m} vs \texttt{K\_03}. Mitigada con análisis de robustez.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Riesgos del uso del modelo}
+\begin{enumerate}
+    \item \textbf{Perfilado individual}: AUC $\approx 0.73$ implica solapamiento alto entre grupos. \textit{No usar} para decisiones sobre personas (policial, laboral, escolar).
+    \item \textbf{Asociaciones $\neq$ causalidad}: edad y sexo correlacionan con factores no observados (red social, entorno).
+    \item \textbf{Estigma reforzado}: mapas y perfiles públicos refuerzan estereotipos. Privilegiar lecturas agregadas.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{Uso responsable propuesto}
+\textbf{Sí} (uso agregado):
+\begin{itemize}
+    \item Estimar tamaño de mercado bajo escenarios regulatorios.
+    \item Diseño tributario simulando bases de contribuyentes por estratos amplios.
+    \item Priorizar segmentos para política preventiva.
+\end{itemize}
+\vspace{0.3cm}
+\textbf{No} (uso individual):
+\begin{itemize}
+    \item Decisiones sobre personas específicas.
+    \item Focalización geográfica fina sin análisis de equidad.
+    \item Predicciones puntuales sin intervalos de incertidumbre.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Implicaciones de política}
+\textbf{Diseño tributario}:
+\begin{itemize}
+    \item Base concentrada en cohortes jóvenes-masculinas.
+    \item Elasticidad-precio probablemente alta $\Rightarrow$ impuesto excesivo desplaza al mercado ilegal.
+    \item Recaudo creíble requiere acoplar este modelo con una elasticidad estimada limpia.
+\end{itemize}
+\vspace{0.3cm}
+\textbf{Política preventiva}:
+\begin{itemize}
+    \item Focalizar en 18--25 años, diferenciada por sexo.
+    \item Aprovechar la sensibilidad de la cohorte a intervenciones tempranas.
+\end{itemize}
+\end{frame}

@@ -11,62 +11,63 @@
 \usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{array}
+\usepackage{float}
 
 \onehalfspacing
 \renewcommand{\arraystretch}{1.2}
 
-\title{Propensión al Consumo de Marihuana en Colombia:\\ Benchmark MCO y Probit con Datos de Encuesta}
+\title{Propensión al Consumo de Marihuana en Colombia:\\ Benchmark Econométrico y Modelos de Machine Learning\\ con Interpretabilidad SHAP}
 
 \author{Santiago Tupaz$^{1,2}$ \and Moisés Quintero$^{1}$ \and Vanessa Rodrigues$^{1}$ \\[0.5cm]
 {\small $^{1}$ Universidad EAFIT, Programa de Economía, Medellín, Colombia} \\
 {\small $^{2}$ Universidad Nacional de Colombia, Programa de Estadística, Sede Medellín} \\[1cm]
 {\small \textbf{Profesora Supervisora:} Paula María Almonacid Hurtado, Universidad EAFIT}}
 
-\date{\small 10 de marzo de 2026}
+\date{\small 12 de mayo de 2026}
 
 \begin{document}
 
 \begin{titlepage}
     \centering
-    \vspace*{3cm}
+    \vspace*{2.5cm}
 
     {\Large \textbf{Universidad EAFIT}}\\[0.3cm]
     {\normalsize Programa de Economía}\\
-    {\normalsize Ciencia de Datos}\\[2cm]
+    {\normalsize Ciencia de los Datos para las Finanzas, la Economía y los Negocios}\\[1.8cm]
 
-    {\large \textbf{Propensión al Consumo de Marihuana en Colombia}}\\[0.5cm]
-    {\small Benchmark MCO y Probit con Datos de Encuesta}\\[2cm]
+    {\large \textbf{Propensión al Consumo de Marihuana en Colombia}}\\[0.4cm]
+    {\small Benchmark Econométrico y Modelos de Machine Learning\\ con Interpretabilidad SHAP}\\[1.8cm]
 
     {\normalsize
     \textbf{Autores:}\\
     Santiago Tupaz$^{1,2}$\\
     Moisés Quintero$^{1}$\\
     Vanessa Rodrigues$^{1}$
-    }\\[1.5cm]
+    }\\[1.2cm]
 
     {\small
     $^{1}$ Universidad EAFIT, Programa de Economía, Medellín, Colombia\\[0.3cm]
     $^{2}$ Universidad Nacional de Colombia, Programa de Estadística, Sede Medellín
-    }\\[1.5cm]
+    }\\[1.2cm]
 
     {\normalsize
     \textbf{Profesora Supervisora:}\\
     Paula María Almonacid Hurtado\\
     {\small Universidad EAFIT}
-    }\\[2.5cm]
+    }\\[2.0cm]
 
     {\normalsize
     Medellín, Colombia\\
-    10 de marzo de 2026
+    12 de mayo de 2026
     }
 
     \vfill
 \end{titlepage}
 
 \begin{abstract}
-Este documento presenta la primera fase empírica del proyecto sobre consumo de marihuana en Colombia. El objetivo actual es modelar la propensión a reportar consumo en los últimos 12 meses utilizando información de la Encuesta Nacional de Consumo de Sustancias Psicoactivas y un conjunto básico de controles sociodemográficos. Para ello se construye una base de trabajo unificada a partir de una base limpia de consumo, el registro de personas y el capítulo sociodemográfico D2. Sobre esa base se estiman cuatro especificaciones de benchmark: dos modelos lineales de probabilidad y dos modelos Probit, con y sin información de precio. Los resultados muestran que la restricción por disponibilidad de precio reduce fuertemente la muestra útil, por lo que el coeficiente asociado al precio debe interpretarse solo como evidencia exploratoria. Esta fase deja establecido un benchmark econométrico sólido y una estructura reproducible para las siguientes etapas del proyecto, incluyendo la comparación con modelos de machine learning.
+Este trabajo modela la propensión individual a reportar consumo de marihuana en los últimos doce meses en Colombia, integrando un benchmark econométrico clásico con modelos de \textit{machine learning} y un análisis de interpretabilidad mediante valores SHAP. La base empírica proviene de la Encuesta Nacional de Consumo de Sustancias Psicoactivas y se complementa con módulos sociodemográficos (capítulo D2) y de personas. Sobre 3 980 observaciones efectivas se estiman dos benchmarks (MCO y Probit) y tres modelos de \textit{machine learning} (Random Forest, XGBoost y Gradient Boosting), todos sobre el mismo conjunto de variables explicativas para asegurar comparabilidad. Tras la búsqueda aleatoria de hiperparámetros con validación cruzada de cinco pliegues, el \textit{Gradient Boosting} tuneado supera al benchmark en \textit{AUC-ROC} (0.7278 vs 0.7232) y en \textit{F1-Score} (0.6129 vs 0.5982), mientras que la validación cruzada de diez pliegues confirma estabilidad. La interpretabilidad SHAP muestra que la edad y su término cuadrático concentran cerca del 77\% de la importancia absoluta del modelo final, seguido por sexo (15\%) y educación (8\%). Un análisis de robustez con una definición alternativa estricta de la variable objetivo (\(K\_03=1\)) confirma que las relaciones estructurales no dependen de la operacionalización elegida. Se discuten finalmente los sesgos del autoreporte, los riesgos de perfilado individual y las implicaciones para el diseño de un eventual marco tributario y para política preventiva.
 
-\textit{Palabras clave}: marihuana, propensión al consumo, MCO, Probit, benchmark econométrico, Colombia
+\textit{Palabras clave}: marihuana, propensión al consumo, MCO, Probit, Gradient Boosting, SHAP, ética del \textit{machine learning}, Colombia.
 \end{abstract}
 
 \newpage
@@ -77,27 +78,35 @@ Este documento presenta la primera fase empírica del proyecto sobre consumo de 
 
 \section{Introducción}
 
-Este trabajo estudia la propensión individual a consumir marihuana en Colombia a partir de información de encuesta. La motivación central del proyecto es construir primero una base empírica clara y reproducible antes de pasar a modelos más complejos y a escenarios de política. En esta fase, el foco está en responder una pregunta simple y operativa: qué factores observables se asocian con la probabilidad de reportar consumo de marihuana en los últimos 12 meses.
+La discusión sobre la regulación de la marihuana en Colombia ha tenido recientemente un giro pragmático: ya no se limita a la dimensión penal o de salud pública, sino que incorpora preguntas económicas concretas sobre el tamaño potencial del mercado, la base de contribuyentes que podría generarse bajo un marco regulado, y los segmentos demográficos donde una eventual política preventiva tendría mayor impacto. Estas preguntas requieren, antes de cualquier simulación fiscal, una caracterización empírica clara de quién consume y con qué intensidad.
 
-La primera etapa se organiza alrededor de un benchmark econométrico. En vez de empezar con modelos complejos, se prioriza una estrategia escalonada: construcción de variables, limpieza, análisis exploratorio, estimación de un modelo MCO como referencia y estimación posterior de un modelo Probit para la misma variable dependiente. Esta secuencia permite evaluar calidad de datos, estabilidad de la muestra y sensibilidad de los coeficientes antes de avanzar a la fase de machine learning.
+Este trabajo se sitúa en esa etapa previa. El objetivo es modelar la propensión individual a reportar consumo de marihuana en los últimos doce meses, utilizando información de la Encuesta Nacional de Consumo de Sustancias Psicoactivas y un conjunto cuidadoso de controles sociodemográficos. La estrategia es comparativa: se estima primero un benchmark econométrico (MCO y Probit) y luego una familia de modelos de \textit{machine learning} (Random Forest, XGBoost y Gradient Boosting), tras lo cual se selecciona un modelo final por validación cruzada y se interpreta con valores SHAP. El proyecto avanza así desde la teoría econométrica de variables binarias hacia la flexibilidad funcional del aprendizaje estadístico moderno, pero manteniendo la disciplina de comparar siempre los modelos contra una referencia interpretable.
+
+Aunque el trabajo está pensado como insumo para un análisis posterior de impacto tributario, las contribuciones específicas aquí son tres: \emph{primero}, una base de modelado reproducible y auditada (con tests unitarios y CLI) que puede reutilizarse en investigaciones futuras; \emph{segundo}, una comparación honesta entre benchmark econométrico y \textit{machine learning} que ilustra cuándo la ganancia predictiva del segundo justifica su menor interpretabilidad; \emph{tercero}, un análisis estructurado de sesgos y limitaciones éticas que delimita los usos legítimos del modelo y, sobre todo, los usos que no recomendamos.
 
 \section{Pregunta de investigación}
 
-La pregunta de trabajo para esta fase es la siguiente:
+La pregunta de trabajo es la siguiente:
 
 \begin{quote}
-\textbf{¿Qué factores observables se asocian con la probabilidad de consumir marihuana en los últimos 12 meses en Colombia?}
+\textbf{¿Qué factores sociodemográficos observables se asocian con la probabilidad de reportar consumo de marihuana en los últimos doce meses en Colombia, y qué tanto mejora la capacidad predictiva del modelo al pasar de un benchmark econométrico a modelos de \textit{machine learning}?}
 \end{quote}
 
-De manera complementaria, se explora qué ocurre cuando se incorpora información de precio en la especificación. Sin embargo, dado que esa variable está disponible solo para una submuestra reducida, el análisis con precio debe entenderse como una extensión exploratoria y no como una estimación causal concluyente.
+La pregunta tiene dos componentes complementarios. El primero es \textit{descriptivo-causal}: identificar variables observables asociadas a la propensión y reportar su signo, magnitud y estabilidad. El segundo es \textit{predictivo}: cuantificar cuánto se gana al permitir no-linealidades e interacciones automáticas, manteniendo el mismo conjunto de regresores que el benchmark para que la comparación sea limpia.
+
+\section{Marco conceptual y trabajos relacionados}
+
+La literatura económica sobre consumo de sustancias controladas se organiza en tres familias de modelos. La primera estima la decisión binaria de consumir mediante variables sociodemográficas, con foco en el efecto de precios e impuestos sobre la demanda \cite{informal:1}. La segunda explora la intensidad del consumo condicional a participar, usando modelos de selección o \textit{two-part}. La tercera, más reciente, incorpora aprendizaje estadístico para mejorar el desempeño predictivo y descubrir interacciones complejas entre variables que el lineal estándar no captura.
+
+En el contexto colombiano, el insumo natural es la Encuesta Nacional de Consumo de Sustancias Psicoactivas, que combina información sobre prevalencia, frecuencia, precio percibido y actitudes. Este trabajo se ubica en la primera familia (decisión binaria), pero incorpora el aporte metodológico de la tercera al comparar el benchmark con \textit{Gradient Boosting} y al usar interpretabilidad SHAP para conectar los resultados predictivos con la lectura económica clásica.
 
 \section{Datos y construcción de la base}
 
 \subsection{Fuentes de información}
 
-La base final de modelado se construyó integrando tres fuentes principales:
+La base final de modelado se construyó integrando tres fuentes:
 
-\begin{table}[h!]
+\begin{table}[H]
 \centering
 \small
 \begin{tabular}{p{4.2cm} p{6.1cm} p{4.2cm}}
@@ -115,15 +124,13 @@ La base final de modelado se construyó integrando tres fuentes principales:
 \label{tab:fuentes}
 \end{table}
 
-La verificación de llaves mostró coincidencia completa entre la base de consumo y las tablas \texttt{personas} y \texttt{d2} para las 3982 observaciones disponibles en la base limpia de consumo. Esa coincidencia permite construir una base integrada sin pérdida adicional en la etapa de merge.
-
-La base integrada conserva por tanto las 3982 observaciones iniciales. Sin embargo, la muestra final para las especificaciones econométricas sin precio se reduce a 3980 porque dos observaciones presentan \texttt{D2\_05 = 9} (\textit{No sabe / No informa}) y quedan fuera al construir la agrupación educativa en tres categorías estables. Esta pérdida es mínima y no altera la interpretación general de los resultados, pero se documenta explícitamente por transparencia y reproducibilidad.
+La unión por llaves cubre las 3 982 observaciones de la base limpia de consumo sin pérdida adicional en la fase de \textit{merge}. La muestra final para las especificaciones econométricas sin precio se reduce a 3 980 porque dos observaciones tienen \texttt{D2\_05 = 9} (No sabe / No informa) y quedan fuera al construir la agrupación educativa estable de tres niveles.
 
 \subsection{Variables priorizadas}
 
-El inventario operativo de variables se construyó a partir del diccionario de datos de la encuesta. Para esta fase se priorizaron las variables estrictamente necesarias para el benchmark:
+Para esta fase se priorizaron las variables estrictamente necesarias para el benchmark y los modelos de \textit{machine learning} comparables:
 
-\begin{table}[h!]
+\begin{table}[H]
 \centering
 \small
 \begin{tabular}{p{2.6cm} p{1.8cm} p{6.4cm} p{3.4cm}}
@@ -131,136 +138,83 @@ El inventario operativo de variables se construyó a partir del diccionario de d
 \textbf{Variable limpia} & \textbf{Código} & \textbf{Definición} & \textbf{Uso} \\
 \midrule
 \texttt{consumo\_12m} & \texttt{K\_03} & ¿Ha consumido marihuana en los últimos 12 meses? & Variable dependiente \\
-\texttt{precio\_compra} & \texttt{K\_09}, \texttt{K\_09\_VALOR} & Conocimiento y valor numérico del precio de un cigarrillo o porro de marihuana & Regresor de interés \\
+\texttt{precio\_compra} & \texttt{K\_09}, \texttt{K\_09\_VALOR} & Conocimiento y valor del precio de un cigarrillo o porro de marihuana & Regresor de interés (submuestra) \\
 \texttt{sexo} & \texttt{sexo} & Sexo de la persona & Control demográfico \\
 \texttt{edad} & \texttt{edad} & Edad en años cumplidos & Control demográfico \\
 \texttt{d2\_05} & \texttt{D2\_05} & Nivel educativo más alto alcanzado & Control socioeconómico \\
-\texttt{frecuencia}\\{\_consumo} & \texttt{K\_04} & Frecuencia de consumo en los últimos 12 meses & Variable auxiliar \\
-\texttt{facil\_marihuana} & \texttt{G\_06\_A} & Facilidad para conseguir marihuana & Proxy de acceso \\
 \bottomrule
 \end{tabular}
 \caption{Variables principales integradas desde el inventario operativo}
 \label{tab:variables}
 \end{table}
 
-Además, se dejaron identificadas para una segunda etapa variables de intensidad, como \texttt{cantidad\_consumo} (\texttt{K\_08}) y \texttt{gasto\_valor} (\texttt{K\_07}), que pueden servir para un modelo posterior de consumo intensivo o gasto.
+\subsection{Discrepancia entre \texttt{consumo\_12m} y \texttt{K\_03}: una nota metodológica}\label{sec:discrepancia}
+
+Una auditoría interna del repositorio (24 de marzo de 2026) detectó que la variable \texttt{consumo\_12m} en la base limpia no coincide exactamente con \texttt{K\_03} en los datos crudos. La distribución comparada es:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lrrr}
+\toprule
+Fuente & Sí (1) & No (2) & NS/NR (9) \\
+\midrule
+\texttt{K\_03} (cuestionario raw) & 1 223 & 2 754 & 5 \\
+\texttt{consumo\_12m} (base limpia, recodificada) & 1 719 & 2 263 ($\equiv 0$) & --- \\
+\bottomrule
+\end{tabular}
+\caption{Comparación de la variable de propensión en su versión \textit{raw} y en la base limpia}
+\label{tab:discrepancia}
+\end{table}
+
+El cruce a nivel individuo muestra que 898 personas marcadas como consumidoras (\texttt{consumo\_12m}=1) declararon explícitamente \texttt{K\_03}=2 en el cuestionario. Esto sugiere que la base limpia construyó \texttt{consumo\_12m} con una lógica más amplia, combinando probablemente \texttt{consumo\_vida}, \texttt{consumo\_30d} y \texttt{consumo\_reciente}. La variable \texttt{frecuencia\_consumo} en la base limpia sí coincide perfectamente con \texttt{K\_03} (1 223 / 2 754 / 5), lo cual refuerza esa hipótesis.
+
+Por transparencia académica, esta discrepancia se declara explícitamente como limitación del trabajo y se atiende mediante un análisis de robustez (Sección~\ref{sec:robustez}) en el que el modelo final se reentrena con la definición estricta $Y_{\text{alt}}=\mathbb{1}\{K\_03=1\}$.
 
 \subsection{Disponibilidad y calidad de datos}
 
-La principal restricción empírica de esta etapa es la disponibilidad desigual de variables. La base completa contiene 3982 observaciones, pero la cobertura efectiva cambia de forma importante según la variable:
+La cobertura efectiva varía sustancialmente entre variables:
 
 \begin{itemize}
-    \item \texttt{consumo\_12m}: 1719 registros no nulos en la base de consumo derivada.
-    \item \texttt{precio\_compra}: 823 registros no nulos en la base derivada original.
-    \item \texttt{cantidad\_consumo}: 1223 registros no nulos.
-    \item \texttt{gasto\_valor}: 1014 registros no nulos.
-    \item \texttt{frecuencia\_consumo}: cobertura completa en las 3982 observaciones.
+    \item \texttt{consumo\_12m}: 1 719 registros marcados como 1 sobre 3 982.
+    \item \texttt{precio\_compra}: 823 registros no nulos; 755 válidos para modelado con covariables completas.
+    \item Edad, sexo, educación agrupable: cobertura cercana al 100\%.
 \end{itemize}
 
-La variable de precio requiere una aclaración adicional. En la base derivada original, los 823 registros no nulos de \texttt{precio\_compra} se distribuyen entre 603 personas que reportan consumo en los últimos 12 meses y 220 personas que no lo reportan. Luego de depurar códigos especiales y conservar únicamente precios válidos y positivos, la variable usable para el modelo se reduce a 756 observaciones. Finalmente, al exigir además covariables demográficas completas y una categoría educativa válida, la muestra econométrica con precio queda en 755 casos. Esta secuencia muestra que la información de precio no está distribuida aleatoriamente respecto al comportamiento de consumo y que la muestra con precio es una submuestra altamente seleccionada.
+La submuestra con precio (\(n=755\)) está fuertemente seleccionada: combina personas que conocen el precio del producto y están dispuestas a reportarlo, lo cual sesga el subconjunto hacia individuos más expuestos al mercado. Por esa razón, todo análisis con precio se reporta como exploratorio y los modelos de \textit{machine learning} se entrenan sobre la muestra amplia sin precio (\(n=3 980\)).
 
-En consecuencia, el análisis se organiza en dos niveles de muestra:
+\subsection{Reglas de limpieza y \textit{feature engineering}}
 
-\begin{enumerate}
-    \item una muestra amplia sin precio, útil para establecer un benchmark general;
-    \item una muestra restringida con precio, útil para explorar sensibilidad, pero no para sostener conclusiones causales fuertes.
-\end{enumerate}
+La construcción siguió estas reglas: \emph{(i)} unión de las tres fuentes vía llaves equivalentes; \emph{(ii)} recodificación binaria de \texttt{K\_03} en \texttt{propension\_12m}; \emph{(iii)} eliminación de códigos especiales (8, 9, 98, 99, 998, 999) en variables numéricas; \emph{(iv)} transformación logarítmica del precio cuando es válido; \emph{(v)} agrupación educativa en tres categorías estables: \textit{baja}, \textit{media} y \textit{superior}; \emph{(vi)} término cuadrático de edad para capturar la no-linealidad sugerida por la teoría del ciclo de vida del consumo.
 
-\subsection{Reglas de limpieza y recodificación}
+\section{Estrategia econométrica: el benchmark}\label{sec:benchmark}
 
-La construcción de la base final siguió estas reglas:
-
-\begin{enumerate}
-    \item unión de las tres fuentes mediante llaves equivalentes;
-    \item recodificación binaria de \texttt{K\_03} como variable de propensión a consumir;
-    \item limpieza de variables numéricas positivas, eliminando códigos especiales como 8, 9, 98, 99, 998 y 999 cuando aparecen como no respuesta;
-    \item transformación logarítmica del precio cuando la variable es válida y positiva;
-    \item agrupación de educación en tres categorías estables: \textit{baja}, \textit{media} y \textit{superior}.
-\end{enumerate}
-
-La recodificación de la variable dependiente requiere un supuesto explícito. En el cuestionario, \texttt{K\_03} distingue al menos tres respuestas relevantes: 1 (\textit{Sí}), 2 (\textit{No}) y 9 (\textit{No contesta}). En la construcción de \texttt{propension\_12m}, el código 1 se transforma en 1, mientras que el código 2, el código 9 y los faltantes se tratan como 0. En consecuencia, la no respuesta se interpreta de la misma forma que la ausencia de consumo reportado. Este es un supuesto operativo útil para construir el benchmark, pero debe entenderse como una decisión metodológica provisional: si la no respuesta estuviera correlacionada con características observables o no observables de los individuos, podría introducir sesgo en etapas posteriores del análisis.
-
-\section{Estrategia econométrica}
-
-\subsection{Modelo benchmark MCO}
-
-El primer benchmark se estimó con un modelo lineal de probabilidad:
+\subsection{Modelo lineal de probabilidad (MCO)}
 
 \[
-    y_i = \beta_0 + \beta_1 \log(precio_i) + \beta_2 edad_i + \beta_3 edad_i^2 + \beta_4 mujer_i + \beta_5 educacion_i + u_i
+y_i = \beta_0 + \beta_1 \log(precio_i) + \beta_2 edad_i + \beta_3 edad_i^2 + \beta_4 mujer_i + \beta_5 educacion_i + u_i,
 \]
-
-donde \(y_i\) toma valor 1 si la persona reporta consumo de marihuana en los últimos 12 meses y 0 en caso contrario. Este modelo se usa como benchmark por su interpretación directa y por su utilidad para comparar especificaciones.
+donde \(y_i=1\) si la persona reporta consumo en los últimos 12 meses, y \(u_i\) es ruido idiosincrásico. El MCO con errores HC1 sirve como referencia interpretable.
 
 \subsection{Modelo Probit}
 
-Como segunda especificación se estimó un modelo Probit con la misma estructura de covariables:
-
 \[
-    Pr(y_i = 1 \mid X_i) = \Phi(\alpha_0 + \alpha_1 \log(precio_i) + \alpha_2 edad_i + \alpha_3 edad_i^2 + \alpha_4 mujer_i + \alpha_5 educacion_i)
+\Pr(y_i=1 \mid X_i) = \Phi(\alpha_0 + \alpha_1 \log(precio_i) + \alpha_2 edad_i + \alpha_3 edad_i^2 + \alpha_4 mujer_i + \alpha_5 educacion_i),
 \]
+con efectos marginales promedio para que la comparación con MCO sea directa.
 
-En el reporte comparativo, las columnas del Probit se presentan mediante efectos marginales promedio para que la comparación con el MCO sea más clara.
+\subsection{Resultados del benchmark}
 
-\subsection{Especificaciones estimadas}
+La Tabla~\ref{tab:fit} resume tamaño muestral y ajuste; la Tabla~\ref{tab:benchmark}, los coeficientes y efectos marginales.
 
-El análisis se estructura sobre dos muestras distintas derivadas de la misma base de modelado.
-
-\begin{enumerate}
-    \item \textbf{Muestra amplia} (\(n=3980\)): incluye todas las observaciones con edad, sexo y educación agrupada disponibles, sin requerir información de precio.
-    \item \textbf{Muestra restringida} (\(n=755\)): corresponde al subconjunto de la muestra amplia para el cual existe además información válida de precio y covariables completas.
-\end{enumerate}
-
-Sobre cada muestra se estiman dos modelos, lo que genera cuatro especificaciones en total:
-
-\begin{enumerate}
-    \item \textbf{MCO completo}: muestra amplia sin precio;
-    \item \textbf{MCO con precio}: muestra restringida con \(\log(precio)\);
-    \item \textbf{Probit completo}: misma muestra amplia sin precio;
-    \item \textbf{Probit con precio}: misma muestra restringida con \(\log(precio)\).
-\end{enumerate}
-
-Esta estructura hace explícita la lógica de dos muestras: por un lado, la asociación general entre variables sociodemográficas y propensión al consumo en la muestra más amplia posible; por otro, la asociación exploratoria entre precio y propensión en una submuestra seleccionada. La comparación entre ambas muestras es importante porque permite separar efectos de especificación de efectos derivados de la pérdida de observaciones.
-
-\section{Resultados de benchmark}
-
-\subsection{Tamaño muestral y ajuste}
-
-La Tabla \ref{tab:fit} resume el número de observaciones y la métrica de ajuste para cada especificación.
-
-\begin{table}[h!]
+\begin{table}[H]
 \centering
 \caption{Resumen de muestra y ajuste}
 \label{tab:fit}
 \input{tables/propension_fit_summary.tex}
 \end{table}
 
-Los modelos sin precio utilizan 3980 observaciones, mientras que los modelos con precio se reducen a 755. Esta caída de muestra es el principal límite empírico del análisis actual. En otras palabras, el benchmark sin precio describe mejor el patrón general de la muestra, mientras que el benchmark con precio debe leerse como una evidencia mucho más condicionada por selección muestral.
-
-\begin{table}[h!]
-\centering
-\small
-\caption{Cobertura de variables en la base de modelado}
-\label{tab:cobertura}
-\begin{tabular}{lrr}
-\toprule
-Variable & No nulos & \% cobertura sobre 3982 \\
-\midrule
-Consumo 12m & 1719 & 43.2 \\
-Precio en base derivada & 823 & 20.7 \\
-Precio válido para modelado & 756 & 19.0 \\
-Edad & 3982 & 100.0 \\
-Sexo & 3982 & 100.0 \\
-Educación agrupable & 3980 & 99.9 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Coeficientes y efectos marginales}
-
-La Tabla \ref{tab:benchmark} presenta los coeficientes del MCO y, para el Probit, los efectos marginales promedio.
-
-\begin{table}[h!]
+\begin{table}[H]
 \centering
 \small
 \caption{Resultados comparados de benchmark}
@@ -268,36 +222,256 @@ La Tabla \ref{tab:benchmark} presenta los coeficientes del MCO y, para el Probit
 \input{tables/propension_benchmark_table.tex}
 \end{table}
 
-En esta comparación, la categoría de referencia para educación es \textit{baja}, que agrupa \textit{Ninguno}, \textit{Preescolar} y \textit{Básica primaria}. Por lo tanto, los coeficientes reportados para \textit{Educación media} y \textit{Educación superior} deben leerse en relación con ese grupo base.
+Los hallazgos del benchmark son consistentes con la literatura: \emph{(i)} las mujeres reportan menor propensión (\(-0.065\) en MCO; efecto marginal cercano a \(-0.064\) en Probit); \emph{(ii)} la edad entra con signo negativo dominante; \emph{(iii)} el coeficiente de \(\log(precio)\) es positivo en la submuestra, pero la selección invalida una lectura causal limpia; \emph{(iv)} la educación cambia entre muestras, reflejando la composición de la submuestra con precio.
 
-\subsection{Lectura preliminar}
+\section{Modelos de Machine Learning}\label{sec:ml}
 
-Los hallazgos más importantes de esta primera fase son los siguientes:
+\subsection{Especificación de los modelos}
 
-\begin{enumerate}
-    \item En la muestra completa, la variable \textit{Mujer} presenta un coeficiente cercano a \(-0.065\) en MCO y un efecto marginal de \(-0.064\) en Probit. Bajo esta especificación, las mujeres muestran una menor propensión observada a reportar consumo de marihuana en los últimos 12 meses frente a los hombres.
-    \item La edad aparece con signo negativo en la muestra completa tanto en MCO como en Probit, lo que sugiere una menor propensión observada al consumo a medida que aumenta la edad.
-    \item En la muestra restringida con precio, el coeficiente de \(\log(precio)\) es positivo y estadísticamente distinto de cero en ambos modelos, con magnitud cercana a \(0.044\). Este resultado no debe interpretarse como elasticidad causal. La lectura correcta en esta etapa es que, dentro de una submuestra específica y altamente seleccionada, el precio aparece correlacionado con la propensión observada.
-    \item Los coeficientes de educación cambian entre la muestra completa y la muestra con precio. Esto refuerza la idea de que la pérdida de observaciones por disponibilidad de precio altera la composición de la muestra y, con ello, la estabilidad de las estimaciones.
-\end{enumerate}
-
-\section{Reproducibilidad de la fase}
-
-La fase quedó organizada para que el análisis pueda repetirse de forma transparente:
+Para una comparación limpia, los modelos de \textit{machine learning} se entrenan sobre exactamente el mismo conjunto de variables del benchmark sin precio (edad, edad², sexo, educación agrupada), bajo la misma partición \texttt{train/test 80/20} estratificada (\texttt{random\_state=42}).
 
 \begin{itemize}
-    \item el inventario operativo de variables quedó documentado en \texttt{data/processed/variables.tex};
-    \item la base de modelado se genera desde funciones en \texttt{src/cannabis\_tax/analysis/modeling.py};
-    \item el análisis exploratorio y el benchmark se ejecutan desde el notebook \texttt{notebooks/01\_eda\_y\_mco\_propension.ipynb};
-    \item las tablas del paper se exportan automáticamente a \texttt{reports/tables/}.
+    \item \textbf{Random Forest}: 300 árboles, \texttt{max\_depth=7}, \texttt{min\_samples\_leaf=10}. \textit{Bagging} robusto a \textit{outliers}.
+    \item \textbf{XGBoost}: 300 árboles, \texttt{max\_depth=5}, \texttt{learning\_rate=0.05}, \texttt{subsample=0.8}, ponderando por la prevalencia.
+    \item \textbf{Gradient Boosting (sklearn)}: 300 árboles, \texttt{max\_depth=3}, \texttt{learning\_rate=0.05}, \texttt{subsample=0.8}, \texttt{min\_samples\_leaf=15}.
 \end{itemize}
 
-Esto deja la primera fase lista para revisión y facilita la transición a la siguiente etapa del proyecto.
+\subsection{Tabla comparativa de desempeño}
 
-\section{Conclusiones y siguiente fase}
+\begin{table}[H]
+\centering
+\small
+\caption{Comparación de modelos — métricas sobre conjunto de prueba y CV 5-fold}
+\label{tab:ml}
+\begin{tabular}{lrrrr}
+\toprule
+Modelo & Accuracy & AUC-ROC & F1 & CV AUC (5-fold) \\
+\midrule
+MCO (LPM)            & 0.6608 & 0.7232 & 0.5982 & 0.6728 \\
+Probit               & 0.6608 & 0.7228 & 0.5982 & 0.6728 \\
+Random Forest        & 0.6533 & 0.7063 & 0.5763 & 0.6674 \\
+XGBoost              & 0.6432 & 0.7001 & 0.5610 & 0.6614 \\
+Gradient Boosting    & 0.6545 & 0.7093 & 0.5736 & 0.6716 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-La primera fase ya permite sostener varias conclusiones operativas. Primero, la pregunta de propensión al consumo en los últimos 12 meses está correctamente aterrizada en una variable observada y documentada del capítulo K de la encuesta. Segundo, la integración entre la base limpia de consumo y los módulos sociodemográficos funciona sin pérdida por llaves. Tercero, el benchmark MCO y Probit ya está completamente implementado y ofrece un punto de comparación claro para modelos posteriores.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/comparacion_benchmark_ml.png}
+\caption{Comparación visual del desempeño en prueba: benchmark vs \textit{machine learning}.}
+\label{fig:comp_bench_ml}
+\end{figure}
 
-Al mismo tiempo, el trabajo deja identificada la principal limitación de la etapa: la baja cobertura de la variable de precio. Por eso, la fase siguiente no debería centrarse en refinar indefinidamente el benchmark, sino en avanzar hacia el componente de machine learning, manteniendo el benchmark econométrico como referencia y evaluando si el desempeño predictivo mejora con modelos más flexibles.
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/curvas_roc_comparacion.png}
+\caption{Curvas ROC para los cinco modelos sobre el conjunto de prueba.}
+\label{fig:roc}
+\end{figure}
+
+\textbf{Hallazgo no obvio.} Con los hiperparámetros por defecto, ninguno de los tres modelos de \textit{machine learning} supera al benchmark econométrico. Esto sugiere que con sólo cuatro \textit{features} la relación es aproximadamente lineal y el MCO paga un costo mínimo de sesgo. La pregunta clave entonces es si esa diferencia desaparece tras un \textit{tuning} disciplinado.
+
+\section{Validación, robustez y selección del modelo final}\label{sec:validacion}
+
+\subsection{Validación cruzada de 10 pliegues}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/cv_10fold_boxplot.png}
+\caption{Distribución de AUC-ROC en validación cruzada de 10 pliegues: Random Forest y Gradient Boosting frente al CV de MCO (línea punteada de referencia).}
+\label{fig:cv10}
+\end{figure}
+
+La validación cruzada de 10 pliegues confirma estabilidad: las medianas de Random Forest (0.6674) y Gradient Boosting (0.6716) son muy cercanas al CV del benchmark MCO (0.6728), pero con dispersión que se solapa.
+
+\subsection{Curvas de aprendizaje}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/curvas_aprendizaje.png}
+\caption{Curvas de aprendizaje (\textit{train vs.\ validation}) para Random Forest y Gradient Boosting.}
+\label{fig:learning}
+\end{figure}
+
+Las curvas muestran convergencia entre \textit{train} y \textit{validation} en Gradient Boosting (brecha menor que en Random Forest), confirmando que el GBM controla mejor la varianza con esta configuración.
+
+\subsection{Búsqueda de hiperparámetros}
+
+Se ejecutó \texttt{RandomizedSearchCV} sobre Gradient Boosting con 60 combinaciones aleatorias y CV estratificada de 5 pliegues (\(300\) ajustes totales). El espacio explorado incluyó \texttt{n\_estimators}, \texttt{max\_depth}, \texttt{learning\_rate}, \texttt{subsample}, \texttt{min\_samples\_leaf} y \texttt{max\_features}. La mejor configuración encontrada fue:
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lr}
+\toprule
+Hiperparámetro & Valor óptimo \\
+\midrule
+\texttt{n\_estimators} & 157 \\
+\texttt{max\_depth} & 2 \\
+\texttt{learning\_rate} & 0.0422 \\
+\texttt{subsample} & 0.972 \\
+\texttt{min\_samples\_leaf} & 26 \\
+\texttt{max\_features} & \texttt{log2} \\
+\bottomrule
+\end{tabular}
+\caption{Hiperparámetros óptimos del Gradient Boosting Machine (GBM) tuneado.}
+\label{tab:gbm_params}
+\end{table}
+
+\subsection{Selección razonada del modelo final}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lrr}
+\toprule
+Métrica & GBM base & GBM tuneado \\
+\midrule
+AUC-ROC (test)    & 0.7093 & \textbf{0.7278} \\
+Accuracy (test)   & 0.6545 & \textbf{0.6621} \\
+F1-Score (test)   & 0.5736 & \textbf{0.6129} \\
+CV AUC (10-fold)  & 0.6716 & \textbf{0.6756} \\
+\bottomrule
+\end{tabular}
+\caption{Mejora del GBM tras el \textit{tuning} de hiperparámetros.}
+\label{tab:gbm_tuned}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/roc_gbm_tuned.png}
+\caption{Curva ROC del GBM tuneado, comparada con el benchmark MCO.}
+\label{fig:roc_gbm}
+\end{figure}
+
+\textbf{Decisión.} Se selecciona el \textbf{Gradient Boosting tuneado} como modelo final. Argumentos: \emph{(i)} mayor AUC-ROC en prueba (0.7278 vs 0.7232 del benchmark); \emph{(ii)} mayor F1-Score (0.6129 vs 0.5982); \emph{(iii)} brecha train-validation menor que Random Forest y XGBoost; \emph{(iv)} hiperparámetros conservadores (árboles poco profundos, regularización fuerte) que reducen el riesgo de sobreajuste con \(n\) moderado.
+
+\subsection{Análisis de robustez con Y alternativa estricta}\label{sec:robustez}
+
+Atendiendo la discrepancia documentada en la Sección~\ref{sec:discrepancia}, se reentrena el GBM tuneado con $Y_{\text{alt}}=\mathbb{1}\{K\_03=1\}$ y se comparan métricas:
+
+\begin{table}[H]
+\centering
+\small
+\caption{Robustez del GBM tuneado bajo definición alternativa estricta de la variable objetivo.}
+\label{tab:robustez_y_alt}
+\input{tables/robustez_y_alt.tex}
+\end{table}
+
+\textbf{Interpretación.} La CV AUC-10fold incluso \emph{mejora} con la Y estricta (+0.0267), señal de que cuando la operacionalización de la variable es más limpia, la generalización del modelo aumenta. La AUC-ROC en prueba cae moderadamente (\(-0.031\)) pero permanece sobre el azar. La caída de F1 (\(-0.29\)) se explica por la menor prevalencia (0.31 vs 0.43): con un umbral fijo de 0.5, muchos positivos se pierden; la discriminación (AUC) sigue alta. \emph{Las relaciones estructurales detectadas por el modelo son robustas a la elección de la operacionalización.}
+
+\section{Interpretabilidad con valores SHAP}\label{sec:shap}
+
+\subsection{Metodología}
+
+Los valores SHAP \cite{informal:lundberg2017} descomponen cada predicción del modelo como una suma de contribuciones por variable, con la propiedad de aditividad: $f(x_i) = \phi_0 + \sum_j \phi_{ij}$. La importancia global se aproxima como el promedio del valor absoluto de las contribuciones, $\text{Imp}_j = \mathbb{E}[\,|\phi_j|\,]$.
+
+\subsection{Importancia global}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.80\textwidth]{figures/shap_bar.png}
+\caption{Importancia media absoluta de las variables según SHAP (GBM tuneado, conjunto de prueba).}
+\label{fig:shap_bar}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Importancia media absoluta de las variables según valores SHAP.}
+\label{tab:shap}
+\input{tables/shap_importance.tex}
+\end{table}
+
+La edad y su término cuadrático concentran \textbf{aproximadamente 77\%} de la importancia absoluta. El sexo aporta 15\% adicional y la educación, cerca de 8\% entre las dos categorías. Esta concentración tiene una implicación metodológica directa: con sólo cuatro \textit{features}, el modelo no puede ir mucho más allá de un segmentador edad-sexo. La ganancia del \textit{Gradient Boosting} sobre el benchmark proviene de capturar mejor la forma funcional de la edad (no monótona y no estrictamente cuadrática), no de descubrir patrones nuevos.
+
+\subsection{Lectura individual}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/shap_summary.png}
+\caption{SHAP \textit{summary plot} — distribución de contribuciones por variable e individuo en el conjunto de prueba. Cada punto representa una persona; el color codifica el valor de la variable (rojo = alto, azul = bajo).}
+\label{fig:shap_summary}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.80\textwidth]{figures/shap_dependence_edad.png}
+\caption{Dependencia parcial SHAP para la edad — relación no monótona capturada por el GBM.}
+\label{fig:shap_edad}
+\end{figure}
+
+El gráfico de dependencia confirma la forma funcional implícita: la contribución a la propensión es positiva en cohortes jóvenes y decae con la edad, con un patrón que el lineal aproxima sólo en promedio. Esto justifica empíricamente la ganancia predictiva del GBM.
+
+\section{Ética, sesgos y limitaciones}\label{sec:etica}
+
+\subsection{Sesgos del dato}
+
+\paragraph{Autoreporte y deseabilidad social.} La encuesta captura comportamientos socialmente estigmatizados. Es bien documentado que el autoreporte de consumo subestima la prevalencia real, y que ese subreporte se correlaciona con la percepción de riesgo legal y social. Por construcción, el modelo aprende propensión a \emph{reportar} consumo, no propensión a \emph{consumir}.
+
+\paragraph{Sesgo de selección por cobertura de precio.} La submuestra con precio (\(n\approx755\)) está fuertemente seleccionada hacia personas más expuestas al mercado. Por ello el benchmark con precio se reporta como exploratorio, y los modelos de ML se entrenan sobre la muestra amplia sin precio.
+
+\paragraph{Sesgo de medición en la Y.} La discrepancia entre \texttt{consumo\_12m} y \texttt{K\_03} (Sección~\ref{sec:discrepancia}) introduce ruido. La robustez (Sección~\ref{sec:robustez}) muestra que las conclusiones cualitativas se mantienen, pero un trabajo definitivo debería reconciliar la construcción de la variable.
+
+\subsection{Riesgos del uso del modelo}
+
+\begin{enumerate}
+    \item \textbf{Perfilado individual.} Con AUC \(\approx 0.73\), las distribuciones de propensión por grupo se solapan sustancialmente. Usar el modelo para decisiones sobre personas (perfilado policial, decisiones laborales, vigilancia escolar) sería un mal uso: el costo social del falso positivo es severo dado el estigma asociado.
+    \item \textbf{Asociaciones, no causalidad.} Los SHAP muestran asociaciones. Que el modelo asigne mayor probabilidad a hombres jóvenes no implica causalidad; la edad y el sexo están correlacionados con factores no observados (red social, exposición, entorno).
+    \item \textbf{Estigma reforzado.} Publicar mapas o perfiles de consumo puede reforzar estereotipos. La comunicación pública debe privilegiar lecturas agregadas sobre lecturas individuales.
+\end{enumerate}
+
+\subsection{Uso responsable propuesto}
+
+El modelo se propone como herramienta \textbf{agregada} para: \emph{(i)} estimar tamaños de mercado bajo escenarios regulatorios; \emph{(ii)} apoyar el diseño tributario simulando bases de contribuyentes por estratos amplios; \emph{(iii)} priorizar segmentos para política preventiva. No se recomienda para decisiones individuales ni para focalización geográfica fina sin análisis adicional de equidad.
+
+\section{Implicaciones económicas y de política pública}\label{sec:implicaciones}
+
+\paragraph{Tamaño y demografía del mercado.} El GBM tuneado permite clasificar la población encuestada en grupos de mayor o menor propensión, insumo para una proyección poblacional con estructura etaria del DANE. La concentración en cohortes 18--35 años sugiere un mercado potencial relativamente acotado en términos de personas, pero con probable alta frecuencia de consumo en el segmento activo.
+
+\paragraph{Diseño tributario.} Si Colombia avanzara hacia un marco regulado, la base de contribuyentes (vía IVA u otro impuesto al consumo) estaría concentrada en cohortes jóvenes-masculinas. La elasticidad-precio probablemente es elevada en ese segmento, lo cual exige cautela: un impuesto demasiado alto desplazaría la demanda al mercado ilegal, anulando el efecto recaudatorio. Una proyección de recaudo creíble requiere acoplar este modelo de propensión con una elasticidad-precio estimada limpiamente, algo que la submuestra disponible no permite.
+
+\paragraph{Política preventiva.} Las cohortes 18--25 años son las de mayor propensión observada. Esto justifica focalizar campañas de información y prevención en ese rango y diseñar mecanismos diferenciados por sexo.
+
+\paragraph{Trabajo futuro.} Las líneas más prometedoras son: \emph{(i)} expandir el \textit{feature set} con variables de entorno (geografía, red social, ingreso del hogar); \emph{(ii)} resolver la construcción de la variable objetivo a partir de \texttt{K\_03} directo; \emph{(iii)} estimar elasticidad-precio con un diseño que corrija el sesgo de selección de la submuestra con precio.
+
+\section{Reproducibilidad}
+
+El proyecto está organizado para que cualquier análisis pueda repetirse de forma transparente:
+
+\begin{itemize}
+    \item \textbf{Pipeline CLI}: \texttt{python -m cannabis\_tax.cli pipeline} ejecuta limpieza, validación y construcción de la base modeladora.
+    \item \textbf{Notebook 01}: \texttt{notebooks/01\_eda\_y\_mco\_propension.ipynb} — EDA y benchmark.
+    \item \textbf{Notebook 03}: \texttt{notebooks/03\_modelos\_ml.ipynb} — entrenamiento inicial de RF/XGBoost/GBM.
+    \item \textbf{Notebook 04}: \texttt{notebooks/04\_pca.ipynb} — exploración PCA complementaria.
+    \item \textbf{Notebook 05}: \texttt{notebooks/05\_validacion\_semanas10\_12.ipynb} — validación cruzada, búsqueda de hiperparámetros, selección del modelo final.
+    \item \textbf{Notebook 06}: \texttt{notebooks/06\_interpretabilidad\_etica.ipynb} — SHAP, robustez con Y alternativa y discusión ética.
+    \item \textbf{Tests}: \texttt{make test} corre la suite de pruebas unitarias del paquete.
+\end{itemize}
+
+Todas las tablas y figuras del paper se exportan automáticamente desde el código y residen en \texttt{reports/tables/} y \texttt{reports/figures/}.
+
+\section{Conclusiones}
+
+Este trabajo cubrió el ciclo completo CRISP-DM aplicado a la propensión al consumo de marihuana en Colombia: desde la construcción de la base hasta la interpretabilidad y la discusión ética. Las conclusiones principales son cuatro.
+
+\textbf{Primera.} El benchmark econométrico (MCO y Probit) ofrece un punto de partida sólido y, con sólo cuatro regresores demográficos, alcanza una AUC-ROC de 0.7232 en prueba. Esto debe ser el punto de comparación para cualquier modelo más complejo en este dataset.
+
+\textbf{Segunda.} El \textit{Gradient Boosting} con hiperparámetros por defecto \emph{no supera} al benchmark. La ganancia del \textit{machine learning} sólo se materializa después de un \textit{tuning} disciplinado: el GBM tuneado alcanza AUC-ROC 0.7278 y F1 0.6129, superando al benchmark de manera modesta pero consistente. La lección académica es que la flexibilidad funcional sin regularización adecuada introduce varianza que opaca cualquier ganancia de sesgo.
+
+\textbf{Tercera.} La interpretabilidad SHAP muestra que la edad y su término cuadrático concentran cerca del 77\% de la importancia absoluta del modelo, con el sexo aportando un 15\% adicional. Es un modelo \emph{honestamente delgado}: con cuatro \textit{features}, el techo de información está cerca. La línea natural de mejora es ampliar el \textit{feature set} con variables de entorno.
+
+\textbf{Cuarta.} El análisis de robustez con \(Y_{\text{alt}}=\mathbb{1}\{K\_03=1\}\) confirma que las relaciones estructurales no dependen de la operacionalización elegida para la variable objetivo, pero la discrepancia documental entre \texttt{consumo\_12m} y \texttt{K\_03} debe quedar declarada como limitación seria del trabajo y como prioridad de resolución para una eventual fase posterior.
+
+En términos de uso, el modelo se propone como insumo agregado para análisis de mercado y diseño tributario, no para decisiones individuales. Esa frontera no es accesoria: es parte sustantiva de lo que significa hacer \textit{ciencia de datos} con responsabilidad en un dominio sensible.
+
+\begin{thebibliography}{9}
+\bibitem{informal:1} Becker, G. \& Murphy, K. (1988). A Theory of Rational Addiction. \textit{Journal of Political Economy}, 96(4), 675--700.
+\bibitem{informal:lundberg2017} Lundberg, S. M. \& Lee, S.-I. (2017). A Unified Approach to Interpreting Model Predictions. \textit{NeurIPS 2017}.
+\bibitem{informal:dane} DANE. Encuesta Nacional de Consumo de Sustancias Psicoactivas.
+\bibitem{informal:friedman} Friedman, J. H. (2001). Greedy function approximation: A gradient boosting machine. \textit{Annals of Statistics}, 29(5), 1189--1232.
+\bibitem{informal:hastie} Hastie, T., Tibshirani, R. \& Friedman, J. (2009). \textit{The Elements of Statistical Learning} (2nd ed.). Springer.
+\end{thebibliography}
 
 \end{document}

@@ -2,37 +2,42 @@
 \section{Conclusiones}
 
 \begin{frame}
-\frametitle{Hallazgos Clave}
-\begin{itemize}
-    \item El modelo integra datos de 169,346 individuos con características sociodemográficas
-    \item Las variables demográficas son determinantes en la predicción de ingresos tributarios
-    \item Diferentes marcos regulatorios generan variaciones significativas en recaudos
-    \item La formalización de este mercado tiene potencial fiscal importante para Colombia
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Implicaciones de Política Pública}
+\frametitle{Hallazgos clave}
 \begin{enumerate}
-    \item \textbf{Diseño tributario}: Estructura impositiva óptima según escenarios
-    \item \textbf{Regulación}: Marcos normativos que maximicen recaudos y control
-    \item \textbf{Segmentación}: Políticas diferenciadas por perfil sociodemográfico
-    \item \textbf{Fiscalización}: Mecanismos efectivos de cumplimiento tributario
+    \item El benchmark MCO/Probit alcanza AUC-ROC = 0.7232. Es un piso difícil de superar con sólo 4 \textit{features}.
+    \item Los modelos ML por defecto \textit{no} superan al benchmark.
+    \item El \textbf{GBM tuneado} sí lo hace: AUC = \textbf{0.7278}, F1 = \textbf{0.6129}.
+    \item SHAP: edad + edad² $\approx 77\%$ de la importancia. Modelo \emph{honestamente delgado}.
+    \item Robustez Y alternativa: relaciones estructurales estables.
 \end{enumerate}
 \end{frame}
 
 \begin{frame}
-\frametitle{Próximos Pasos}
+\frametitle{Lecciones metodológicas}
 \begin{itemize}
-    \item Refinar modelos predictivos con variables económicas adicionales
-    \item Incorporar elasticidades precio de demanda por segmento
-    \item Análisis de spillovers con mercados ilegales
-    \item Validación de proyecciones con casos internacionales
-    \item Actualización con datos más recientes
+    \item La flexibilidad sin regularización introduce varianza que opaca la ganancia de sesgo.
+    \item El \textit{tuning} disciplinado importa más que el algoritmo en datos chicos.
+    \item La interpretabilidad no es opcional: define qué tan utilizable es el modelo para política.
+    \item Documentar limitaciones (Y discrepante, submuestra con precio) es parte del trabajo, no un anexo.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Próximos pasos}
+\begin{itemize}
+    \item Reconciliar la construcción de \texttt{consumo\_12m} con \texttt{K\_03} directo.
+    \item Ampliar el \textit{feature set} con variables de entorno (geografía, red social, ingreso del hogar).
+    \item Estimar elasticidad-precio con un diseño que corrija el sesgo de selección.
+    \item Acoplar el modelo de propensión con proyecciones poblacionales del DANE para simulación tributaria.
 \end{itemize}
 \end{frame}
 
 \begin{frame}[plain]
 \centering
-\Huge \textbf{Preguntas y Discusión}
+\Huge \textbf{Preguntas y discusión}
+\vspace{0.6cm}
+\\[0.4cm]
+\normalsize
+\textit{Tupaz, Quintero, Rodrigues — Universidad EAFIT}\\
+\textit{Profesora supervisora: Paula María Almonacid Hurtado}
 \end{frame}

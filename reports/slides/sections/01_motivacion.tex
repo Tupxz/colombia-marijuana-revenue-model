@@ -2,42 +2,43 @@
 \section{Introducción}
 
 \begin{frame}
-\frametitle{Contexto Global}
+\frametitle{Contexto y motivación}
 \begin{itemize}
-    \item \textbf{Tendencia mundial}: Más de 40 países han legalizado cannabis en alguna forma
-    \item \textbf{Impacto fiscal}: Generación de ingresos tributarios significativos en jurisdicciones que regulan
-    \item \textbf{Colombia}: Contexto único con historial en economías ilícitas de drogas
-    \item \textbf{Oportunidad}: Regulación de mercados alternativos para ingresos públicos
+    \item \textbf{Tendencia global}: más de 40 países han legalizado el cannabis en alguna forma.
+    \item \textbf{Colombia}: el debate sobre regulación incorpora hoy preguntas económicas concretas (tamaño de mercado, base tributaria, política preventiva).
+    \item \textbf{Pregunta previa}: antes de cualquier simulación fiscal, hay que caracterizar empíricamente \textbf{quién consume} y \textbf{con qué propensión}.
+    \item \textbf{Insumo natural}: la Encuesta Nacional de Consumo de Sustancias Psicoactivas (ENCSPA).
 \end{itemize}
 \end{frame}
 
 \begin{frame}
-\frametitle{Brecha de Conocimiento}
+\frametitle{Brecha que aborda este trabajo}
 \begin{itemize}
-    \item Escasez de modelos predictivos sobre estructura tributaria en mercados legalizados
-    \item Falta de análisis cuantitativos específicos para Colombia
-    \item Necesidad de herramientas para proyecciones fiscales bajo distintos marcos regulatorios
-    \item Integración de datos sociodemográficos para segmentación de mercado
+    \item Pocos modelos comparan rigurosamente \textbf{benchmark econométrico vs.\ \textit{machine learning}} en este dominio para Colombia.
+    \item Escasa discusión estructurada de \textbf{ética y sesgos} en estudios de consumo de drogas con datos de encuesta.
+    \item Necesidad de \textbf{interpretabilidad} (no sólo precisión) cuando el modelo se usa para política pública.
 \end{itemize}
+\vspace{0.3cm}
+\textbf{Nuestra contribución}: pipeline reproducible + comparación honesta + interpretabilidad SHAP + frontera ética explícita.
 \end{frame}
 
 \begin{frame}
-\frametitle{¿Por Qué Importa?}
+\frametitle{¿Por qué importa?}
 \begin{columns}
 \column{0.5\textwidth}
-\textbf{Dimensión Fiscal:}
+\textbf{Dimensión económica:}
 \begin{itemize}
-    \item Ingresos tributarios potenciales
-    \item Presión sobre finanzas públicas
-    \item Eficiencia recaudatoria
+    \item Tamaño potencial del mercado
+    \item Base tributaria si se legaliza
+    \item Elasticidad-precio del segmento
 \end{itemize}
 
 \column{0.5\textwidth}
-\textbf{Dimensión Social:}
+\textbf{Dimensión social:}
 \begin{itemize}
-    \item Formalización económica
-    \item Reducción de economía ilícita
-    \item Regulación y control
+    \item Focalización de prevención
+    \item Reducción del estigma vía datos
+    \item Uso responsable de IA en política
 \end{itemize}
 \end{columns}
 \end{frame}
