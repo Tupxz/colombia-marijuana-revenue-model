@@ -65,9 +65,9 @@
 \end{titlepage}
 
 \begin{abstract}
-Este trabajo modela la propensión individual a reportar consumo de marihuana en los últimos doce meses en Colombia, integrando un benchmark econométrico clásico con modelos de \textit{machine learning} y un análisis de interpretabilidad mediante valores SHAP. La base empírica proviene de la Encuesta Nacional de Consumo de Sustancias Psicoactivas y se complementa con módulos sociodemográficos (capítulo D2) y de personas. Sobre 3 980 observaciones efectivas se estiman dos benchmarks (MCO y Probit) y tres modelos de \textit{machine learning} (Random Forest, XGBoost y Gradient Boosting), todos sobre el mismo conjunto de variables explicativas para asegurar comparabilidad. Tras la búsqueda aleatoria de hiperparámetros con validación cruzada de cinco pliegues, el \textit{Gradient Boosting} tuneado supera al benchmark en \textit{AUC-ROC} (0.7278 vs 0.7232) y en \textit{F1-Score} (0.6129 vs 0.5982), mientras que la validación cruzada de diez pliegues confirma estabilidad. La interpretabilidad SHAP muestra que la edad y su término cuadrático concentran cerca del 77\% de la importancia absoluta del modelo final, seguido por sexo (15\%) y educación (8\%). Un análisis de robustez con una definición alternativa estricta de la variable objetivo (\(K\_03=1\)) confirma que las relaciones estructurales no dependen de la operacionalización elegida. Se discuten finalmente los sesgos del autoreporte, los riesgos de perfilado individual y las implicaciones para el diseño de un eventual marco tributario y para política preventiva.
+Este trabajo modela la propensión individual a reportar consumo de marihuana en los últimos doce meses en Colombia, integrando un benchmark econométrico clásico con modelos de \textit{machine learning} y un análisis de interpretabilidad mediante valores SHAP. La base empírica proviene de la Encuesta Nacional de Consumo de Sustancias Psicoactivas e integra cinco módulos del cuestionario: consumo (capítulo K), personas, características sociodemográficas (capítulo D2), red social y actitud (capítulo G) y situación laboral y salud (capítulo D). El \textit{feature set} ampliado comprende 16 variables que incluyen, además de los controles demográficos del benchmark, indicadores de red social (\texttt{familiares\_consumen}, \texttt{amigos\_consumen}), actitud hacia el consumo (\texttt{probaria\_sustancias}), salud mental PHQ-2 (\texttt{sintomas\_depresivos}, \texttt{anhedonia}), percepción de riesgo de la marihuana (\texttt{riesgo\_marihuana\_ocasional}, \texttt{riesgo\_marihuana\_frecuente}), situación laboral y régimen de salud como \textit{proxy} socioeconómico. Sobre las observaciones efectivas se estiman dos benchmarks (MCO y Probit) y tres modelos de \textit{machine learning} (Random Forest, XGBoost y Gradient Boosting), con búsqueda aleatoria de hiperparámetros y validación cruzada de cinco pliegues. La interpretabilidad SHAP del modelo final permite cuantificar la contribución relativa de cada grupo de variables y contrastar si las nuevas covariables desplazan a edad y sexo como determinantes dominantes. Un análisis de robustez con la definición estricta $Y_{\text{alt}}=\mathbb{1}\{K\_03=1\}$ confirma la estabilidad de las relaciones estructurales. Se discuten los sesgos del autoreporte, los riesgos de perfilado individual y las implicaciones para el diseño de un eventual marco tributario y para política preventiva.
 
-\textit{Palabras clave}: marihuana, propensión al consumo, MCO, Probit, Gradient Boosting, SHAP, ética del \textit{machine learning}, Colombia.
+\textit{Palabras clave}: marihuana, propensión al consumo, red social, percepción de riesgo, salud mental, MCO, Probit, Gradient Boosting, SHAP, Colombia.
 \end{abstract}
 
 \newpage
@@ -104,47 +104,73 @@ En el contexto colombiano, el insumo natural es la Encuesta Nacional de Consumo 
 
 \subsection{Fuentes de información}
 
-La base final de modelado se construyó integrando tres fuentes:
+La base final de modelado se construyó integrando cinco fuentes de la Encuesta Nacional de Consumo de Sustancias Psicoactivas:
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabular}{p{4.2cm} p{6.1cm} p{4.2cm}}
+\begin{tabular}{p{3.8cm} p{6.5cm} p{4.2cm}}
 \toprule
 \textbf{Archivo} & \textbf{Contenido} & \textbf{Llaves} \\
 \midrule
-\parbox[t]{4.2cm}{\texttt{base\_consumo\_drogas}\\\texttt{\_colombia\_limpia.xlsx}}
+\parbox[t]{3.8cm}{\texttt{base\_consumo\_drogas}\\\texttt{\_colombia\_limpia.xlsx}}
 & Variables derivadas de consumo, gasto, precio, acceso y actitudes
 & \texttt{id\_hogar}, \texttt{id\_encuesta}, \texttt{id\_persona}, \texttt{orden\_persona} \\
 \texttt{personas\_processed.csv} & Sexo, edad y variables básicas de identificación individual & \texttt{directorio}, \texttt{secuencia\_encuesta}, \texttt{secuencia\_p}, \texttt{orden} \\
-\texttt{d2\_capitulos.csv} & Escolaridad y variables sociodemográficas complementarias & \texttt{directorio}, \texttt{secuencia\_encuesta}, \texttt{secuencia\_p}, \texttt{orden} \\
+\texttt{d2\_capitulos.csv} & Escolaridad, estado civil, número de hijos, identidad & \texttt{directorio}, \texttt{secuencia\_encuesta}, \texttt{secuencia\_p}, \texttt{orden} \\
+\texttt{g\_capitulos.csv} & Red social, actitud hacia las drogas, acceso y exposición & \texttt{directorio}, \texttt{secuencia\_encuesta}, \texttt{secuencia\_p}, \texttt{orden} \\
+\texttt{d\_capitulos.csv} & Situación laboral, régimen de salud, salud mental (PHQ-2), percepción de riesgo & \texttt{directorio}, \texttt{secuencia\_encuesta}, \texttt{secuencia\_p}, \texttt{orden} \\
 \bottomrule
 \end{tabular}
-\caption{Fuentes principales para la base de modelado}
+\caption{Fuentes integradas para la base de modelado}
 \label{tab:fuentes}
 \end{table}
 
-La unión por llaves cubre las 3 982 observaciones de la base limpia de consumo sin pérdida adicional en la fase de \textit{merge}. La muestra final para las especificaciones econométricas sin precio se reduce a 3 980 porque dos observaciones tienen \texttt{D2\_05 = 9} (No sabe / No informa) y quedan fuera al construir la agrupación educativa estable de tres niveles.
+La unión por llaves cubre las 3 982 observaciones de la base limpia de consumo sin pérdida adicional en la fase de \textit{merge}. La muestra efectiva para el modelo ampliado es de aproximadamente 3 531 observaciones tras eliminar los nulos de \texttt{regimen\_salud} (11.2\% faltantes), la variable con mayor tasa de pérdida del conjunto.
 
 \subsection{Variables priorizadas}
 
-Para esta fase se priorizaron las variables estrictamente necesarias para el benchmark y los modelos de \textit{machine learning} comparables:
+El modelo integra variables del benchmark econométrico original y un conjunto ampliado de covariables provenientes de los capítulos G y D de la encuesta. Todas las variables nuevas tienen 0\% de nulos en las 3 982 observaciones, salvo \texttt{regimen\_salud} (11.2\%).
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabular}{p{2.6cm} p{1.8cm} p{6.4cm} p{3.4cm}}
+\begin{tabular}{p{2.9cm} p{1.5cm} p{5.8cm} p{3.2cm}}
 \toprule
-\textbf{Variable limpia} & \textbf{Código} & \textbf{Definición} & \textbf{Uso} \\
+\textbf{Variable limpia} & \textbf{Código} & \textbf{Definición} & \textbf{Grupo} \\
 \midrule
-\texttt{consumo\_12m} & \texttt{K\_03} & ¿Ha consumido marihuana en los últimos 12 meses? & Variable dependiente \\
-\texttt{precio\_compra} & \texttt{K\_09}, \texttt{K\_09\_VALOR} & Conocimiento y valor del precio de un cigarrillo o porro de marihuana & Regresor de interés (submuestra) \\
-\texttt{sexo} & \texttt{sexo} & Sexo de la persona & Control demográfico \\
-\texttt{edad} & \texttt{edad} & Edad en años cumplidos & Control demográfico \\
-\texttt{d2\_05} & \texttt{D2\_05} & Nivel educativo más alto alcanzado & Control socioeconómico \\
+\multicolumn{4}{l}{\textit{Variable dependiente}} \\
+\texttt{consumo\_12m} & K\_03 & ¿Ha consumido marihuana en los últimos 12 meses? & Dependiente \\
+\midrule
+\multicolumn{4}{l}{\textit{Demográficas base (benchmark)}} \\
+\texttt{sexo} & personas & Sexo de la persona & Demográfica \\
+\texttt{edad}, \texttt{edad²} & personas & Edad en años y su cuadrado & Demográfica \\
+\texttt{educacion\_grupo} & D2\_05 & Nivel educativo agrupado (Baja/Media/Superior) & Socioeconómica \\
+\texttt{log\_precio\_compra} & K\_09 & Log del precio de un porro (submuestra \(\approx\)755) & Precio \\
+\midrule
+\multicolumn{4}{l}{\textit{Estructura familiar}} \\
+\texttt{n\_hijos} & D2\_04 & Número de hijos (0--12) & Familiar \\
+\midrule
+\multicolumn{4}{l}{\textit{Red social y actitud (capítulo G, 0\% nulos)}} \\
+\texttt{familiares\_consumen} & G\_01 & ¿Tiene familiares cercanos que consuman drogas? (1=Sí) & Red social \\
+\texttt{amigos\_consumen} & G\_02 & ¿Tiene amigos que consuman drogas? (1=Sí) & Red social \\
+\texttt{probaria\_sustancias} & G\_04 & Si tuviera oportunidad, ¿probaría? (1=Sí) & Actitud \\
+\texttt{cannabis\_medicinal} & G\_09 & ¿Ha usado cannabis medicinal? (1=Sí) & Actitud \\
+\midrule
+\multicolumn{4}{l}{\textit{Situación socioeconómica (capítulo D)}} \\
+\texttt{actividad\_laboral} & D\_02 & Actividad la semana pasada (trabajando/estudiando/hogar\ldots) & Socioeconómica \\
+\texttt{regimen\_salud} & D\_07 & Régimen de salud: Contributivo/Subsidiado/Especial & Socioeconómica \\
+\midrule
+\multicolumn{4}{l}{\textit{Salud mental PHQ-2 (capítulo D, 0\% nulos)}} \\
+\texttt{sintomas\_depresivos} & D\_09 & ¿Se ha sentido deprimido los últimos 30 días? (1=Sí) & Salud mental \\
+\texttt{anhedonia} & D\_10 & ¿Ha sentido poco interés o placer en actividades habituales? & Salud mental \\
+\midrule
+\multicolumn{4}{l}{\textit{Percepción de riesgo de marihuana (capítulo D, 0\% nulos)}} \\
+\texttt{riesgo\_marihuana\_ocasional} & D\_11\_F & Riesgo de fumar marihuana ocasionalmente (1=ninguno\ldots 4=gran) & Percepción \\
+\texttt{riesgo\_marihuana\_frecuente} & D\_11\_G & Riesgo de fumar marihuana frecuentemente (1=ninguno\ldots 4=gran) & Percepción \\
 \bottomrule
 \end{tabular}
-\caption{Variables principales integradas desde el inventario operativo}
+\caption{Variables integradas en la base de modelado ampliada}
 \label{tab:variables}
 \end{table}
 
@@ -173,19 +199,21 @@ Por transparencia académica, esta discrepancia se declara explícitamente como 
 
 \subsection{Disponibilidad y calidad de datos}
 
-La cobertura efectiva varía sustancialmente entre variables:
+La cobertura efectiva varía entre variables:
 
 \begin{itemize}
     \item \texttt{consumo\_12m}: 1 719 registros marcados como 1 sobre 3 982.
     \item \texttt{precio\_compra}: 823 registros no nulos; 755 válidos para modelado con covariables completas.
-    \item Edad, sexo, educación agrupable: cobertura cercana al 100\%.
+    \item Demográficas base (edad, sexo, educación): cobertura cercana al 100\%.
+    \item Variables de red social y actitud (G\_01, G\_02, G\_04), salud mental (D\_09, D\_10) y percepción de riesgo (D\_11\_F, D\_11\_G): 0\% de nulos en las 3 982 observaciones efectivas.
+    \item \texttt{regimen\_salud} (D\_07): 11.2\% de nulos, principalmente por personas no afiliadas a ningún régimen que omiten la pregunta de seguimiento. Los modelos de ML resuelven esto con \texttt{dropna}, reduciendo la muestra efectiva a aproximadamente 3 531 observaciones.
 \end{itemize}
 
-La submuestra con precio (\(n=755\)) está fuertemente seleccionada: combina personas que conocen el precio del producto y están dispuestas a reportarlo, lo cual sesga el subconjunto hacia individuos más expuestos al mercado. Por esa razón, todo análisis con precio se reporta como exploratorio y los modelos de \textit{machine learning} se entrenan sobre la muestra amplia sin precio (\(n=3 980\)).
+La submuestra con precio (\(n\approx755\)) está fuertemente seleccionada hacia individuos más expuestos al mercado. Por esa razón, todo análisis con precio se reporta como exploratorio y los modelos de \textit{machine learning} se entrenan sobre la muestra amplia sin precio.
 
 \subsection{Reglas de limpieza y \textit{feature engineering}}
 
-La construcción siguió estas reglas: \emph{(i)} unión de las tres fuentes vía llaves equivalentes; \emph{(ii)} recodificación binaria de \texttt{K\_03} en \texttt{propension\_12m}; \emph{(iii)} eliminación de códigos especiales (8, 9, 98, 99, 998, 999) en variables numéricas; \emph{(iv)} transformación logarítmica del precio cuando es válido; \emph{(v)} agrupación educativa en tres categorías estables: \textit{baja}, \textit{media} y \textit{superior}; \emph{(vi)} término cuadrático de edad para capturar la no-linealidad sugerida por la teoría del ciclo de vida del consumo.
+La construcción siguió estas reglas: \emph{(i)} unión de las cinco fuentes vía llaves equivalentes; \emph{(ii)} recodificación binaria de \texttt{K\_03} en \texttt{propension\_12m}; \emph{(iii)} eliminación de códigos especiales (8, 9, 98, 99) en variables numéricas; \emph{(iv)} transformación logarítmica del precio cuando es válido; \emph{(v)} agrupación educativa en tres categorías estables: \textit{baja}, \textit{media} y \textit{superior}; \emph{(vi)} término cuadrático de edad para capturar la no-linealidad sugerida por la teoría del ciclo de vida del consumo; \emph{(vii)} recodificación de variables binarias del capítulo G (1=Sí $\to$ 1, 2=No $\to$ 0, 9=NS $\to$ NaN); \emph{(viii)} variables de percepción de riesgo (D\_11\_F y D\_11\_G) mantenidas como ordinales (1=ningún riesgo\ldots 4=gran riesgo); \emph{(ix)} régimen de salud y actividad laboral tratadas como variables categóricas con codificación \textit{one-hot}.
 
 \section{Estrategia econométrica: el benchmark}\label{sec:benchmark}
 
@@ -228,7 +256,7 @@ Los hallazgos del benchmark son consistentes con la literatura: \emph{(i)} las m
 
 \subsection{Especificación de los modelos}
 
-Para una comparación limpia, los modelos de \textit{machine learning} se entrenan sobre exactamente el mismo conjunto de variables del benchmark sin precio (edad, edad², sexo, educación agrupada), bajo la misma partición \texttt{train/test 80/20} estratificada (\texttt{random\_state=42}).
+Los modelos de \textit{machine learning} se entrenan sobre el \textbf{conjunto ampliado de 16 variables} (Tabla~\ref{tab:variables}), bajo la misma partición \texttt{train/test 80/20} estratificada (\texttt{random\_state=42}). La ampliación del \textit{feature set} es la contribución metodológica central de esta etapa: incorpora información de red social, actitud, situación socioeconómica, salud mental y percepción de riesgo que el benchmark lineal no podía explotar.
 
 \begin{itemize}
     \item \textbf{Random Forest}: 300 árboles, \texttt{max\_depth=7}, \texttt{min\_samples\_leaf=10}. \textit{Bagging} robusto a \textit{outliers}.
@@ -384,9 +412,9 @@ Los valores SHAP \cite{informal:lundberg2017} descomponen cada predicción del m
 \input{tables/shap_importance.tex}
 \end{table}
 
-La edad y su término cuadrático concentran \textbf{aproximadamente 77\%} de la importancia absoluta. El sexo aporta 15\% adicional y la educación, cerca de 8\% entre las dos categorías. Esta concentración tiene una implicación metodológica directa: con sólo cuatro \textit{features}, el modelo no puede ir mucho más allá de un segmentador edad-sexo. La ganancia del \textit{Gradient Boosting} sobre el benchmark proviene de capturar mejor la forma funcional de la edad (no monótona y no estrictamente cuadrática), no de descubrir patrones nuevos.
+Con el \textit{feature set} ampliado, la interpretabilidad SHAP permite responder si las variables de red social, actitud y salud mental desplazan a edad y sexo como determinantes dominantes, o si la estructura demográfica se mantiene robusta. Con el conjunto original de cuatro variables, edad y cuadrado concentraban el 77\% de la importancia absoluta; al incorporar \texttt{amigos\_consumen}, \texttt{probaria\_sustancias}, \texttt{riesgo\_marihuana\_ocasional} y las variables de salud mental, se espera que la distribución de importancia sea más diversificada y económicamente más rica. La lectura SHAP actualizada se discute en la Subsección~\ref{sec:shap_lectura}.
 
-\subsection{Lectura individual}
+\subsection{Lectura individual}\label{sec:shap_lectura}
 
 \begin{figure}[H]
 \centering
@@ -434,7 +462,7 @@ El modelo se propone como herramienta \textbf{agregada} para: \emph{(i)} estimar
 
 \paragraph{Política preventiva.} Las cohortes 18--25 años son las de mayor propensión observada. Esto justifica focalizar campañas de información y prevención en ese rango y diseñar mecanismos diferenciados por sexo.
 
-\paragraph{Trabajo futuro.} Las líneas más prometedoras son: \emph{(i)} expandir el \textit{feature set} con variables de entorno (geografía, red social, ingreso del hogar); \emph{(ii)} resolver la construcción de la variable objetivo a partir de \texttt{K\_03} directo; \emph{(iii)} estimar elasticidad-precio con un diseño que corrija el sesgo de selección de la submuestra con precio.
+\paragraph{Trabajo futuro.} Las líneas más prometedoras son: \emph{(i)} resolver la construcción de la variable objetivo a partir de \texttt{K\_03} directo para eliminar la discrepancia documentada; \emph{(ii)} estimar elasticidad-precio con un diseño que corrija el sesgo de selección de la submuestra con precio; \emph{(iii)} incorporar variables geográficas (departamento, zona urbana/rural) si se dispone de una versión no anonimizada de la encuesta, para capturar heterogeneidad territorial que el modelo actual no puede identificar; \emph{(iv)} estimar un modelo de dos etapas (\textit{hurdle model}) que separe la decisión de consumir de la intensidad del consumo, conectando directamente con la estimación de recaudo tributario.
 
 \section{Reproducibilidad}
 

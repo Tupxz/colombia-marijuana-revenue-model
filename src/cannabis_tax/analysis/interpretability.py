@@ -34,7 +34,20 @@ TAB_DIR = paths.reports / "tables"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 TAB_DIR.mkdir(parents=True, exist_ok=True)
 
-FEATURES = ["edad", "edad_cuadrado", "sexo_label", "educacion_grupo"]
+FEATURES = [
+    # Demográficas base
+    "edad", "edad_cuadrado", "sexo_label", "educacion_grupo",
+    # Estructura familiar
+    "n_hijos",
+    # Red social y actitud (capítulo G)
+    "familiares_consumen", "amigos_consumen", "probaria_sustancias", "cannabis_medicinal",
+    # Situación socioeconómica (capítulo D)
+    "actividad_laboral", "regimen_salud",
+    # Salud mental PHQ-2 (capítulo D)
+    "sintomas_depresivos", "anhedonia",
+    # Percepción de riesgo de marihuana (capítulo D)
+    "riesgo_marihuana_ocasional", "riesgo_marihuana_frecuente",
+]
 TARGET = "propension_12m"
 KEYS = ["directorio", "secuencia_encuesta", "secuencia_p", "orden"]
 

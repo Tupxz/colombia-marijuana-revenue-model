@@ -15,6 +15,8 @@ from .validation import validate_consumption_target
 BASE_PATH = paths.data_processed / "base_consumo_drogas_colombia_limpia.xlsx"
 PERSONAS_PATH = paths.data_processed / "personas_processed.csv"
 D2_PATH = paths.data_processed / "d2_capitulos.csv"
+G_PATH = paths.data_processed / "g_capitulos.csv"
+D_PATH = paths.data_processed / "d_capitulos.csv"
 MODEL_BASE_PATH = paths.data_processed / "propensity_model_base.csv"
 RAW_K_PATH = paths.data_raw / "k_capitulos.csv"
 
@@ -66,6 +68,25 @@ DISPLAY_NAME_MAP = {
     "C(educacion_grupo)[T.Superior]": "Educacion superior",
 }
 
+# ---- Etiquetas para las nuevas variables de red social, percepción y salud ----
+ACTIVIDAD_LABELS = {
+    1: "Trabajando",
+    2: "Buscando empleo",
+    3: "Estudiando",
+    4: "Oficios del hogar",
+    5: "Incapacitado",
+    6: "Pensionado",
+    7: "Ocio",
+    8: "Otra actividad",
+}
+
+REGIMEN_SALUD_LABELS = {
+    1: "Contributivo",
+    2: "Especial",
+    3: "Subsidiado",
+    9: None,  # No sabe / No informa → NaN
+}
+
 
 def clean_positive_numeric(
     series: pd.Series,
@@ -100,20 +121,26 @@ def load_model_sources(
     base_path: Path = BASE_PATH,
     personas_path: Path = PERSONAS_PATH,
     d2_path: Path = D2_PATH,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Load the three sources required for the modeling base."""
+    g_path: Path = G_PATH,
+    d_path: Path = D_PATH,
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    """Load all sources required for the modeling base."""
     base = pd.read_excel(base_path)
     personas = pd.read_csv(personas_path)
     d2 = pd.read_csv(d2_path)
-    return base, personas, d2
+    g = pd.read_csv(g_path)
+    d = pd.read_csv(d_path)
+    return base, personas, d2, g, d
 
 
 def merge_model_sources(
     base: pd.DataFrame,
     personas: pd.DataFrame,
     d2: pd.DataFrame,
+    g: pd.DataFrame | None = None,
+    d: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
-    """Merge consumption, person and education data using shared keys."""
+    """Merge consumption, person, education and extended socio-behavioral data."""
     base = base.rename(
         columns={
             "id_hogar": "directorio",
@@ -128,7 +155,32 @@ def merge_model_sources(
 
     merged = base.merge(personas[personas_columns], on=KEY_COLUMNS, how="left", validate="one_to_one")
     merged = merged.merge(d2[d2_columns], on=KEY_COLUMNS, how="left", validate="one_to_one")
+
+    # Capítulo G: red social, actitud, percepción de riesgo
+    if g is not None:
+        g_cols = KEY_COLUMNS + ["g_01", "g_02", "g_04", "g_09"]
+        merged = merged.merge(g[g_cols], on=KEY_COLUMNS, how="left")
+
+    # Capítulo D: situación laboral, régimen de salud, salud mental, percepción riesgo marihuana
+    if d is not None:
+        d_cols = KEY_COLUMNS + ["d_02", "d_07", "d_09", "d_10", "d_11_f", "d_11_g"]
+        merged = merged.merge(d[d_cols], on=KEY_COLUMNS, how="left")
+
     return merged
+
+
+def _recode_binary_yesno(series: pd.Series) -> pd.Series:
+    """Recodifica variables 1=Sí/2=No a 1/0. Trata 9=NS/NR como NaN."""
+    s = pd.to_numeric(series, errors="coerce")
+    s = s.where(s != 9, other=np.nan)  # 9 = No sabe → NaN
+    return (s == 1).astype(float).where(s.notna(), other=np.nan)
+
+
+def _recode_risk_perception(series: pd.Series) -> pd.Series:
+    """Percepción de riesgo ordinal: 1=ningún riesgo … 4=gran riesgo.
+    Devuelve entero 1-4; 5=No sé → NaN."""
+    s = pd.to_numeric(series, errors="coerce")
+    return s.where(s.between(1, 4))
 
 
 def build_propensity_dataset(
@@ -137,8 +189,17 @@ def build_propensity_dataset(
     strict_target_validation: bool = False,
     raw_k_path: Path | None = RAW_K_PATH,
 ) -> pd.DataFrame:
-    """Build the working dataset used for EDA and benchmark models."""
-    base, personas, d2 = load_model_sources()
+    """Build the working dataset used for EDA and benchmark models.
+
+    Fuentes integradas:
+    - base_consumo_drogas_colombia_limpia.xlsx  (target + consumo + precio)
+    - personas_processed.csv                   (sexo, edad)
+    - d2_capitulos.csv                         (educación, hijos, estado civil)
+    - g_capitulos.csv                          (red social, actitud, cannabis medicinal)
+    - d_capitulos.csv                          (actividad laboral, régimen salud,
+                                                salud mental PHQ-2, percepción riesgo)
+    """
+    base, personas, d2, g, d = load_model_sources()
 
     if validate_target:
         raw_k_df = pd.read_csv(raw_k_path) if raw_k_path and raw_k_path.exists() else None
@@ -153,43 +214,69 @@ def build_propensity_dataset(
                     "y corrige inconsistencias antes de modelar."
                 )
 
-    df = merge_model_sources(base, personas, d2)
+    df = merge_model_sources(base, personas, d2, g, d)
 
+    # ---- Target ----
     df["propension_12m"] = recode_propensity_target(df["consumo_12m"])
     df["consumo_12m_missing_original"] = df["consumo_12m"].isna().astype(int)
 
+    # ---- Variables originales de consumo/precio ----
     df["precio_compra"] = clean_positive_numeric(df["precio_compra"])
     df["cantidad_consumo"] = clean_positive_numeric(df["cantidad_consumo"])
     df["gasto_valor"] = clean_positive_numeric(df["gasto_valor"])
 
+    # ---- Demográficas base ----
     df["edad"] = pd.to_numeric(df["edad"], errors="coerce").where(lambda s: s.between(10, 108))
     df["edad_cuadrado"] = df["edad"] ** 2
     df["sexo_label"] = df["sexo"].map(SEX_LABELS)
     df["educacion_label"] = df["d2_05"].map(EDUCATION_LABELS)
     df["educacion_grupo"] = recode_education_group(df["d2_05"])
     df["log_precio_compra"] = np.log(df["precio_compra"])
+    df["n_hijos"] = pd.to_numeric(df["d2_04"], errors="coerce").clip(lower=0)
+
+    # ---- Nuevas features: red social y actitud (capítulo G) ----
+    # G_01: ¿Tiene familiares cercanos que consuman drogas? (1=Sí → 1, 2=No → 0)
+    df["familiares_consumen"] = _recode_binary_yesno(df["g_01"])
+    # G_02: ¿Tiene amigos que consuman drogas? (1=Sí → 1, 2=No → 0)
+    df["amigos_consumen"] = _recode_binary_yesno(df["g_02"])
+    # G_04: Si tuviera oportunidad, ¿probaría alguna sustancia? (1=Sí → 1, 2=No → 0)
+    df["probaria_sustancias"] = _recode_binary_yesno(df["g_04"])
+    # G_09: ¿Ha usado cannabis medicinal? (1=Sí → 1, 2=No → 0)
+    df["cannabis_medicinal"] = _recode_binary_yesno(df["g_09"])
+
+    # ---- Nuevas features: situación laboral y régimen de salud (capítulo D) ----
+    # D_02: Actividad la semana pasada (1=trabajando … 8=otra actividad) → categórica
+    d2_act = pd.to_numeric(df["d_02"], errors="coerce")
+    df["actividad_laboral"] = d2_act.map(ACTIVIDAD_LABELS)
+    # D_07: Régimen salud (1=contributivo, 2=especial, 3=subsidiado, 9→NaN) → ordinal proxy SES
+    d7 = pd.to_numeric(df["d_07"], errors="coerce")
+    d7 = d7.where(d7 != 9, other=np.nan)
+    df["regimen_salud"] = d7.map(REGIMEN_SALUD_LABELS)
+
+    # ---- Nuevas features: salud mental PHQ-2 (capítulo D) ----
+    # D_09: ¿Se ha sentido deprimido los últimos 30 días?
+    df["sintomas_depresivos"] = _recode_binary_yesno(df["d_09"])
+    # D_10: ¿Ha sentido poco interés o placer al hacer cosas habituales?
+    df["anhedonia"] = _recode_binary_yesno(df["d_10"])
+
+    # ---- Nuevas features: percepción de riesgo de marihuana (capítulo D) ----
+    # D_11_F: riesgo fumar marihuana ocasionalmente (1=ningún … 4=gran riesgo)
+    df["riesgo_marihuana_ocasional"] = _recode_risk_perception(df["d_11_f"])
+    # D_11_G: riesgo fumar marihuana frecuentemente
+    df["riesgo_marihuana_frecuente"] = _recode_risk_perception(df["d_11_g"])
 
     ordered_columns = [
-        "directorio",
-        "secuencia_encuesta",
-        "secuencia_p",
-        "orden",
-        "propension_12m",
-        "consumo_12m",
-        "consumo_12m_missing_original",
-        "precio_compra",
-        "log_precio_compra",
-        "cantidad_consumo",
-        "gasto_valor",
-        "sexo",
-        "sexo_label",
-        "edad",
-        "edad_cuadrado",
-        "d2_05",
-        "educacion_label",
-        "educacion_grupo",
-        "frecuencia_consumo",
-        "facil_marihuana",
+        "directorio", "secuencia_encuesta", "secuencia_p", "orden",
+        "propension_12m", "consumo_12m", "consumo_12m_missing_original",
+        "precio_compra", "log_precio_compra", "cantidad_consumo", "gasto_valor",
+        "sexo", "sexo_label", "edad", "edad_cuadrado",
+        "d2_05", "educacion_label", "educacion_grupo",
+        "n_hijos",
+        "familiares_consumen", "amigos_consumen", "probaria_sustancias", "cannabis_medicinal",
+        "actividad_laboral", "regimen_salud",
+        "sintomas_depresivos", "anhedonia",
+        "riesgo_marihuana_ocasional", "riesgo_marihuana_frecuente",
+        "frecuencia_consumo", "facil_marihuana",
     ]
     extra_columns = [column for column in df.columns if column not in ordered_columns]
     df = df[ordered_columns + extra_columns]
