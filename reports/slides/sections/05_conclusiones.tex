@@ -4,11 +4,12 @@
 \begin{frame}
 \frametitle{Hallazgos clave}
 \begin{enumerate}
-    \item El benchmark MCO/Probit alcanza AUC-ROC = 0.7232. Es un piso difícil de superar con sólo 4 \textit{features}.
-    \item Los modelos ML por defecto \textit{no} superan al benchmark.
-    \item El \textbf{GBM tuneado} sí lo hace: AUC = \textbf{0.7278}, F1 = \textbf{0.6129}.
-    \item SHAP: edad + edad² $\approx 77\%$ de la importancia. Modelo \emph{honestamente delgado}.
-    \item Robustez Y alternativa: relaciones estructurales estables.
+    \item Benchmark MCO/Probit: AUC-ROC = 0.7232 con 4 variables. Referencia sólida.
+    \item ML por defecto \textit{no} supera al benchmark con el mismo feature set.
+    \item \textbf{GBM tuneado} (4 feat.): AUC = \textbf{0.7278}, F1 = \textbf{0.6129} — tuning necesario.
+    \item \textbf{Feature set ampliado} a 16 variables: red social, actitud, PHQ-2, percepción de riesgo, situación laboral.
+    \item SHAP sobre modelo ampliado: distribución de importancia más diversificada y económicamente más rica.
+    \item Robustez con Y estricta (K\_03=1): relaciones estructurales estables.
 \end{enumerate}
 \end{frame}
 
@@ -16,8 +17,9 @@
 \frametitle{Lecciones metodológicas}
 \begin{itemize}
     \item La flexibilidad sin regularización introduce varianza que opaca la ganancia de sesgo.
-    \item El \textit{tuning} disciplinado importa más que el algoritmo en datos chicos.
-    \item La interpretabilidad no es opcional: define qué tan utilizable es el modelo para política.
+    \item El \textit{tuning} disciplinado importa más que el algoritmo en muestras moderadas.
+    \item Ampliar el \textit{feature set} con variables teóricamente justificadas (red social, percepción de riesgo) es complementario al tuning, no sustituto.
+    \item La interpretabilidad no es opcional: define qué tan utilizable es el modelo para política pública.
     \item Documentar limitaciones (Y discrepante, submuestra con precio) es parte del trabajo, no un anexo.
 \end{itemize}
 \end{frame}
@@ -26,9 +28,9 @@
 \frametitle{Próximos pasos}
 \begin{itemize}
     \item Reconciliar la construcción de \texttt{consumo\_12m} con \texttt{K\_03} directo.
-    \item Ampliar el \textit{feature set} con variables de entorno (geografía, red social, ingreso del hogar).
-    \item Estimar elasticidad-precio con un diseño que corrija el sesgo de selección.
-    \item Acoplar el modelo de propensión con proyecciones poblacionales del DANE para simulación tributaria.
+    \item Estimar elasticidad-precio con un diseño que corrija el sesgo de selección de la submuestra.
+    \item Incorporar variables geográficas (departamento, zona urbana/rural) si se dispone de versión no anonimizada.
+    \item Estimar modelo de dos etapas (\textit{hurdle model}): decisión de consumir + intensidad del consumo, para conectar directamente con la simulación de recaudo tributario.
 \end{itemize}
 \end{frame}
 
@@ -38,6 +40,6 @@
 \vspace{0.6cm}
 \\[0.4cm]
 \normalsize
-\textit{Tupaz, Quintero, Rodrigues — Universidad EAFIT}\\
-\textit{Profesora supervisora: Paula María Almonacid Hurtado}
+\textit{Tupaz, Quintero, Rodrigues — Universidad EAFIT}\\[0.2cm]
+\textit{Profesores: Paula María Almonacid Hurtado \& Carlos Alberto Cerro Espinal}
 \end{frame}

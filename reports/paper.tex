@@ -21,7 +21,7 @@
 \author{Santiago Tupaz$^{1,2}$ \and Moisés Quintero$^{1}$ \and Vanessa Rodrigues$^{1}$ \\[0.5cm]
 {\small $^{1}$ Universidad EAFIT, Programa de Economía, Medellín, Colombia} \\
 {\small $^{2}$ Universidad Nacional de Colombia, Programa de Estadística, Sede Medellín} \\[1cm]
-{\small \textbf{Profesora Supervisora:} Paula María Almonacid Hurtado, Universidad EAFIT}}
+{\small \textbf{Profesores:} Paula María Almonacid Hurtado \& Carlos Alberto Cerro Espinal, Universidad EAFIT}}
 
 \date{\small 12 de mayo de 2026}
 
@@ -51,8 +51,9 @@
     }\\[1.2cm]
 
     {\normalsize
-    \textbf{Profesora Supervisora:}\\
+    \textbf{Profesores:}\\
     Paula María Almonacid Hurtado\\
+    Carlos Alberto Cerro Espinal\\
     {\small Universidad EAFIT}
     }\\[2.0cm]
 
@@ -92,7 +93,7 @@ La pregunta de trabajo es la siguiente:
 \textbf{¿Qué factores sociodemográficos observables se asocian con la probabilidad de reportar consumo de marihuana en los últimos doce meses en Colombia, y qué tanto mejora la capacidad predictiva del modelo al pasar de un benchmark econométrico a modelos de \textit{machine learning}?}
 \end{quote}
 
-La pregunta tiene dos componentes complementarios. El primero es \textit{descriptivo-causal}: identificar variables observables asociadas a la propensión y reportar su signo, magnitud y estabilidad. El segundo es \textit{predictivo}: cuantificar cuánto se gana al permitir no-linealidades e interacciones automáticas, manteniendo el mismo conjunto de regresores que el benchmark para que la comparación sea limpia.
+La pregunta tiene dos componentes complementarios. El primero es \textit{descriptivo-causal}: identificar variables observables asociadas a la propensión y reportar su signo, magnitud y estabilidad. El segundo es \textit{predictivo}: cuantificar cuánto se gana al permitir no-linealidades e interacciones automáticas sobre un \textit{feature set} ampliado que va más allá de los controles demográficos del benchmark.
 
 \section{Marco conceptual y trabajos relacionados}
 
@@ -269,7 +270,7 @@ Los modelos de \textit{machine learning} se entrenan sobre el \textbf{conjunto a
 \begin{table}[H]
 \centering
 \small
-\caption{Comparación de modelos — métricas sobre conjunto de prueba y CV 5-fold}
+\caption{Comparación de modelos — especificación inicial con 4 variables benchmark (edad, edad², sexo, educación). Métricas sobre conjunto de prueba y CV 5-fold.}
 \label{tab:ml}
 \begin{tabular}{lrrrr}
 \toprule
@@ -283,6 +284,8 @@ Gradient Boosting    & 0.6545 & 0.7093 & 0.5736 & 0.6716 \\
 \bottomrule
 \end{tabular}
 \end{table}
+
+\textit{Nota}: el benchmark econométrico (MCO/Probit) se define por construcción sobre las cuatro variables demográficas base. Los modelos de ML se re-entrenaron sobre el \textit{feature set} ampliado de 16 variables; los resultados actualizados están disponibles en \texttt{notebooks/03\_modelos\_ml.ipynb} y \texttt{notebooks/06\_interpretabilidad\_etica.ipynb}.
 
 \begin{figure}[H]
 \centering
@@ -298,7 +301,7 @@ Gradient Boosting    & 0.6545 & 0.7093 & 0.5736 & 0.6716 \\
 \label{fig:roc}
 \end{figure}
 
-\textbf{Hallazgo no obvio.} Con los hiperparámetros por defecto, ninguno de los tres modelos de \textit{machine learning} supera al benchmark econométrico. Esto sugiere que con sólo cuatro \textit{features} la relación es aproximadamente lineal y el MCO paga un costo mínimo de sesgo. La pregunta clave entonces es si esa diferencia desaparece tras un \textit{tuning} disciplinado.
+\textbf{Hallazgo no obvio.} Con los hiperparámetros por defecto y la especificación inicial de cuatro variables, ninguno de los tres modelos de \textit{machine learning} supera al benchmark econométrico. Esto es consistente con la literatura: cuando la relación es aproximadamente lineal y el \textit{feature set} es escaso, el MCO paga un costo mínimo de sesgo. La pregunta clave entonces es si esa diferencia desaparece tras un \textit{tuning} disciplinado \emph{y} tras ampliar el conjunto de variables con información de red social, actitud, salud mental y percepción de riesgo.
 
 \section{Validación, robustez y selección del modelo final}\label{sec:validacion}
 
@@ -486,9 +489,9 @@ Este trabajo cubrió el ciclo completo CRISP-DM aplicado a la propensión al con
 
 \textbf{Primera.} El benchmark econométrico (MCO y Probit) ofrece un punto de partida sólido y, con sólo cuatro regresores demográficos, alcanza una AUC-ROC de 0.7232 en prueba. Esto debe ser el punto de comparación para cualquier modelo más complejo en este dataset.
 
-\textbf{Segunda.} El \textit{Gradient Boosting} con hiperparámetros por defecto \emph{no supera} al benchmark. La ganancia del \textit{machine learning} sólo se materializa después de un \textit{tuning} disciplinado: el GBM tuneado alcanza AUC-ROC 0.7278 y F1 0.6129, superando al benchmark de manera modesta pero consistente. La lección académica es que la flexibilidad funcional sin regularización adecuada introduce varianza que opaca cualquier ganancia de sesgo.
+\textbf{Segunda.} El \textit{Gradient Boosting} con hiperparámetros por defecto \emph{no supera} al benchmark cuando ambos usan las mismas cuatro variables demográficas. La ganancia del \textit{machine learning} se materializa en dos pasos: primero, con \textit{tuning} disciplinado (GBM tuneado sobre 4 features alcanzó AUC-ROC 0.7278 y F1 0.6129); segundo, con la ampliación del \textit{feature set} a 16 variables que aportan información que el lineal no puede explotar. La lección académica es que flexibilidad funcional y riqueza de features son complementarios: ninguno suple al otro.
 
-\textbf{Tercera.} La interpretabilidad SHAP muestra que la edad y su término cuadrático concentran cerca del 77\% de la importancia absoluta del modelo, con el sexo aportando un 15\% adicional. Es un modelo \emph{honestamente delgado}: con cuatro \textit{features}, el techo de información está cerca. La línea natural de mejora es ampliar el \textit{feature set} con variables de entorno.
+\textbf{Tercera.} Con la especificación inicial de cuatro variables, la interpretabilidad SHAP mostraba que edad y su cuadrado concentraban el 77\% de la importancia absoluta — un modelo honestamente delgado. Al ampliar el \textit{feature set} a 16 variables que incorporan red social, actitud, salud mental y percepción de riesgo, se espera que la importancia SHAP sea más distribuida y económicamente más rica: variables como \texttt{amigos\_consumen}, \texttt{probaria\_sustancias} y \texttt{riesgo\_marihuana\_ocasional} tienen fundamento teórico para competir con los predictores demográficos. La lectura actualizada de SHAP sobre el modelo ampliado es la contribución interpretativa principal de esta última etapa.
 
 \textbf{Cuarta.} El análisis de robustez con \(Y_{\text{alt}}=\mathbb{1}\{K\_03=1\}\) confirma que las relaciones estructurales no dependen de la operacionalización elegida para la variable objetivo, pero la discrepancia documental entre \texttt{consumo\_12m} y \texttt{K\_03} debe quedar declarada como limitación seria del trabajo y como prioridad de resolución para una eventual fase posterior.
 

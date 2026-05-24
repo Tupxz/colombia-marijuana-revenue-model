@@ -2,7 +2,7 @@
 \section{Resultados}
 
 \begin{frame}
-\frametitle{Tabla comparativa — benchmark vs.\ ML}
+\frametitle{Benchmark vs.\ ML — especificación inicial (4 variables)}
 \centering
 \scriptsize
 \begin{tabular}{lrrrr}
@@ -15,12 +15,14 @@ Random Forest        & 0.6533 & 0.7063 & 0.5763 & 0.6674 \\
 XGBoost              & 0.6432 & 0.7001 & 0.5610 & 0.6614 \\
 Gradient Boosting    & 0.6545 & 0.7093 & 0.5736 & 0.6716 \\
 \midrule
-\textbf{GBM tuneado} & \textbf{0.6621} & \textbf{0.7278} & \textbf{0.6129} & \textbf{0.6756} \\
+\textbf{GBM tuneado (4 feat.)} & \textbf{0.6621} & \textbf{0.7278} & \textbf{0.6129} & \textbf{0.6756} \\
 \bottomrule
 \end{tabular}
-\vspace{0.3cm}
+\vspace{0.2cm}
 \\
-\small \textbf{Hallazgo no obvio}: con hiperparámetros por defecto el ML \textit{no} supera al benchmark. La ganancia aparece tras un \textit{tuning} disciplinado.
+\small \textbf{Hallazgo}: con hiperparámetros por defecto el ML \textit{no} supera al benchmark. La ganancia aparece tras \textit{tuning} + ampliación de features.
+\\[0.1cm]
+\tiny \textit{Nota}: MCO/Probit se define sobre 4 variables. Los ML re-entrenados con 16 variables están en los notebooks actualizados.
 \end{frame}
 
 \begin{frame}

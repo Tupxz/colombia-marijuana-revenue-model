@@ -2,27 +2,29 @@
 \section{Metodología}
 
 \begin{frame}
-\frametitle{Datos y fuentes}
+\frametitle{Datos y fuentes — 5 módulos integrados}
 \begin{columns}[T]
-\column{0.48\textwidth}
-\textbf{Base integrada}
+\column{0.52\textwidth}
+\textbf{Fuentes}
 \begin{itemize}
-\item \(n=3\,982\) individuos
-\item Base limpia de consumo (ENCSPA)
+\item Base limpia de consumo (cap. K)
 \item Módulo \texttt{personas} (sexo, edad)
-\item Módulo \texttt{d2} (educación)
+\item Módulo \texttt{d2} (educación, hijos)
+\item Módulo \texttt{g} (red social, actitud)
+\item Módulo \texttt{d} (laboral, salud, percepción)
 \end{itemize}
 
-\column{0.48\textwidth}
-\textbf{Cobertura clave}
+\column{0.44\textwidth}
+\textbf{Cobertura}
 \begin{itemize}
-\item Edad, sexo, educación: $\sim 100\%$
-\item \texttt{consumo\_12m}: 1\,719 unos
-\item Precio: 823 (submuestra exploratoria)
+\item \(n=3\,982\) individuos
+\item 16 features, 0\% nulos (salvo \texttt{regimen\_salud}: 11.2\%)
+\item \texttt{consumo\_12m}: 1\,719 positivos
+\item Precio: submuestra exploratoria ($n{\approx}755$)
 \end{itemize}
 \end{columns}
 \vspace{0.3cm}
-\textit{Decisión}: ML sobre la muestra amplia sin precio ($n=3\,980$).
+\textit{Decisión}: ML sobre la muestra amplia sin precio.
 \end{frame}
 
 \begin{frame}
@@ -58,6 +60,28 @@ con efectos marginales promedio.
 \end{frame}
 
 \begin{frame}
+\frametitle{Feature set ampliado — 16 variables}
+\centering
+\footnotesize
+\begin{tabular}{ll}
+\toprule
+\textbf{Grupo} & \textbf{Variables} \\
+\midrule
+Demográficas base & edad, edad², sexo, educación \\
+Estructura familiar & n\_hijos \\
+Red social (G\_01, G\_02) & familiares\_consumen, amigos\_consumen \\
+Actitud (G\_04, G\_09) & probaria\_sustancias, cannabis\_medicinal \\
+Situación socioeconómica (D\_02, D\_07) & actividad\_laboral, regimen\_salud \\
+Salud mental PHQ-2 (D\_09, D\_10) & sintomas\_depresivos, anhedonia \\
+Percepción de riesgo (D\_11\_F, D\_11\_G) & riesgo\_marihuana\_ocasional/frecuente \\
+\bottomrule
+\end{tabular}
+\vspace{0.3cm}
+\\
+\small Todos con 0\% de nulos salvo \texttt{regimen\_salud} (11.2\%). Categóricas con \textit{one-hot encoding}.
+\end{frame}
+
+\begin{frame}
 \frametitle{Modelos de Machine Learning}
 \begin{itemize}
     \item \textbf{Random Forest}: \textit{bagging}, 300 árboles, \texttt{max\_depth=7}.
@@ -67,7 +91,7 @@ con efectos marginales promedio.
 \vspace{0.3cm}
 \textbf{Reglas de comparación}:
 \begin{itemize}
-    \item Mismo \textit{feature set} que el benchmark (edad, edad², sexo, educación).
+    \item \textit{Feature set} ampliado de 16 variables (ver tabla anterior).
     \item Mismo \texttt{train/test split} estratificado (\texttt{random\_state=42}).
     \item Métricas: Accuracy, AUC-ROC, F1, CV AUC (5 y 10 folds).
 \end{itemize}

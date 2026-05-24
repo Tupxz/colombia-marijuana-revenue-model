@@ -19,12 +19,13 @@ La importancia global es $\text{Imp}_j = \mathbb{E}[\,|\phi_j|\,]$.
 \end{frame}
 
 \begin{frame}
-\frametitle{Importancia SHAP — global}
+\frametitle{Importancia SHAP — global (modelo ampliado)}
 \centering
 \includegraphics[width=0.78\textwidth]{../figures/shap_bar.png}
 \\
 \vspace{0.2cm}
-\small \textbf{edad} + \textbf{edad²} concentran ${\sim}77\%$ de la importancia. Sexo: 15\%. Educación: 8\%.
+\small Con 4 features: edad + edad² ${\sim}77\%$, sexo 15\%, educación 8\% — modelo demográfico puro.\\
+Con 16 features: se espera que \texttt{amigos\_consumen}, \texttt{probaria\_sustancias} y \texttt{riesgo\_marihuana\_ocasional} ganen peso. Ver notebook 06 para el análisis actualizado.
 \end{frame}
 
 \begin{frame}

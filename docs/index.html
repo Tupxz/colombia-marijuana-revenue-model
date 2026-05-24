@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Propensión al Consumo de Cannabis en Colombia — EAFIT 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green-dark:   #0d3b2e;
+      --green-mid:    #1a5c42;
+      --green-light:  #2d8a62;
+      --green-accent: #3eb882;
+      --green-pale:   #e8f5ee;
+      --gold:         #c9a84c;
+      --gold-light:   #f0d89a;
+      --text:         #1a1a1a;
+      --text-muted:   #5a6472;
+      --bg:           #fafaf8;
+      --card-bg:      #ffffff;
+      --border:       #e2e8e4;
+      --radius:       12px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(160deg, var(--green-dark) 0%, var(--green-mid) 60%, var(--green-light) 100%);
+      color: #fff;
+      padding: 80px 24px 72px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='1.5' fill='rgba(255,255,255,0.07)'/%3E%3C/svg%3E") repeat;
+    }
+    .hero-inner { position: relative; max-width: 860px; margin: 0 auto; }
+
+    .venue-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 5px 16px;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: clamp(1.8rem, 5vw, 2.9rem);
+      font-weight: 600;
+      line-height: 1.25;
+      margin-bottom: 28px;
+      letter-spacing: -0.01em;
+    }
+
+    .authors {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px 20px;
+      margin-bottom: 8px;
+    }
+    .author {
+      font-size: 1rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.92);
+    }
+    .affil {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 32px;
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--gold);
+      color: var(--green-dark);
+    }
+    .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); }
+    .btn-outline {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.35);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+    section { padding: 64px 0; }
+    section:nth-child(even) { background: var(--green-pale); }
+
+    h2 {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.65rem;
+      font-weight: 600;
+      color: var(--green-dark);
+      margin-bottom: 10px;
+    }
+    .section-line {
+      width: 48px;
+      height: 3px;
+      background: var(--green-accent);
+      border-radius: 2px;
+      margin-bottom: 32px;
+    }
+
+    p { margin-bottom: 1em; color: var(--text); }
+    p:last-child { margin-bottom: 0; }
+
+    /* ── ABSTRACT ── */
+    .abstract-box {
+      background: var(--card-bg);
+      border-left: 4px solid var(--green-accent);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      padding: 28px 32px;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.03rem;
+      line-height: 1.8;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    }
+
+    /* ── METRICS ── */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border-top: 3px solid var(--green-accent);
+      transition: transform 0.2s;
+    }
+    .metric-card:hover { transform: translateY(-3px); }
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--green-mid);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .metric-label {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 500;
+    }
+
+    /* ── PIPELINE ── */
+    .pipeline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      gap: 0;
+      margin: 8px 0;
+    }
+    .pipe-step {
+      flex: 1;
+      min-width: 140px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      text-align: center;
+      position: relative;
+    }
+    .pipe-step + .pipe-step { margin-left: 8px; }
+    .pipe-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      background: var(--green-mid);
+      color: #fff;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .pipe-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--green-dark);
+      margin-bottom: 6px;
+    }
+    .pipe-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* ── TABLE ── */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    thead th {
+      background: var(--green-dark);
+      color: #fff;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody td { padding: 11px 16px; color: var(--text); }
+    tbody tr:hover { background: var(--green-pale); }
+    .best { font-weight: 700; color: var(--green-mid); }
+    .tag-best {
+      display: inline-block;
+      background: var(--green-accent);
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    /* ── FIGURES ── */
+    .figures-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .fig-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .fig-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+    .fig-card img { width: 100%; display: block; background: #f4f4f4; }
+    .fig-caption {
+      padding: 14px 18px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      border-top: 1px solid var(--border);
+    }
+    .fig-caption strong { color: var(--green-dark); }
+
+    /* ── FEATURES ── */
+    .feat-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .feat-group {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border-left: 3px solid var(--green-accent);
+    }
+    .feat-group-title {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      font-weight: 700;
+      color: var(--green-mid);
+      margin-bottom: 10px;
+    }
+    .feat-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .feat-tag {
+      background: var(--green-pale);
+      color: var(--green-dark);
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      font-weight: 500;
+    }
+
+    /* ── ETHICS ── */
+    .ethics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .ethics-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .ethics-icon { font-size: 1.6rem; margin-bottom: 12px; }
+    .ethics-title { font-weight: 600; font-size: 0.95rem; color: var(--green-dark); margin-bottom: 8px; }
+    .ethics-text { font-size: 0.83rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* ── CITATION ── */
+    .citation-box {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      font-size: 0.82rem;
+      line-height: 1.7;
+      position: relative;
+      overflow: hidden;
+    }
+    .citation-box .kw { color: #89dceb; }
+    .citation-box .val { color: #a6e3a1; }
+    .copy-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255,255,255,0.1);
+      color: #cdd6f4;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--green-dark);
+      color: rgba(255,255,255,0.7);
+      text-align: center;
+      padding: 40px 24px;
+      font-size: 0.85rem;
+    }
+    footer a { color: var(--green-accent); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      padding: 0 24px;
+    }
+    .nav-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 52px;
+    }
+    .nav-logo { font-weight: 700; font-size: 0.88rem; color: var(--green-dark); }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a {
+      text-decoration: none;
+      font-size: 0.83rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--green-mid); }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .pipeline { flex-direction: column; }
+      .pipe-step + .pipe-step { margin-left: 0; margin-top: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav>
+  <div class="nav-inner">
+    <span class="nav-logo">Cannabis Tax · EAFIT 2026</span>
+    <div class="nav-links">
+      <a href="#abstract">Abstract</a>
+      <a href="#resultados">Resultados</a>
+      <a href="#shap">SHAP</a>
+      <a href="#metodologia">Metodología</a>
+      <a href="#etica">Ética</a>
+      <a href="#citar">Citar</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<header class="hero">
+  <div class="hero-inner">
+    <div class="venue-badge">EAFIT · Ciencia de los Datos · 2026</div>
+    <h1>Propensión al Consumo de Cannabis en Colombia:<br/>Benchmark Econométrico vs. Machine Learning</h1>
+    <div class="authors">
+      <span class="author">Luis Carlos Tupaz</span>
+      <span class="author">Santiago Quintero</span>
+      <span class="author">Rodrigues</span>
+    </div>
+    <p class="affil">Universidad EAFIT &nbsp;·&nbsp; Profesores: Paula M. Almonacid Hurtado &amp; Carlos A. Cerro Espinal</p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="../reports/paper.tex">
+        📄 Paper (LaTeX)
+      </a>
+      <a class="btn btn-outline" href="https://github.com" target="_blank">
+        &lt;/&gt; Código
+      </a>
+      <a class="btn btn-outline" href="../reports/slides/slides.pdf" target="_blank">
+        🎞 Slides
+      </a>
+      <a class="btn btn-outline" href="../notebooks/03_modelos_ml.ipynb" target="_blank">
+        📓 Notebook ML
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ══ ABSTRACT ══ -->
+<section id="abstract">
+  <div class="container">
+    <h2>Abstract</h2>
+    <div class="section-line"></div>
+    <div class="abstract-box">
+      <p>
+        Construimos un pipeline reproducible que compara un benchmark econométrico (MCO/Probit) con modelos de machine learning (Random Forest, XGBoost y Gradient Boosting Machine) para predecir la probabilidad individual de reportar consumo de marihuana en los últimos doce meses en Colombia. Utilizamos la Encuesta Nacional de Consumo de Sustancias Psicoactivas (ENCSPA), integrando cinco módulos: consumo (cap. K), datos demográficos, educación, red social y actitudes (cap. G), y situación laboral, salud mental y percepción de riesgo (cap. D). El feature set ampliado incluye 16 variables distribuidas en siete grupos teóricos.
+      </p>
+      <p>
+        Con cuatro variables, el benchmark MCO alcanza AUC-ROC de 0.7232. El GBM con hiperparámetros por defecto no supera este umbral; sólo tras <em>tuning</em> disciplinado (RandomizedSearchCV, 60 combinaciones × 5 folds) el GBM alcanza AUC-ROC = 0.7278 y F1 = 0.6129. La interpretabilidad via SHAP revela que con el modelo ampliado las variables de red social (<em>amigos_consumen</em>), actitud (<em>probaria_sustancias</em>) y percepción de riesgo ganan peso sustancial frente a las puramente demográficas. Un análisis de robustez con variable objetivo alternativa confirma la estabilidad de las relaciones estructurales. Se discuten sesgos, limitaciones éticas y usos responsables del modelo.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ KEY METRICS ══ -->
+<section id="resultados">
+  <div class="container">
+    <h2>Resultados Clave</h2>
+    <div class="section-line"></div>
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-value">0.7278</div>
+        <div class="metric-label">AUC-ROC<br/>GBM Tuneado</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">0.6129</div>
+        <div class="metric-label">F1 Score<br/>GBM Final</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">0.7232</div>
+        <div class="metric-label">AUC-ROC<br/>Benchmark MCO</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">3,982</div>
+        <div class="metric-label">Individuos<br/>en la muestra</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">16</div>
+        <div class="metric-label">Features<br/>modelo ampliado</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">300</div>
+        <div class="metric-label">Ajustes en<br/>búsqueda hiperpar.</div>
+      </div>
+    </div>
+
+    <!-- Results Table -->
+    <div style="margin-top: 40px;">
+      <h3 style="font-size:1.1rem; font-weight:600; color:var(--green-dark); margin-bottom:16px;">Comparación de modelos — especificación de 4 variables</h3>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Modelo</th>
+              <th>Accuracy</th>
+              <th>AUC-ROC</th>
+              <th>F1</th>
+              <th>CV AUC (5-fold)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>MCO (LPM)</td>
+              <td>0.6608</td>
+              <td>0.7232</td>
+              <td>0.5982</td>
+              <td>0.6728</td>
+            </tr>
+            <tr>
+              <td>Probit</td>
+              <td>0.6608</td>
+              <td>0.7228</td>
+              <td>0.5982</td>
+              <td>0.6728</td>
+            </tr>
+            <tr>
+              <td>Random Forest</td>
+              <td>0.6533</td>
+              <td>0.7063</td>
+              <td>0.5763</td>
+              <td>0.6674</td>
+            </tr>
+            <tr>
+              <td>XGBoost</td>
+              <td>0.6432</td>
+              <td>0.7001</td>
+              <td>0.5610</td>
+              <td>0.6614</td>
+            </tr>
+            <tr>
+              <td>Gradient Boosting</td>
+              <td>0.6545</td>
+              <td>0.7093</td>
+              <td>0.5736</td>
+              <td>0.6716</td>
+            </tr>
+            <tr style="background: #f0faf5;">
+              <td><strong>GBM Tuneado (4 feat.)</strong> <span class="tag-best">MEJOR</span></td>
+              <td class="best">0.6621</td>
+              <td class="best">0.7278</td>
+              <td class="best">0.6129</td>
+              <td class="best">0.6756</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:0.8rem; color:var(--text-muted); margin-top:10px;">
+        El ML por defecto <em>no</em> supera al benchmark. La ganancia aparece únicamente tras tuning disciplinado. Ver notebooks 05 y 06 para el análisis con 16 features.
+      </p>
+    </div>
+
+    <!-- Figures row -->
+    <div style="margin-top:40px;" class="figures-grid">
+      <div class="fig-card">
+        <img src="../reports/figures/comparacion_benchmark_ml.png" alt="Comparación Benchmark vs ML" loading="lazy" />
+        <div class="fig-caption"><strong>Fig. 1</strong> — Comparación visual de AUC-ROC entre el benchmark econométrico y los modelos ML, antes y después del tuning.</div>
+      </div>
+      <div class="fig-card">
+        <img src="../reports/figures/roc_gbm_tuned.png" alt="ROC GBM Tuneado" loading="lazy" />
+        <div class="fig-caption"><strong>Fig. 2</strong> — Curva ROC del GBM tuneado (AUC = 0.7278). Comparada con la referencia aleatoria.</div>
+      </div>
+      <div class="fig-card">
+        <img src="../reports/figures/cv_10fold_boxplot.png" alt="CV 10-fold" loading="lazy" />
+        <div class="fig-caption"><strong>Fig. 3</strong> — Distribución de AUC-ROC en validación cruzada de 10 pliegues. Solapamiento sustancial con el CV del benchmark antes del tuning.</div>
+      </div>
+      <div class="fig-card">
+        <img src="../reports/figures/curvas_aprendizaje.png" alt="Curvas de aprendizaje" loading="lazy" />
+        <div class="fig-caption"><strong>Fig. 4</strong> — Curvas de aprendizaje del GBM. Brecha train/validation como diagnóstico de overfitting.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SHAP ══ -->
+<section id="shap">
+  <div class="container">
+    <h2>Interpretabilidad SHAP</h2>
+    <div class="section-line"></div>
+    <p style="max-width:720px; margin-bottom:32px;">
+      Usando <strong>SHAP TreeExplainer</strong> (Lundberg &amp; Lee, 2017) descomponemos cada predicción como suma de contribuciones por variable:
+      <em>f(xᵢ) = φ₀ + Σⱼ φᵢⱼ</em>.
+      La importancia global es el valor absoluto esperado de cada contribución.
+      Con el modelo de 4 variables, edad+edad² concentran ~77% de la importancia. Al ampliar a 16 variables, <code>amigos_consumen</code>, <code>probaria_sustancias</code> y <code>riesgo_marihuana_ocasional</code> ganan peso sustancial.
+    </p>
+    <div class="figures-grid">
+      <div class="fig-card">
+        <img src="../reports/figures/shap_bar.png" alt="SHAP importancia global" loading="lazy" />
+        <div class="fig-caption"><strong>Fig. 5</strong> — Importancia SHAP global (modelo de referencia). Con 4 features: edad+edad² dominan (77%), sexo 15%, educación 8%.</div>
+      </div>
+      <div class="fig-card">
+        <img src="../reports/figures/shap_summary.png" alt="SHAP summary plot" loading="lazy" />
+        <div class="fig-caption"><strong>Fig. 6</strong> — SHAP summary plot. Distribución de valores individuales por variable: dirección e intensidad del efecto para cada observación.</div>
+      </div>
+      <div class="fig-card">
+        <img src="../reports/figures/shap_dependence_edad.png" alt="Dependencia SHAP edad" loading="lazy" />
+        <div class="fig-caption"><strong>Fig. 7</strong> — Dependencia parcial SHAP sobre edad. Relación no monótona: positiva en jóvenes, decae con la edad — forma funcional que el GBM captura mejor que el lineal.</div>
+      </div>
+    </div>
+
+    <!-- Robustness table -->
+    <div style="margin-top:40px;">
+      <h3 style="font-size:1.05rem; font-weight:600; color:var(--green-dark); margin-bottom:16px;">Análisis de robustez — Variable objetivo alternativa</h3>
+      <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:16px;">
+        La auditoría detectó que <code>consumo_12m</code> difiere de <code>K_03</code> en 898 casos. Se reentrenó el GBM tuneado con Y<sub>alt</sub> = 𝟙{K_03=1} para verificar estabilidad estructural.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Métrica</th><th>Y original</th><th>Y estricta</th><th>Δ</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>AUC-ROC (test)</td>
+              <td>0.7182</td>
+              <td>0.6870</td>
+              <td style="color:#b45309;">−0.031</td>
+            </tr>
+            <tr>
+              <td>CV AUC-10fold (media)</td>
+              <td>0.6685</td>
+              <td>0.6951</td>
+              <td style="color:var(--green-mid);">+0.027</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:0.82rem; color:var(--text-muted); margin-top:10px;">
+        <strong>Conclusión:</strong> las relaciones estructurales se mantienen; la discrepancia en la construcción de Y no domina el resultado.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ METHODOLOGY ══ -->
+<section id="metodologia">
+  <div class="container">
+    <h2>Metodología</h2>
+    <div class="section-line"></div>
+
+    <h3 style="font-size:1rem; font-weight:600; color:var(--green-dark); margin-bottom:20px;">Pipeline reproducible</h3>
+    <div class="pipeline">
+      <div class="pipe-step">
+        <div class="pipe-num">1</div>
+        <div class="pipe-title">Limpieza</div>
+        <div class="pipe-desc"><code>cannabis_tax.cli pipeline</code><br/>5 módulos ENCSPA integrados</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num">2</div>
+        <div class="pipe-title">EDA + Benchmark</div>
+        <div class="pipe-desc">Notebook 01<br/>MCO y Probit con HC1</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num">3</div>
+        <div class="pipe-title">Modelos ML</div>
+        <div class="pipe-desc">Notebook 03<br/>RF, XGBoost, GBM</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num">4</div>
+        <div class="pipe-title">Validación</div>
+        <div class="pipe-desc">Notebook 05<br/>CV-10, tuning, selección</div>
+      </div>
+      <div class="pipe-step">
+        <div class="pipe-num">5</div>
+        <div class="pipe-title">SHAP + Ética</div>
+        <div class="pipe-desc">Notebook 06<br/>Interpretabilidad y robustez</div>
+      </div>
+    </div>
+
+    <!-- Feature set -->
+    <h3 style="font-size:1rem; font-weight:600; color:var(--green-dark); margin: 40px 0 20px;">Feature set ampliado — 16 variables, 7 grupos</h3>
+    <div class="feat-groups">
+      <div class="feat-group">
+        <div class="feat-group-title">Demográficas base</div>
+        <div class="feat-tags">
+          <span class="feat-tag">edad</span>
+          <span class="feat-tag">edad²</span>
+          <span class="feat-tag">sexo</span>
+          <span class="feat-tag">educacion</span>
+        </div>
+      </div>
+      <div class="feat-group">
+        <div class="feat-group-title">Estructura familiar</div>
+        <div class="feat-tags">
+          <span class="feat-tag">n_hijos</span>
+        </div>
+      </div>
+      <div class="feat-group">
+        <div class="feat-group-title">Red social (G_01, G_02)</div>
+        <div class="feat-tags">
+          <span class="feat-tag">familiares_consumen</span>
+          <span class="feat-tag">amigos_consumen</span>
+        </div>
+      </div>
+      <div class="feat-group">
+        <div class="feat-group-title">Actitud (G_04, G_09)</div>
+        <div class="feat-tags">
+          <span class="feat-tag">probaria_sustancias</span>
+          <span class="feat-tag">cannabis_medicinal</span>
+        </div>
+      </div>
+      <div class="feat-group">
+        <div class="feat-group-title">Situación socioeconómica</div>
+        <div class="feat-tags">
+          <span class="feat-tag">actividad_laboral</span>
+          <span class="feat-tag">regimen_salud</span>
+        </div>
+      </div>
+      <div class="feat-group">
+        <div class="feat-group-title">Salud mental PHQ-2</div>
+        <div class="feat-tags">
+          <span class="feat-tag">sintomas_depresivos</span>
+          <span class="feat-tag">anhedonia</span>
+        </div>
+      </div>
+      <div class="feat-group">
+        <div class="feat-group-title">Percepción de riesgo</div>
+        <div class="feat-tags">
+          <span class="feat-tag">riesgo_marihuana_ocasional</span>
+          <span class="feat-tag">riesgo_marihuana_frecuente</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tuning details -->
+    <div style="margin-top:40px; display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:20px;">
+      <div style="background:var(--card-bg); border-radius:var(--radius); padding:24px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+        <h4 style="font-size:0.95rem; font-weight:600; color:var(--green-dark); margin-bottom:14px;">Hiperparámetros óptimos — GBM</h4>
+        <table style="font-size:0.85rem; box-shadow:none;">
+          <tbody>
+            <tr><td style="padding:5px 10px 5px 0; color:var(--text-muted);"><code>n_estimators</code></td><td style="padding:5px; font-weight:600;">157</td></tr>
+            <tr><td style="padding:5px 10px 5px 0; color:var(--text-muted);"><code>max_depth</code></td><td style="padding:5px; font-weight:600;">2</td></tr>
+            <tr><td style="padding:5px 10px 5px 0; color:var(--text-muted);"><code>learning_rate</code></td><td style="padding:5px; font-weight:600;">0.0422</td></tr>
+            <tr><td style="padding:5px 10px 5px 0; color:var(--text-muted);"><code>subsample</code></td><td style="padding:5px; font-weight:600;">0.972</td></tr>
+            <tr><td style="padding:5px 10px 5px 0; color:var(--text-muted);"><code>min_samples_leaf</code></td><td style="padding:5px; font-weight:600;">26</td></tr>
+            <tr><td style="padding:5px 10px 5px 0; color:var(--text-muted);"><code>max_features</code></td><td style="padding:5px; font-weight:600;">log2</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:0.78rem; color:var(--text-muted); margin-top:10px;">Patrón: árboles poco profundos + regularización fuerte → menor varianza.</p>
+      </div>
+      <div style="background:var(--card-bg); border-radius:var(--radius); padding:24px; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+        <h4 style="font-size:0.95rem; font-weight:600; color:var(--green-dark); margin-bottom:14px;">Lecciones metodológicas</h4>
+        <ul style="list-style:none; padding:0; font-size:0.85rem; color:var(--text-muted); line-height:1.8;">
+          <li>📐 Flexibilidad sin regularización introduce varianza que opaca la ganancia de sesgo</li>
+          <li>🎯 Tuning importa más que el algoritmo en muestras moderadas</li>
+          <li>🔗 Ampliar features con variables teóricamente justificadas es complementario, no sustituto</li>
+          <li>🔍 Interpretabilidad no es opcional en modelos de política pública</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ ETHICS ══ -->
+<section id="etica">
+  <div class="container">
+    <h2>Dimensión Ética</h2>
+    <div class="section-line"></div>
+    <p style="max-width:680px; margin-bottom:32px; color:var(--text-muted); font-size:0.95rem;">
+      El uso de modelos predictivos sobre comportamientos sensibles impone obligaciones éticas explícitas. Este trabajo adopta los principios de la <em>Responsible AI</em> aplicados al contexto de política de drogas.
+    </p>
+    <div class="ethics-grid">
+      <div class="ethics-card">
+        <div class="ethics-icon">⚖️</div>
+        <div class="ethics-title">Usos legítimos</div>
+        <div class="ethics-text">Caracterizar patrones de consumo para informar política de salud pública y simulaciones fiscales. No para vigilancia individual.</div>
+      </div>
+      <div class="ethics-card">
+        <div class="ethics-icon">🚫</div>
+        <div class="ethics-title">Usos prohibidos</div>
+        <div class="ethics-text">Identificación de individuos, perfilado discriminatorio, o cualquier uso en procesos de selección o penalización.</div>
+      </div>
+      <div class="ethics-card">
+        <div class="ethics-icon">📊</div>
+        <div class="ethics-title">Sesgos documentados</div>
+        <div class="ethics-text">Sesgo de auto-reporte en encuestas de sustancias. Submuestra con precio no representativa. Datos anonimizados sin variable geográfica.</div>
+      </div>
+      <div class="ethics-card">
+        <div class="ethics-icon">🔬</div>
+        <div class="ethics-title">Limitaciones del modelo</div>
+        <div class="ethics-text">Correlación ≠ causalidad. La discrepancia Y/K_03 (898 casos) está documentada y atendida con análisis de robustez.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CITATION ══ -->
+<section id="citar">
+  <div class="container">
+    <h2>Cómo citar</h2>
+    <div class="section-line"></div>
+    <div class="citation-box" id="citation-text">
+      <button class="copy-btn" onclick="copyCitation()">Copiar</button>
+<span class="kw">@techreport</span>{<span class="val">tupaz2026cannabis</span>,<br/>
+&nbsp;&nbsp;<span class="kw">title</span>  = {<span class="val">Propensión al Consumo de Cannabis en Colombia: Benchmark Econométrico vs. Machine Learning</span>},<br/>
+&nbsp;&nbsp;<span class="kw">author</span> = {<span class="val">Tupaz, Luis Carlos and Quintero, Santiago and Rodrigues</span>},<br/>
+&nbsp;&nbsp;<span class="kw">institution</span> = {<span class="val">Universidad EAFIT</span>},<br/>
+&nbsp;&nbsp;<span class="kw">year</span>   = {<span class="val">2026</span>},<br/>
+&nbsp;&nbsp;<span class="kw">note</span>   = {<span class="val">Ciencia de los Datos para las Finanzas, la Economía y los Negocios</span>}<br/>
+}
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <p style="margin-bottom:8px;">
+    <strong style="color:#fff;">Cannabis Tax · Colombia</strong> — Pipeline reproducible de propensión al consumo
+  </p>
+  <p>
+    Universidad EAFIT · 2026 ·
+    <a href="https://github.com" target="_blank">GitHub</a> ·
+    Datos: <a href="#" target="_blank">ENCSPA (Ministerio de Justicia)</a>
+  </p>
+</footer>
+
+<script>
+  function copyCitation() {
+    const text = `@techreport{tupaz2026cannabis,
+  title  = {Propensión al Consumo de Cannabis en Colombia: Benchmark Econométrico vs. Machine Learning},
+  author = {Tupaz, Luis Carlos and Quintero, Santiago and Rodrigues},
+  institution = {Universidad EAFIT},
+  year   = {2026},
+  note   = {Ciencia de los Datos para las Finanzas, la Economía y los Negocios}
+}`;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = '✓ Copiado';
+      setTimeout(() => btn.textContent = 'Copiar', 2000);
+    });
+  }
+
+  // Smooth appear on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.metric-card, .fig-card, .feat-group, .ethics-card, .pipe-step').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = 'opacity 0.45s ease, transform 0.45s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
