@@ -1,45 +1,73 @@
 % Conclusiones
 \section{Conclusiones}
 
+% ── Slide 1: Hallazgos ──
 \begin{frame}
-\frametitle{Hallazgos clave}
+\frametitle{Cuatro conclusiones sustantivas}
+\small
 \begin{enumerate}
-    \item Benchmark MCO/Probit: AUC-ROC = 0.7232 con 4 variables. Referencia sólida.
-    \item ML por defecto \textit{no} supera al benchmark con el mismo feature set.
-    \item \textbf{GBM tuneado} (4 feat.): AUC = \textbf{0.7278}, F1 = \textbf{0.6129} — tuning necesario.
-    \item \textbf{Feature set ampliado} a 16 variables: red social, actitud, PHQ-2, percepción de riesgo, situación laboral.
-    \item SHAP sobre modelo ampliado: distribución de importancia más diversificada y económicamente más rica.
-    \item Robustez con Y estricta (K\_03=1): relaciones estructurales estables.
+    \item \textbf{El benchmark es una restricción activa.} Probit con 4 variables: CV5 AUC = 0.6648. Ningún modelo ML con las mismas 4 variables lo supera de forma consistente.
+
+    \vspace{0.15cm}
+    \item \textbf{El \textit{tuning} es condición necesaria, no suficiente.} GBM tuneado (4 feat.): CV5 = 0.6714 — apenas $+0.007$ sobre el benchmark. El ML con pocas variables bien modeladas no tiene ventaja estructural sobre la regresión lineal.
+
+    \vspace{0.15cm}
+    \item \textbf{Las 16 variables y el RF Tuneado (regularizado) generalizan mejor.} CV5 AUC = \textbf{0.703} ($\pm 0.007$), superior al benchmark en $+0.038$ y al GBM tuneado de 4 variables en $+0.032$. Brecha \textit{train-test} = 0.060 — reducida desde 0.094 con regularización explícita (\texttt{max\_depth=15}, \texttt{min\_samples\_leaf=25}).
+
+    \vspace{0.15cm}
+    \item \textbf{El hallazgo interpretativo es el más valioso.} SHAP sobre RF Tuneado: \texttt{probaria\_sustancias} (17.1\%) y \texttt{amigos\_consumen} (16.2\%) alcanzan importancia comparable a \texttt{edad} (19.9\%). El sexo cae del 3\textsuperscript{er} al 6\textsuperscript{to} lugar. La red social y la actitud \textit{co-determinan} la propensión tanto como el ciclo de vida.
 \end{enumerate}
 \end{frame}
 
+% ── Slide 2: Lecciones metodológicas ──
 \begin{frame}
 \frametitle{Lecciones metodológicas}
 \begin{itemize}
-    \item La flexibilidad sin regularización introduce varianza que opaca la ganancia de sesgo.
-    \item El \textit{tuning} disciplinado importa más que el algoritmo en muestras moderadas.
-    \item Ampliar el \textit{feature set} con variables teóricamente justificadas (red social, percepción de riesgo) es complementario al tuning, no sustituto.
-    \item La interpretabilidad no es opcional: define qué tan utilizable es el modelo para política pública.
-    \item Documentar limitaciones (Y discrepante, submuestra con precio) es parte del trabajo, no un anexo.
+    \item \textbf{El \textit{tuning} importa más que el algoritmo} en muestras moderadas: la elección entre RF, XGBoost o GBM es secundaria respecto a su calibración adecuada.
+
+    \vspace{0.15cm}
+    \item \textbf{La riqueza de features es complementaria al tuning}, no sustituta. Ampliar el feature set con variables teóricamente justificadas cambia la estructura interpretativa y mejora la generalización (CV5).
+
+    \vspace{0.15cm}
+    \item \textbf{El CV AUC es más informativo que el AUC en prueba} cuando la muestra es moderada: la varianza de la partición puede enmascarar ganancias reales de generalización.
+
+    \vspace{0.15cm}
+    \item \textbf{La interpretabilidad no es decorativa}: sin SHAP, no habríamos detectado que el género cae 3 posiciones al controlar por la red social, validando la Teoría del Aprendizaje Social.
+
+    \vspace{0.15cm}
+    \item \textbf{Documentar limitaciones es parte del trabajo}: discrepancia Y/K\_03, nulos en \texttt{regimen\_salud}, ausencia de variables geográficas.
 \end{itemize}
 \end{frame}
 
+% ── Slide 3: Próximos pasos ──
 \begin{frame}
 \frametitle{Próximos pasos}
 \begin{itemize}
-    \item Reconciliar la construcción de \texttt{consumo\_12m} con \texttt{K\_03} directo.
-    \item Estimar elasticidad-precio con un diseño que corrija el sesgo de selección de la submuestra.
-    \item Incorporar variables geográficas (departamento, zona urbana/rural) si se dispone de versión no anonimizada.
-    \item Estimar modelo de dos etapas (\textit{hurdle model}): decisión de consumir + intensidad del consumo, para conectar directamente con la simulación de recaudo tributario.
+    \item \textbf{Reconciliar Y}: resolver las 898 discrepancias entre \texttt{consumo\_12m} y \texttt{K\_03} para eliminar el ruido en la variable objetivo.
+
+    \vspace{0.15cm}
+    \item \textbf{Imputar \texttt{regimen\_salud}} (11.2\% nulos) con imputación múltiple o modelo predictivo, recuperando $\sim$581 observaciones adicionales.
+
+    \vspace{0.15cm}
+    \item \textbf{Nuevo \textit{tuning} sobre 16 variables con $Y_{\text{alt}}$}: re-estimar el RF Tuneado con la variable objetivo reconciliada; el CV AUC mejoró $+0.027$ con la Y estricta en la especificación de 4 variables.
+
+    \vspace{0.15cm}
+    \item \textbf{Elasticidad-precio}: estimar con diseño que corrija el sesgo de selección de la submuestra con datos de precio ($n \approx 755$).
+
+    \vspace{0.15cm}
+    \item \textbf{Modelo \textit{hurdle}}: decisión de consumir + intensidad, para conectar directamente con la simulación de recaudo tributario.
 \end{itemize}
 \end{frame}
 
+% ── Slide 4: Cierre ──
 \begin{frame}[plain]
 \centering
 \Huge \textbf{Preguntas y discusión}
-\vspace{0.6cm}
+\vspace{0.8cm}
 \\[0.4cm]
 \normalsize
-\textit{Tupaz, Quintero, Rodrigues — Universidad EAFIT}\\[0.2cm]
+\textit{Santiago Tupaz \quad Moisés Quintero \quad Vanessa Rodrigues}\\[0.2cm]
+\textit{Universidad EAFIT}\\[0.4cm]
+\small
 \textit{Profesores: Paula María Almonacid Hurtado \& Carlos Alberto Cerro Espinal}
 \end{frame}

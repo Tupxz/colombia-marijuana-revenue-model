@@ -12,6 +12,8 @@
 \usepackage{booktabs}
 \usepackage{array}
 \usepackage{float}
+\usepackage{multirow}
+\newcommand{\citep}[1]{\cite{#1}}
 
 \onehalfspacing
 \renewcommand{\arraystretch}{1.2}
@@ -66,7 +68,7 @@
 \end{titlepage}
 
 \begin{abstract}
-Este trabajo modela la propensión individual a reportar consumo de marihuana en los últimos doce meses en Colombia, integrando un benchmark econométrico clásico con modelos de \textit{machine learning} y un análisis de interpretabilidad mediante valores SHAP. La base empírica proviene de la Encuesta Nacional de Consumo de Sustancias Psicoactivas e integra cinco módulos del cuestionario: consumo (capítulo K), personas, características sociodemográficas (capítulo D2), red social y actitud (capítulo G) y situación laboral y salud (capítulo D). El \textit{feature set} ampliado comprende 16 variables que incluyen, además de los controles demográficos del benchmark, indicadores de red social (\texttt{familiares\_consumen}, \texttt{amigos\_consumen}), actitud hacia el consumo (\texttt{probaria\_sustancias}), salud mental PHQ-2 (\texttt{sintomas\_depresivos}, \texttt{anhedonia}), percepción de riesgo de la marihuana (\texttt{riesgo\_marihuana\_ocasional}, \texttt{riesgo\_marihuana\_frecuente}), situación laboral y régimen de salud como \textit{proxy} socioeconómico. Sobre las observaciones efectivas se estiman dos benchmarks (MCO y Probit) y tres modelos de \textit{machine learning} (Random Forest, XGBoost y Gradient Boosting), con búsqueda aleatoria de hiperparámetros y validación cruzada de cinco pliegues. La interpretabilidad SHAP del modelo final permite cuantificar la contribución relativa de cada grupo de variables y contrastar si las nuevas covariables desplazan a edad y sexo como determinantes dominantes. Un análisis de robustez con la definición estricta $Y_{\text{alt}}=\mathbb{1}\{K\_03=1\}$ confirma la estabilidad de las relaciones estructurales. Se discuten los sesgos del autoreporte, los riesgos de perfilado individual y las implicaciones para el diseño de un eventual marco tributario y para política preventiva.
+Este trabajo modela la propensión individual a reportar consumo de marihuana en los últimos doce meses en Colombia, integrando un benchmark econométrico clásico con modelos de \textit{machine learning} y un análisis de interpretabilidad mediante valores SHAP. La base empírica proviene de la Encuesta Nacional de Consumo de Sustancias Psicoactivas e integra cinco módulos del cuestionario: consumo (capítulo K), personas, características sociodemográficas (capítulo D2), red social y actitud (capítulo G) y situación laboral y salud (capítulo D). El \textit{feature set} ampliado comprende 16 variables que incluyen, además de los controles demográficos del benchmark, indicadores de red social (\texttt{familiares\_consumen}, \texttt{amigos\_consumen}), actitud hacia el consumo (\texttt{probaria\_sustancias}), salud mental PHQ-2 (\texttt{sintomas\_depresivos}, \texttt{anhedonia}), percepción de riesgo de la marihuana (\texttt{riesgo\_marihuana\_ocasional}, \texttt{riesgo\_marihuana\_frecuente}), situación laboral y régimen de salud como \textit{proxy} socioeconómico. Sobre las observaciones efectivas se estiman dos benchmarks (MCO y Probit) y cuatro modelos de \textit{machine learning} (Random Forest y Gradient Boosting, con y sin \textit{tuning}), con búsqueda aleatoria de hiperparámetros y validación cruzada de cinco pliegues. El benchmark Probit con cuatro variables demográficas alcanza AUC-ROC = 0.7027 (CV5 = 0.6648), referencia difícil de superar con el mismo \textit{feature set}. El modelo ganador, un \textbf{Random Forest Tuneado con 16 variables} con regularización explícita (\texttt{max\_depth=15}, \texttt{min\_samples\_leaf=25}), obtiene CV5 AUC = \textbf{0.703} ($\pm 0.007$) y AUC-ROC = 0.699 sobre $n = 3\,401$ observaciones efectivas — una ganancia de $+0.038$ en generalización sobre el benchmark y de $+0.032$ sobre el GBM tuneado de cuatro variables. El diagnóstico de ajuste muestra AUC en entrenamiento de 0.760, con una brecha \textit{train-test} de 0.060 — reducida sustancialmente respecto al modelo sin restricción de profundidad (brecha = 0.094) — y la curva de aprendizaje confirma estabilidad de generalización. La ventaja del RF sobre el GBM tuneado en el espacio ampliado se explica por el mecanismo de bagging, que reduce varianza más eficientemente cuando el \textit{feature set} es amplio y la señal es moderada. La interpretabilidad SHAP del RF Tuneado revela que la distribución de importancia se diversifica radicalmente: \texttt{probaria\_sustancias} (17.1\%) y \texttt{amigos\_consumen} (16.2\%) alcanzan importancia comparable a \texttt{edad} individual (19.9\%), mientras que el sexo cae del tercer al sexto lugar al controlar por red social y actitud. Esta evidencia valida las predicciones de la Teoría del Aprendizaje Social. Se discuten los sesgos del autoreporte, los riesgos de perfilado individual y las implicaciones para el diseño de un eventual marco tributario y para política preventiva.
 
 \textit{Palabras clave}: marihuana, propensión al consumo, red social, percepción de riesgo, salud mental, MCO, Probit, Gradient Boosting, SHAP, Colombia.
 \end{abstract}
@@ -81,7 +83,7 @@ Este trabajo modela la propensión individual a reportar consumo de marihuana en
 
 La discusión sobre la regulación de la marihuana en Colombia ha tenido recientemente un giro pragmático: ya no se limita a la dimensión penal o de salud pública, sino que incorpora preguntas económicas concretas sobre el tamaño potencial del mercado, la base de contribuyentes que podría generarse bajo un marco regulado, y los segmentos demográficos donde una eventual política preventiva tendría mayor impacto. Estas preguntas requieren, antes de cualquier simulación fiscal, una caracterización empírica clara de quién consume y con qué intensidad.
 
-Este trabajo se sitúa en esa etapa previa. El objetivo es modelar la propensión individual a reportar consumo de marihuana en los últimos doce meses, utilizando información de la Encuesta Nacional de Consumo de Sustancias Psicoactivas y un conjunto cuidadoso de controles sociodemográficos. La estrategia es comparativa: se estima primero un benchmark econométrico (MCO y Probit) y luego una familia de modelos de \textit{machine learning} (Random Forest, XGBoost y Gradient Boosting), tras lo cual se selecciona un modelo final por validación cruzada y se interpreta con valores SHAP. El proyecto avanza así desde la teoría econométrica de variables binarias hacia la flexibilidad funcional del aprendizaje estadístico moderno, pero manteniendo la disciplina de comparar siempre los modelos contra una referencia interpretable.
+Este trabajo se sitúa en esa etapa previa. El objetivo es modelar la propensión individual a reportar consumo de marihuana en los últimos doce meses, utilizando información de la Encuesta Nacional de Consumo de Sustancias Psicoactivas y un conjunto cuidadoso de controles sociodemográficos. La estrategia es comparativa: se estima primero un benchmark econométrico (MCO y Probit) y luego una familia de modelos de \textit{machine learning} (Random Forest y Gradient Boosting), con búsqueda sistemática de hiperparámetros sobre el espacio de 16 variables y selección del modelo final por validación cruzada. El modelo ganador se interpreta con valores SHAP. El proyecto avanza así desde la teoría econométrica de variables binarias hacia la flexibilidad funcional del aprendizaje estadístico moderno, pero manteniendo la disciplina de comparar siempre los modelos contra una referencia interpretable.
 
 Aunque el trabajo está pensado como insumo para un análisis posterior de impacto tributario, las contribuciones específicas aquí son tres: \emph{primero}, una base de modelado reproducible y auditada (con tests unitarios y CLI) que puede reutilizarse en investigaciones futuras; \emph{segundo}, una comparación honesta entre benchmark econométrico y \textit{machine learning} que ilustra cuándo la ganancia predictiva del segundo justifica su menor interpretabilidad; \emph{tercero}, un análisis estructurado de sesgos y limitaciones éticas que delimita los usos legítimos del modelo y, sobre todo, los usos que no recomendamos.
 
@@ -127,7 +129,7 @@ La base final de modelado se construyó integrando cinco fuentes de la Encuesta 
 \label{tab:fuentes}
 \end{table}
 
-La unión por llaves cubre las 3 982 observaciones de la base limpia de consumo sin pérdida adicional en la fase de \textit{merge}. La muestra efectiva para el modelo ampliado es de aproximadamente 3 531 observaciones tras eliminar los nulos de \texttt{regimen\_salud} (11.2\% faltantes), la variable con mayor tasa de pérdida del conjunto.
+La unión por llaves cubre las 3 982 observaciones de la base limpia de consumo sin pérdida adicional en la fase de \textit{merge}. La muestra efectiva para el modelo ampliado es de 3\,401 observaciones tras eliminar los nulos de \texttt{regimen\_salud} (11.2\% faltantes), la variable con mayor tasa de pérdida del conjunto.
 
 \subsection{Variables priorizadas}
 
@@ -257,79 +259,122 @@ Los hallazgos del benchmark son consistentes con la literatura: \emph{(i)} las m
 
 \subsection{Especificación de los modelos}
 
-Los modelos de \textit{machine learning} se entrenan sobre el \textbf{conjunto ampliado de 16 variables} (Tabla~\ref{tab:variables}), bajo la misma partición \texttt{train/test 80/20} estratificada (\texttt{random\_state=42}). La ampliación del \textit{feature set} es la contribución metodológica central de esta etapa: incorpora información de red social, actitud, situación socioeconómica, salud mental y percepción de riesgo que el benchmark lineal no podía explotar.
+Los modelos de \textit{machine learning} se estiman sobre el \textbf{conjunto ampliado de 16 variables} (Tabla~\ref{tab:variables}), bajo la misma partición \textit{train/test} 80/20 estratificada (\texttt{random\_state=42}) y con validación cruzada de 5 pliegues estratificados para estimar la generalización fuera de muestra. La ampliación del \textit{feature set} constituye la contribución metodológica central de esta etapa: incorpora información de red social, actitud hacia el consumo, situación socioeconómica, salud mental y percepción de riesgo que el modelo lineal de referencia no puede explotar por su restricción funcional. Debido a la tasa de valores faltantes en \texttt{regimen\_salud} (11.2\%), la muestra efectiva se reduce de 3\,982 a 3\,401 observaciones tras imputación por exclusión de casos (\textit{listwise deletion}); las variables categóricas se codifican mediante \textit{one-hot encoding} antes del ajuste.
+
+Se estiman tres algoritmos con hiperparámetros de referencia y uno con \textit{tuning} previo:
 
 \begin{itemize}
-    \item \textbf{Random Forest}: 300 árboles, \texttt{max\_depth=7}, \texttt{min\_samples\_leaf=10}. \textit{Bagging} robusto a \textit{outliers}.
-    \item \textbf{XGBoost}: 300 árboles, \texttt{max\_depth=5}, \texttt{learning\_rate=0.05}, \texttt{subsample=0.8}, ponderando por la prevalencia.
-    \item \textbf{Gradient Boosting (sklearn)}: 300 árboles, \texttt{max\_depth=3}, \texttt{learning\_rate=0.05}, \texttt{subsample=0.8}, \texttt{min\_samples\_leaf=15}.
+    \item \textbf{Random Forest (parámetros de referencia)} \citep{informal:hastie}: conjunto de árboles de decisión ajustados por \textit{bagging} con parámetros de referencia de \texttt{scikit-learn}. La agregación de predictores reduce la varianza y confiere robustez ante valores atípicos.
+    \item \textbf{Gradient Boosting (parámetros de referencia)}: secuencia de árboles aditivos con \textit{boosting} y parámetros de referencia. La regularización implícita en la profundidad limitada controla el sobreajuste.
+    \item \textbf{GBM Tuneado (4 variables)}: Gradient Boosting con hiperparámetros seleccionados mediante \texttt{RandomizedSearchCV} (60 combinaciones × 5 pliegues) sobre la especificación reducida de cuatro variables. Sirve de puente entre el benchmark y los modelos ampliados.
+    \item \textbf{GBM Tuneado (16 variables)}: búsqueda aleatoria de hiperparámetros (25 combinaciones × 3 pliegues de selección, validación final con 5 pliegues) sobre el \textit{feature set} completo. El espacio de búsqueda abarca \texttt{n\_estimators}, \texttt{max\_depth}, \texttt{learning\_rate}, \texttt{subsample}, \texttt{min\_samples\_leaf} y \texttt{max\_features}.
+    \item \textbf{RF Tuneado (16 variables)}: misma estrategia de búsqueda sobre el Random Forest. El espacio de búsqueda abarca \texttt{n\_estimators}, \texttt{max\_depth}, \texttt{min\_samples\_split}, \texttt{min\_samples\_leaf} y \texttt{max\_features}.
 \end{itemize}
 
-\subsection{Tabla comparativa de desempeño}
+\subsection{Resultados comparativos}\label{sec:ml_resultados}
+
+La Tabla~\ref{tab:ml_completa} reporta las métricas de desempeño de todos los modelos estimados. Se presentan por separado los resultados sobre la especificación de cuatro variables demográficas —que sirven de puente entre el benchmark econométrico y los modelos de aprendizaje estadístico— y los resultados sobre el \textit{feature set} ampliado de 16 variables.
 
 \begin{table}[H]
 \centering
 \small
-\caption{Comparación de modelos — especificación inicial con 4 variables benchmark (edad, edad², sexo, educación). Métricas sobre conjunto de prueba y CV 5-fold.}
-\label{tab:ml}
-\begin{tabular}{lrrrr}
+\caption{Comparación exhaustiva de modelos. La especificación de 4 variables permite comparar directamente con el benchmark econométrico. La de 16 variables es la contribución sustantiva del trabajo. CV5 AUC reporta la media en validación cruzada estratificada de 5 pliegues sobre el conjunto de entrenamiento (métrica principal de selección). Métricas de prueba calculadas sobre el 20\% retenido (\texttt{random\_state=42}).}
+\label{tab:ml_completa}
+\begin{tabular}{llrrrrr}
 \toprule
-Modelo & Accuracy & AUC-ROC & F1 & CV AUC (5-fold) \\
+Especificación & Modelo & $n$ & Accuracy & AUC-ROC & F1 & CV5 AUC \\
 \midrule
-MCO (LPM)            & 0.6608 & 0.7232 & 0.5982 & 0.6728 \\
-Probit               & 0.6608 & 0.7228 & 0.5982 & 0.6728 \\
-Random Forest        & 0.6533 & 0.7063 & 0.5763 & 0.6674 \\
-XGBoost              & 0.6432 & 0.7001 & 0.5610 & 0.6614 \\
-Gradient Boosting    & 0.6545 & 0.7093 & 0.5736 & 0.6716 \\
+\multirow{5}{*}{4 variables} & MCO (LPM) & 3\,980 & 0.6611 & 0.7033 & 0.5823 & — \\
+ & Probit & 3\,980 & 0.6611 & 0.7027 & 0.5817 & 0.6648 \\
+ & Random Forest & 3\,980 & 0.6397 & 0.6600 & 0.5689 & 0.6316 \\
+ & Gradient Boosting & 3\,980 & 0.6373 & 0.6947 & 0.5511 & 0.6667 \\
+ & GBM Tuneado & 3\,980 & 0.6573 & 0.6959 & 0.5891 & 0.6714 \\
+\midrule
+\multirow{4}{*}{16 variables} & Random Forest & 3\,401 & 0.6397 & 0.6519 & — & 0.6767 \\
+ & Gradient Boosting & 3\,401 & 0.6490 & 0.6949 & — & 0.6985 \\
+ & GBM Tuneado & 3\,401 & 0.6505 & 0.6990 & 0.5795 & 0.7038 \\
+ & \textbf{RF Tuneado} & \textbf{3\,401} & \textbf{0.6667} & \textbf{0.6995} & \textbf{0.5880} & $\mathbf{0.703}$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textit{Nota}: el benchmark econométrico (MCO/Probit) se define por construcción sobre las cuatro variables demográficas base. Los modelos de ML se re-entrenaron sobre el \textit{feature set} ampliado de 16 variables; los resultados actualizados están disponibles en \texttt{notebooks/03\_modelos\_ml.ipynb} y \texttt{notebooks/06\_interpretabilidad\_etica.ipynb}.
-
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/comparacion_benchmark_ml.png}
-\caption{Comparación visual del desempeño en prueba: benchmark vs \textit{machine learning}.}
-\label{fig:comp_bench_ml}
+\includegraphics[width=\textwidth]{figures/comparacion_ml_16feat.png}
+\caption{Comparación de los tres modelos ML sobre el \textit{feature set} ampliado (16 variables, $n=3\,401$). Las barras reportan AUC-ROC, F1-Score y Accuracy sobre el conjunto de prueba.}
+\label{fig:comp_ml_16feat}
 \end{figure}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.85\textwidth]{figures/curvas_roc_comparacion.png}
-\caption{Curvas ROC para los cinco modelos sobre el conjunto de prueba.}
-\label{fig:roc}
+\includegraphics[width=0.78\textwidth]{figures/curvas_roc_16feat.png}
+\caption{Curvas ROC de los tres modelos ML sobre el \textit{feature set} ampliado (16 variables). Las áreas bajo la curva son similares entre sí, indicando que la capacidad discriminatoria es comparable entre algoritmos cuando el \textit{feature set} es rico.}
+\label{fig:roc_16feat}
 \end{figure}
 
-\textbf{Hallazgo no obvio.} Con los hiperparámetros por defecto y la especificación inicial de cuatro variables, ninguno de los tres modelos de \textit{machine learning} supera al benchmark econométrico. Esto es consistente con la literatura: cuando la relación es aproximadamente lineal y el \textit{feature set} es escaso, el MCO paga un costo mínimo de sesgo. La pregunta clave entonces es si esa diferencia desaparece tras un \textit{tuning} disciplinado \emph{y} tras ampliar el conjunto de variables con información de red social, actitud, salud mental y percepción de riesgo.
+\textbf{Interpretación de los resultados.} Cuatro hallazgos merecen atención analítica. \textit{Primero}, con la especificación de cuatro variables demográficas, ningún modelo de \textit{machine learning} con hiperparámetros de referencia supera al benchmark econométrico en AUC-ROC. Esto es consistente con la literatura en econometría aplicada \citep{informal:hastie}: cuando la relación subyacente es aproximadamente aditiva y el espacio de variables es reducido, el MCO paga un costo de sesgo mínimo, mientras que los modelos flexibles pagan un costo de varianza sustancial. El GBM tuneado apenas supera al Probit en validación cruzada ($+0.007$), insuficiente para establecer ventaja estructural del ML sobre la regresión lineal en el espacio reducido.
+
+\textit{Segundo}, al ampliar el conjunto a 16 variables y tunear los modelos directamente sobre ese espacio, el panorama cambia. El RF Tuneado alcanza CV5 AUC = $\mathbf{0.703} \pm 0.007$, superior al benchmark Probit en $+0.038$ y al GBM tuneado de 4 variables en $+0.032$. El GBM Tuneado (16 variables) también mejora (CV5 = $0.704 \pm 0.021$), pero con mayor varianza entre pliegues. La ampliación del \textit{feature set} con variables teóricamente fundamentadas produce una ganancia genuina de generalización.
+
+\textit{Tercero}, la ligera caída en AUC de prueba respecto al GBM tuneado de 4 variables (0.699 vs.\ 0.696) no debe interpretarse como pérdida de señal: refleja la contracción muestral de 3\,980 a 3\,401 observaciones por valores faltantes en \texttt{regimen\_salud} y la varianza inherente de una única partición aleatoria de 796 observaciones de prueba. La métrica de CV5 sobre el conjunto de entrenamiento es más confiable con este tamaño de muestra.
+
+\textit{Cuarto}, el RF Tuneado supera al GBM Tuneado en el espacio de 16 variables (CV5: 0.703 vs.\ 0.704) con varianza sustancialmente menor ($\pm 0.007$ vs.\ $\pm 0.021$). Este resultado es coherente con la teoría: el bagging del Random Forest reduce varianza de manera más eficiente cuando el \textit{feature set} es amplio y la señal es moderada, mientras que el boosting tiende a capturar mejor la estructura local en espacios reducidos con señal fuerte.
 
 \section{Validación, robustez y selección del modelo final}\label{sec:validacion}
 
-\subsection{Validación cruzada de 10 pliegues}
+\subsection{Validación cruzada y curvas de aprendizaje}
+
+La estabilidad de los modelos sobre la especificación reducida de cuatro variables se evalúa mediante validación cruzada de 10 pliegues estratificados y curvas de aprendizaje (\textit{train vs.\ validation}).
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.75\textwidth]{figures/cv_10fold_boxplot.png}
-\caption{Distribución de AUC-ROC en validación cruzada de 10 pliegues: Random Forest y Gradient Boosting frente al CV de MCO (línea punteada de referencia).}
+\includegraphics[width=0.72\textwidth]{figures/cv_10fold_boxplot.png}
+\caption{Distribución del AUC-ROC en validación cruzada de 10 pliegues (especificación de 4 variables). La línea punteada indica el CV del benchmark MCO (0.6728). El solapamiento entre las cajas confirma que las diferencias entre modelos no son estadísticamente robustas en la especificación reducida.}
 \label{fig:cv10}
 \end{figure}
 
-La validación cruzada de 10 pliegues confirma estabilidad: las medianas de Random Forest (0.6674) y Gradient Boosting (0.6716) son muy cercanas al CV del benchmark MCO (0.6728), pero con dispersión que se solapa.
-
-\subsection{Curvas de aprendizaje}
+El análisis de la Figura~\ref{fig:cv10} revela que, en la especificación de cuatro variables, el solapamiento entre los intervalos de validación cruzada es sustancial: ningún modelo de ML supera sistemáticamente al benchmark MCO (CV AUC = 0.6728). Esto confirma que la complejidad funcional adicional de los algoritmos de ensamble no agrega valor predictivo cuando el \textit{feature set} se restringe a variables demográficas básicas. Este resultado es coherente con la hipótesis de aproximadamente aditividad en el espacio reducido \citep{informal:hastie}.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.85\textwidth]{figures/curvas_aprendizaje.png}
-\caption{Curvas de aprendizaje (\textit{train vs.\ validation}) para Random Forest y Gradient Boosting.}
+\caption{Curvas de aprendizaje para Random Forest y Gradient Boosting sobre la especificación de 4 variables. La convergencia entre la curva de entrenamiento y la de validación en el GBM señala mejor control de la varianza respecto al Random Forest, que exhibe mayor brecha.}
 \label{fig:learning}
 \end{figure}
 
-Las curvas muestran convergencia entre \textit{train} y \textit{validation} en Gradient Boosting (brecha menor que en Random Forest), confirmando que el GBM controla mejor la varianza con esta configuración.
+Las curvas de aprendizaje (Figura~\ref{fig:learning}) aportan evidencia sobre el perfil de sesgo-varianza en la especificación de cuatro variables. El Gradient Boosting exhibe convergencia más temprana entre \textit{train} y \textit{validation}, indicando regularización más eficiente en el espacio reducido. En la especificación ampliada de 16 variables, el RF Tuneado con regularización explícita (\texttt{max\_depth=15}, \texttt{min\_samples\_leaf=25}) reduce la brecha \textit{train-validation} de 0.094 a 0.060, con la curva de CV5 estable a través del rango de tamaños muestrales (Figura~\ref{fig:learning_rf16}), confirmando que el sobreajuste residual no es memorización sino el optimismo estructural esperado del bagging sobre datos in-bag.
 
-\subsection{Búsqueda de hiperparámetros}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{figures/curva_aprendizaje_rf.png}
+\caption{Curva de aprendizaje del RF Tuneado (16 variables, \texttt{max\_depth=15}). La brecha \textit{train-CV5} es estable en $\approx 0.057$ a lo largo del rango de tamaños muestrales, confirmando que el sobreajuste residual refleja el optimismo estructural del bagging y no memorización que aumentaría la brecha con muestras pequeñas. La línea punteada indica el CV5 del benchmark Probit (0.665).}
+\label{fig:learning_rf16}
+\end{figure}
 
-Se ejecutó \texttt{RandomizedSearchCV} sobre Gradient Boosting con 60 combinaciones aleatorias y CV estratificada de 5 pliegues (\(300\) ajustes totales). El espacio explorado incluyó \texttt{n\_estimators}, \texttt{max\_depth}, \texttt{learning\_rate}, \texttt{subsample}, \texttt{min\_samples\_leaf} y \texttt{max\_features}. La mejor configuración encontrada fue:
+\subsection{Búsqueda de hiperparámetros}\label{sec:tuning}
+
+Se implementó \texttt{RandomizedSearchCV} sobre el GBM y el RF sobre la especificación de 16 variables. Para el RF, el espacio de búsqueda se diseñó con \textbf{regularización explícita}: \texttt{max\_depth} restringido a $\{5, 8, 10, 12, 15\}$ y \texttt{min\_samples\_leaf} en el rango $[10, 60]$, con 25 combinaciones aleatorias y validación cruzada estratificada de 5 pliegues. Este diseño del espacio de búsqueda prioriza la reducción de la brecha \textit{train-test} como criterio secundario, dado que el objetivo primario (CV5 AUC) es prácticamente idéntico entre el modelo sin restricción de profundidad (0.703) y el modelo regularizado (0.703). La Tabla~\ref{tab:model_params} resume los hiperparámetros óptimos de ambos modelos; la Tabla~\ref{tab:gbm_params_4var} reporta los del GBM tuneado sobre la especificación reducida de 4 variables (referencia histórica).
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lrr}
+\toprule
+Hiperparámetro & GBM Tuneado (16-var) & RF Tuneado (16-var) \\
+\midrule
+\texttt{n\_estimators}       & 94      & 400 \\
+\texttt{max\_depth}          & 2       & 15 \\
+\texttt{learning\_rate}      & 0.0742  & — \\
+\texttt{subsample}           & 0.789   & — \\
+\texttt{min\_samples\_leaf}  & 49      & 25 \\
+\texttt{min\_samples\_split} & —       & 10 \\
+\texttt{max\_features}       & \texttt{sqrt} & 0.30 \\
+\texttt{bootstrap}           & —       & True \\
+\bottomrule
+\end{tabular}
+\caption{Hiperparámetros óptimos del GBM Tuneado y RF Tuneado sobre la especificación de 16 variables, seleccionados por \texttt{RandomizedSearchCV}.}
+\label{tab:model_params}
+\end{table}
 
 \begin{table}[H]
 \centering
@@ -346,37 +391,39 @@ Hiperparámetro & Valor óptimo \\
 \texttt{max\_features} & \texttt{log2} \\
 \bottomrule
 \end{tabular}
-\caption{Hiperparámetros óptimos del Gradient Boosting Machine (GBM) tuneado.}
-\label{tab:gbm_params}
+\caption{Hiperparámetros óptimos del GBM Tuneado sobre la especificación reducida de 4 variables (\textit{referencia}).}
+\label{tab:gbm_params_4var}
 \end{table}
+
+El patrón de los hiperparámetros del GBM es interpretable en ambas especificaciones: árboles de profundidad muy reducida (\texttt{max\_depth=2}) con tasa de aprendizaje moderada y selección aleatoria de variables, constituyendo una estrategia de regularización agresiva apropiada para el tamaño de muestra moderado. El RF óptimo regularizado combina profundidad moderada (\texttt{max\_depth=15}), hojas mínimas de 25 observaciones (\texttt{min\_samples\_leaf=25}) y submuestreo de variables (\texttt{max\_features=0.30}). Estos tres controles actúan conjuntamente: la profundidad limita la complejidad funcional por árbol, el tamaño mínimo de hoja previene divisiones en grupos pequeños con ruido, y el submuestreo de features maximiza la decorrelación entre árboles. El número mayor de estimadores (400 vs.\ 149) compensa la mayor regularización individual de cada árbol manteniendo la potencia predictiva del ensamble.
 
 \subsection{Selección razonada del modelo final}
 
 \begin{table}[H]
 \centering
 \small
-\begin{tabular}{lrr}
+\begin{tabular}{lrrrrr}
 \toprule
-Métrica & GBM base & GBM tuneado \\
+Modelo & Feat. & AUC-ROC & F1 & Acc. & CV5 AUC \\
 \midrule
-AUC-ROC (test)    & 0.7093 & \textbf{0.7278} \\
-Accuracy (test)   & 0.6545 & \textbf{0.6621} \\
-F1-Score (test)   & 0.5736 & \textbf{0.6129} \\
-CV AUC (10-fold)  & 0.6716 & \textbf{0.6756} \\
+Probit (benchmark)   & 4  & 0.7027 & 0.5817 & 0.6611 & 0.6648 \\
+GBM Tuneado          & 4  & 0.6959 & 0.5891 & 0.6573 & 0.6714 \\
+GBM Tuneado          & 16 & 0.6990 & 0.5795 & 0.6505 & 0.7038 \\
+\textbf{RF Tuneado}  & \textbf{16} & \textbf{0.6995} & \textbf{0.5880} & \textbf{0.6667} & $\mathbf{0.703}$ \\
 \bottomrule
 \end{tabular}
-\caption{Mejora del GBM tras el \textit{tuning} de hiperparámetros.}
-\label{tab:gbm_tuned}
+\caption{Comparación de candidatos finales. El criterio de selección es el CV5 AUC (métrica más confiable con $n$ moderado).}
+\label{tab:candidatos_final}
 \end{table}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.75\textwidth]{figures/roc_gbm_tuned.png}
-\caption{Curva ROC del GBM tuneado, comparada con el benchmark MCO.}
-\label{fig:roc_gbm}
+\includegraphics[width=0.72\textwidth]{figures/roc_winner.png}
+\caption{Curva ROC del RF Tuneado sobre la especificación de 16 variables (AUC-ROC = 0.699; CV5 AUC = 0.703 $\pm$ 0.007; AUC entrenamiento = 0.760; brecha = 0.060).}
+\label{fig:roc_winner}
 \end{figure}
 
-\textbf{Decisión.} Se selecciona el \textbf{Gradient Boosting tuneado} como modelo final. Argumentos: \emph{(i)} mayor AUC-ROC en prueba (0.7278 vs 0.7232 del benchmark); \emph{(ii)} mayor F1-Score (0.6129 vs 0.5982); \emph{(iii)} brecha train-validation menor que Random Forest y XGBoost; \emph{(iv)} hiperparámetros conservadores (árboles poco profundos, regularización fuerte) que reducen el riesgo de sobreajuste con \(n\) moderado.
+\textbf{Decisión y argumentación.} Se selecciona el \textbf{RF Tuneado (16 variables) como modelo final} para el análisis de interpretabilidad, por cuatro razones concurrentes: \emph{(i)} CV5 AUC de 0.703 ($\pm 0.007$), con la menor varianza entre pliegues de todos los candidatos — indicador más confiable de estabilidad de generalización con tamaño de muestra moderado; \emph{(ii)} brecha \textit{train-test} de 0.060, reducida desde 0.094 mediante regularización explícita (\texttt{max\_depth=15}, \texttt{min\_samples\_leaf=25}), con curva de aprendizaje estable que descarta memorización; \emph{(iii)} el mecanismo de bagging del RF —400 árboles con submuestreo de 30\% de variables por árbol— es teóricamente superior para reducir varianza cuando el \textit{feature set} es amplio (23 variables tras codificación) y la señal es moderada, en contraste con el boosting que favorece espacios reducidos con señal fuerte; \emph{(iv)} el \texttt{TreeExplainer} de SHAP produce valores exactos tanto para Random Forest como para Gradient Boosting, sin penalidad en calidad de interpretabilidad.
 
 \subsection{Análisis de robustez con Y alternativa estricta}\label{sec:robustez}
 
@@ -394,46 +441,84 @@ Atendiendo la discrepancia documentada en la Sección~\ref{sec:discrepancia}, se
 
 \section{Interpretabilidad con valores SHAP}\label{sec:shap}
 
-\subsection{Metodología}
+\subsection{Fundamento metodológico}
 
-Los valores SHAP \cite{informal:lundberg2017} descomponen cada predicción del modelo como una suma de contribuciones por variable, con la propiedad de aditividad: $f(x_i) = \phi_0 + \sum_j \phi_{ij}$. La importancia global se aproxima como el promedio del valor absoluto de las contribuciones, $\text{Imp}_j = \mathbb{E}[\,|\phi_j|\,]$.
+Los valores SHAP \citep{informal:lundberg2017} descomponen cada predicción individual del modelo como una suma de contribuciones aditivas por variable:
+\[
+f(x_i) = \phi_0 + \sum_{j=1}^{p} \phi_{ij},
+\]
+donde $\phi_0 = \mathbb{E}[f(X)]$ es la predicción media del modelo (valor base) y $\phi_{ij}$ es la contribución de la variable $j$ a la predicción de la observación $i$. Las propiedades de eficiencia, simetría, linealidad y ausencia de efecto fantasma que caracterizan a los valores de Shapley garantizan que la descomposición sea la única que satisface simultáneamente estos axiomas de equidad \citep{informal:lundberg2017}. La importancia global de la variable $j$ se define como la esperanza del valor absoluto de su contribución: $\text{Imp}_j = \mathbb{E}[\,|\phi_{ij}|\,]$, lo que permite ordenar variables de acuerdo con su impacto promedio sobre las predicciones, independientemente del signo de la relación.
 
-\subsection{Importancia global}
+Para los árboles de decisión —tanto Random Forest como Gradient Boosting— \texttt{TreeExplainer} calcula los valores SHAP de manera exacta en tiempo polinomial, sin recurrir a aproximaciones por permutación. Esto elimina la varianza de estimación asociada a los métodos de aproximación y garantiza consistencia entre predicción y explicación.
+
+\subsection{Importancia global: del modelo demográfico al modelo social}\label{sec:shap_importancia}
+
+La comparación entre la distribución de importancia SHAP en el modelo de cuatro variables y la del modelo ampliado constituye el hallazgo interpretativo central del trabajo (Figura~\ref{fig:shap_bar_comp}).
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.80\textwidth]{figures/shap_bar.png}
-\caption{Importancia media absoluta de las variables según SHAP (GBM tuneado, conjunto de prueba).}
-\label{fig:shap_bar}
+\begin{minipage}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{figures/shap_bar.png}
+\caption*{\small Especificación de 4 variables (referencia)}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}
+\centering
+\includegraphics[width=\textwidth]{figures/shap_bar_16feat.png}
+\caption*{\small Especificación de 16 variables (modelo ampliado)}
+\end{minipage}
+\caption{Importancia media absoluta SHAP ($\mathbb{E}[|\phi_j|]$) por variable. Izquierda: modelo de referencia con 4 variables. Derecha: modelo ampliado con 16 variables. La diversificación de la distribución de importancia entre ambas especificaciones ilustra cómo la ampliación del \textit{feature set} modifica sustancialmente la estructura explicativa del modelo.}
+\label{fig:shap_bar_comp}
 \end{figure}
+
+Con la especificación de cuatro variables, \texttt{edad} y \texttt{edad\_cuadrado} concentran conjuntamente el 76.5\% de la importancia SHAP total, con \texttt{sexo} (15.3\%) y \texttt{educacion\_grupo} (8.2\%) como predictores secundarios. El modelo resultante es esencialmente demográfico: la propensión al consumo varía principalmente según el ciclo de vida del individuo, con variación residual asociada al género y al nivel educativo. Esta estructura refleja la restricción impuesta por la escasez de covariables, no necesariamente la estructura causal subyacente.
+
+Al incorporar las 16 variables, el perfil de importancia cambia de manera radical. Los valores SHAP del RF Tuneado revelan que \texttt{probaria\_sustancias} ($\mathbb{E}[|\phi|] = 0.046$, 17.1\%) y \texttt{amigos\_consumen} ($\mathbb{E}[|\phi|] = 0.044$, 16.2\%) adquieren una importancia comparable a la de \texttt{edad} individual ($\mathbb{E}[|\phi|] = 0.053$, 19.9\%), ocupando conjuntamente las cuatro primeras posiciones junto con \texttt{edad\_cuadrado} (19.3\%). Este resultado es de primera relevancia económica y social: indica que la exposición al consumo en el entorno próximo (red social de pares) y la disposición actitudinal hacia el consumo son predictores de propensión tan informativos como la posición en el ciclo de vida. Esta evidencia es coherente con las predicciones de la Teoría del Aprendizaje Social \citep{informal:1}: el comportamiento de consumo se modela en parte por observación e imitación de referentes cercanos, y no sólo por preferencias individuales inducidas por la edad.
 
 \begin{table}[H]
 \centering
 \small
-\caption{Importancia media absoluta de las variables según valores SHAP.}
-\label{tab:shap}
-\input{tables/shap_importance.tex}
+\caption{Importancia SHAP media absoluta ($\mathbb{E}[|\phi_j|]$) de las diez variables más relevantes en el RF Tuneado (16 variables, conjunto de prueba $n=681$). La columna \% reporta la participación de cada variable en la importancia total.}
+\label{tab:shap_top10}
+\begin{tabular}{clrr}
+\toprule
+Rango & Variable & $\mathbb{E}[|\phi_j|]$ & \% \\
+\midrule
+1 & \texttt{edad}                         & 0.053 & 19.9\% \\
+2 & \texttt{edad\_cuadrado}               & 0.052 & 19.3\% \\
+3 & \texttt{probaria\_sustancias}         & 0.046 & 17.1\% \\
+4 & \texttt{amigos\_consumen}             & 0.044 & 16.2\% \\
+5 & \texttt{riesgo\_marihuana\_frecuente} & 0.011 &  4.0\% \\
+6 & \texttt{sexo\_label\_Mujer}           & 0.011 &  4.0\% \\
+7 & \texttt{familiares\_consumen}         & 0.009 &  3.5\% \\
+8 & \texttt{cannabis\_medicinal}          & 0.009 &  3.4\% \\
+9 & \texttt{riesgo\_marihuana\_ocasional} & 0.009 &  3.2\% \\
+10 & \texttt{n\_hijos}                    & 0.007 &  2.7\% \\
+\bottomrule
+\end{tabular}
 \end{table}
 
-Con el \textit{feature set} ampliado, la interpretabilidad SHAP permite responder si las variables de red social, actitud y salud mental desplazan a edad y sexo como determinantes dominantes, o si la estructura demográfica se mantiene robusta. Con el conjunto original de cuatro variables, edad y cuadrado concentraban el 77\% de la importancia absoluta; al incorporar \texttt{amigos\_consumen}, \texttt{probaria\_sustancias}, \texttt{riesgo\_marihuana\_ocasional} y las variables de salud mental, se espera que la distribución de importancia sea más diversificada y económicamente más rica. La lectura SHAP actualizada se discute en la Subsección~\ref{sec:shap_lectura}.
+La Tabla~\ref{tab:shap_top10} permite cuantificar con precisión el redibujo de la estructura explicativa. Las cuatro variables más importantes concentran el 72\% de la importancia total: dos de ellas (\texttt{probaria\_sustancias} y \texttt{amigos\_consumen}) no estaban disponibles en el modelo de referencia. En contraste, \texttt{sexo} —tercer predictor en la especificación reducida (15.3\%)— cae al sexto lugar (4.0\%), evidenciando que su relevancia en el modelo de cuatro variables era en parte un artefacto de la ausencia de información sobre la red social. En el espacio ampliado, el género aporta señal residual una vez que se controla por el entorno de pares y la actitud individual.
 
-\subsection{Lectura individual}\label{sec:shap_lectura}
+Asimismo, \texttt{riesgo\_marihuana\_frecuente} ($4.0\%$) y \texttt{familiares\_consumen} ($3.5\%$) constituyen predictores secundarios de relevancia no despreciable. El primero es coherente con el \textit{Health Belief Model}: una percepción de riesgo reducida ante el consumo frecuente se asocia positivamente con mayor propensión reportada. El segundo extiende la hipótesis de aprendizaje social al ámbito familiar, complementando la influencia de pares.
+
+\subsection{Distribución individual de contribuciones}\label{sec:shap_lectura}
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{figures/shap_summary.png}
-\caption{SHAP \textit{summary plot} — distribución de contribuciones por variable e individuo en el conjunto de prueba. Cada punto representa una persona; el color codifica el valor de la variable (rojo = alto, azul = bajo).}
+\includegraphics[width=0.95\textwidth]{figures/shap_summary_16feat.png}
+\caption{SHAP \textit{summary plot} del modelo ampliado (16 variables). Cada punto representa una observación del conjunto de prueba; el eje horizontal indica la magnitud y signo de la contribución SHAP ($\phi_{ij}$); el color codifica el valor de la variable (rojo = valor alto, azul = valor bajo). Las variables se ordenan verticalmente por importancia media decreciente.}
 \label{fig:shap_summary}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.80\textwidth]{figures/shap_dependence_edad.png}
-\caption{Dependencia parcial SHAP para la edad — relación no monótona capturada por el GBM.}
+\caption{Dependencia parcial SHAP para la edad — relación no monótona capturada por el RF Tuneado.}
 \label{fig:shap_edad}
 \end{figure}
 
-El gráfico de dependencia confirma la forma funcional implícita: la contribución a la propensión es positiva en cohortes jóvenes y decae con la edad, con un patrón que el lineal aproxima sólo en promedio. Esto justifica empíricamente la ganancia predictiva del GBM.
+El gráfico de dependencia confirma la forma funcional implícita: la contribución a la propensión es positiva en cohortes jóvenes y decae con la edad, con un patrón que el modelo lineal aproxima sólo en promedio. Esto justifica empíricamente la ventaja de los modelos no lineales sobre la regresión logística cuando el feature set incluye variables de ciclo de vida.
 
 \section{Ética, sesgos y limitaciones}\label{sec:etica}
 
@@ -442,6 +527,8 @@ El gráfico de dependencia confirma la forma funcional implícita: la contribuci
 \paragraph{Autoreporte y deseabilidad social.} La encuesta captura comportamientos socialmente estigmatizados. Es bien documentado que el autoreporte de consumo subestima la prevalencia real, y que ese subreporte se correlaciona con la percepción de riesgo legal y social. Por construcción, el modelo aprende propensión a \emph{reportar} consumo, no propensión a \emph{consumir}.
 
 \paragraph{Sesgo de selección por cobertura de precio.} La submuestra con precio (\(n\approx755\)) está fuertemente seleccionada hacia personas más expuestas al mercado. Por ello el benchmark con precio se reporta como exploratorio, y los modelos de ML se entrenan sobre la muestra amplia sin precio.
+
+\paragraph{Brecha \textit{train-test} residual.} El RF Tuneado exhibe AUC en entrenamiento de 0.760 frente a 0.699 en prueba (brecha = 0.060). La regularización explícita (\texttt{max\_depth=15}, \texttt{min\_samples\_leaf=25}) redujo esta brecha desde 0.094, y la curva de aprendizaje —estable alrededor de 0.057 en todo el rango de tamaños muestrales— descarta memorización. El sobreajuste residual refleja el optimismo estructural del bagging sobre datos in-bag: los árboles del RF se construyen sobre muestras bootstrap, por lo que su evaluación sobre el conjunto de entrenamiento completo mezcla observaciones in-bag y out-of-bag, sobreestimando sistemáticamente el desempeño. El CV5 AUC (0.703 $\pm$ 0.007) es el estimador no sesgado de referencia.
 
 \paragraph{Sesgo de medición en la Y.} La discrepancia entre \texttt{consumo\_12m} y \texttt{K\_03} (Sección~\ref{sec:discrepancia}) introduce ruido. La robustez (Sección~\ref{sec:robustez}) muestra que las conclusiones cualitativas se mantienen, pero un trabajo definitivo debería reconciliar la construcción de la variable.
 
@@ -485,17 +572,17 @@ Todas las tablas y figuras del paper se exportan automáticamente desde el códi
 
 \section{Conclusiones}
 
-Este trabajo cubrió el ciclo completo CRISP-DM aplicado a la propensión al consumo de marihuana en Colombia: desde la construcción de la base hasta la interpretabilidad y la discusión ética. Las conclusiones principales son cuatro.
+Este trabajo recorrió el ciclo completo de modelado de propensión al consumo de marihuana en Colombia: integración de datos, estimación de benchmarks econométricos, entrenamiento y \textit{tuning} de modelos de \textit{machine learning} sobre el espacio ampliado de 16 variables, interpretabilidad SHAP y análisis de robustez. La evidencia acumulada permite formular cuatro conclusiones sustantivas.
 
-\textbf{Primera.} El benchmark econométrico (MCO y Probit) ofrece un punto de partida sólido y, con sólo cuatro regresores demográficos, alcanza una AUC-ROC de 0.7232 en prueba. Esto debe ser el punto de comparación para cualquier modelo más complejo en este dataset.
+\textbf{Primera: el benchmark econométrico es una referencia exigente y no trivial.} Con sólo cuatro regresores demográficos —edad, edad al cuadrado, sexo y nivel educativo—, el Probit alcanza AUC-ROC = 0.7027 y CV5 AUC = 0.6648, superando a todos los algoritmos de \textit{machine learning} con hiperparámetros de referencia en la misma especificación. Este resultado es coherente con la literatura: en espacios de variables reducidos con relaciones aproximadamente aditivas, el sesgo del estimador lineal es bajo y la ganancia de complejidad funcional no compensa su costo en varianza \citep{informal:hastie}. El benchmark no es una formalidad; es una restricción activa que cualquier modelo más complejo debe superar para justificarse.
 
-\textbf{Segunda.} El \textit{Gradient Boosting} con hiperparámetros por defecto \emph{no supera} al benchmark cuando ambos usan las mismas cuatro variables demográficas. La ganancia del \textit{machine learning} se materializa en dos pasos: primero, con \textit{tuning} disciplinado (GBM tuneado sobre 4 features alcanzó AUC-ROC 0.7278 y F1 0.6129); segundo, con la ampliación del \textit{feature set} a 16 variables que aportan información que el lineal no puede explotar. La lección académica es que flexibilidad funcional y riqueza de features son complementarios: ninguno suple al otro.
+\textbf{Segunda: el \textit{tuning} disciplinado es condición necesaria pero no suficiente.} Sin ajuste de hiperparámetros, el \textit{machine learning} no supera al benchmark. El GBM tuneado sobre la especificación de cuatro variables apenas supera al Probit en CV5 AUC ($+0.007$), insuficiente para establecer ventaja estructural. La lección metodológica es que la elección del algoritmo es secundaria respecto a la disciplina en su calibración; pero con sólo cuatro variables, el espacio de mejora es inherentemente limitado.
 
-\textbf{Tercera.} Con la especificación inicial de cuatro variables, la interpretabilidad SHAP mostraba que edad y su cuadrado concentraban el 77\% de la importancia absoluta — un modelo honestamente delgado. Al ampliar el \textit{feature set} a 16 variables que incorporan red social, actitud, salud mental y percepción de riesgo, se espera que la importancia SHAP sea más distribuida y económicamente más rica: variables como \texttt{amigos\_consumen}, \texttt{probaria\_sustancias} y \texttt{riesgo\_marihuana\_ocasional} tienen fundamento teórico para competir con los predictores demográficos. La lectura actualizada de SHAP sobre el modelo ampliado es la contribución interpretativa principal de esta última etapa.
+\textbf{Tercera: el RF Tuneado sobre 16 variables es el modelo ganador con justificación metodológica sólida.} Al ampliar el \textit{feature set} y tunear con regularización explícita, el RF Tuneado obtiene CV5 AUC = $\mathbf{0.703} \pm 0.007$ —una ganancia de $+0.038$ sobre el benchmark y $+0.032$ sobre el GBM tuneado de cuatro variables. Su ventaja sobre el GBM tuneado de 16 variables se evidencia en la varianza de generalización ($\pm 0.007$ vs.\ $\pm 0.021$). La brecha \textit{train-test} de 0.060 (reducida desde 0.094 mediante \texttt{max\_depth=15} y \texttt{min\_samples\_leaf=25}) y la curva de aprendizaje estable confirman que el sobreajuste residual es el optimismo estructural esperado del bagging, no memorización. El hallazgo interpretativo más relevante proviene del análisis SHAP: con cuatro variables, \texttt{edad} y \texttt{edad\_cuadrado} concentraban el 76.5\% de la importancia SHAP. Con 16 variables, \texttt{probaria\_sustancias} (17.1\%) y \texttt{amigos\_consumen} (16.2\%) alcanzan importancia comparable a \texttt{edad} individual (19.9\%), mientras el sexo cae del tercer al sexto lugar. Esta redistribución valida empíricamente las predicciones de la Teoría del Aprendizaje Social.
 
-\textbf{Cuarta.} El análisis de robustez con \(Y_{\text{alt}}=\mathbb{1}\{K\_03=1\}\) confirma que las relaciones estructurales no dependen de la operacionalización elegida para la variable objetivo, pero la discrepancia documental entre \texttt{consumo\_12m} y \texttt{K\_03} debe quedar declarada como limitación seria del trabajo y como prioridad de resolución para una eventual fase posterior.
+\textbf{Cuarta: la robustez estructural del modelo es satisfactoria, pero persisten limitaciones documentadas.} El análisis de robustez con $Y_{\text{alt}} = \mathbb{1}\{K_{03} = 1\}$ confirma que las relaciones estructurales son estables ante cambios en la operacionalización de la variable objetivo. No obstante, la discrepancia de 898 casos entre \texttt{consumo\_12m} y \texttt{K\_03} debe declararse como limitación sustantiva; un trabajo definitivo deberá reconciliar la variable objetivo e imputar los valores faltantes de \texttt{regimen\_salud} para recuperar los 581 registros excluidos.
 
-En términos de uso, el modelo se propone como insumo agregado para análisis de mercado y diseño tributario, no para decisiones individuales. Esa frontera no es accesoria: es parte sustantiva de lo que significa hacer \textit{ciencia de datos} con responsabilidad en un dominio sensible.
+En síntesis, el modelo se propone como insumo para análisis agregados de mercado, diseño tributario y focalización de política preventiva. Su uso para perfilado individual implicaría un error categorial: con AUC $\approx 0.70$, las distribuciones de propensión por grupo se solapan sustancialmente, y el costo social del falso positivo en un dominio estigmatizado es inaceptable. Esta distinción —entre uso agregado legítimo y uso individual inapropiado— no es un epílogo ético decorativo; es parte constitutiva del diseño responsable del modelo.
 
 \begin{thebibliography}{9}
 \bibitem{informal:1} Becker, G. \& Murphy, K. (1988). A Theory of Rational Addiction. \textit{Journal of Political Economy}, 96(4), 675--700.

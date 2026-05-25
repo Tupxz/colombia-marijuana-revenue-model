@@ -1,55 +1,100 @@
 % Interpretabilidad SHAP
 \section{Interpretabilidad}
 
+% ── Slide 1: Por qué SHAP ──
 \begin{frame}
 \frametitle{¿Por qué SHAP?}
-\textbf{Problema}: el GBM es una caja gris. Sin interpretabilidad, no es útil para política pública.
+\textbf{Problema}: el RF Tuneado es una caja negra. Sin interpretabilidad, no es útil para política pública.
 
 \vspace{0.3cm}
-\textbf{SHAP (Lundberg \& Lee, 2017)}: descompone cada predicción como suma de contribuciones por variable.
-
-\vspace{0.2cm}
-\textit{Propiedad clave}: aditividad
+\textbf{SHAP (Lundberg \& Lee, 2017)}: descompone cada predicción como suma de contribuciones por variable:
 \[
-f(x_i) = \phi_0 + \sum_j \phi_{ij}
+f(x_i) = \phi_0 + \sum_{j=1}^{p} \phi_{ij}
 \]
 
+La importancia global: $\text{Imp}_j = \mathbb{E}[\,|\phi_{ij}|\,]$
+
 \vspace{0.2cm}
-La importancia global es $\text{Imp}_j = \mathbb{E}[\,|\phi_j|\,]$.
-\end{frame}
+\textbf{Ventaja clave}: \texttt{TreeExplainer} calcula valores SHAP \textit{exactos} para árboles de decisión, sin aproximación por permutación. Válido tanto para Random Forest como para GBM.
 
-\begin{frame}
-\frametitle{Importancia SHAP — global (modelo ampliado)}
-\centering
-\includegraphics[width=0.78\textwidth]{../figures/shap_bar.png}
-\\
 \vspace{0.2cm}
-\small Con 4 features: edad + edad² ${\sim}77\%$, sexo 15\%, educación 8\% — modelo demográfico puro.\\
-Con 16 features: se espera que \texttt{amigos\_consumen}, \texttt{probaria\_sustancias} y \texttt{riesgo\_marihuana\_ocasional} ganen peso. Ver notebook 06 para el análisis actualizado.
+\textit{Uso aquí}: comparar la estructura explicativa del modelo de 4 variables vs.\ el modelo de 16 variables (RF Tuneado).
 \end{frame}
 
+% ── Slide 2: Comparación importancia SHAP ──
 \begin{frame}
-\frametitle{SHAP summary — distribución individual}
+\frametitle{Importancia SHAP — del modelo demográfico al modelo social}
+\begin{columns}[T]
+\column{0.48\textwidth}
 \centering
-\includegraphics[height=0.78\textheight,keepaspectratio]{../figures/shap_summary.png}
+\small \textbf{4 variables} (GBM Tuneado — referencia)\\[0.1cm]
+\includegraphics[width=\textwidth]{../figures/shap_bar.png}
+\scriptsize Edad+edad² concentran \textbf{76.5\%}.\\Sexo ocupa el 3\textsuperscript{er} lugar (15.3\%).\\Modelo demográfico puro.
+
+\column{0.48\textwidth}
+\centering
+\small \textbf{16 variables} (RF Tuneado $\star$)\\[0.1cm]
+\includegraphics[width=\textwidth]{../figures/shap_bar_16feat.png}
+\scriptsize Red social y actitud alcanzan importancia comparable a la edad (19.9\%). Sexo cae al 6\textsuperscript{to} lugar (4.0\%).
+\end{columns}
 \end{frame}
 
+% ── Slide 3: Tabla top-10 SHAP ──
 \begin{frame}
-\frametitle{Dependencia parcial — edad}
+\frametitle{Top 10 variables — importancia SHAP (RF Tuneado, 16 variables)}
 \centering
-\includegraphics[height=0.66\textheight,keepaspectratio]{../figures/shap_dependence_edad.png}
+\footnotesize
+\begin{tabular}{clrr}
+\toprule
+\# & Variable & $\mathbb{E}[|\phi_j|]$ & \% \\
+\midrule
+1 & \texttt{edad}                         & 0.053 & 19.9\% \\
+2 & \texttt{edad\_cuadrado}               & 0.052 & 19.3\% \\
+3 & \texttt{probaria\_sustancias}         & 0.046 & 17.1\% \\
+4 & \texttt{amigos\_consumen}             & 0.044 & 16.2\% \\
+5 & \texttt{riesgo\_marihuana\_frecuente} & 0.011 &  4.0\% \\
+6 & \texttt{sexo\_label\_Mujer}           & 0.011 &  4.0\% \\
+7 & \texttt{familiares\_consumen}         & 0.009 &  3.5\% \\
+8 & \texttt{cannabis\_medicinal}          & 0.009 &  3.4\% \\
+9 & \texttt{riesgo\_marihuana\_ocasional} & 0.009 &  3.2\% \\
+10 & \texttt{n\_hijos}                    & 0.007 &  2.7\% \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.25cm}
+\flushleft
+\scriptsize
+\textbf{Lectura}: \texttt{probaria\_sustancias} (17.1\%) y \texttt{amigos\_consumen} (16.2\%) son \textit{tan importantes como la edad individual} (19.9\%). El sexo —3\textsuperscript{er} predictor con 4 variables (15.3\%)— cae al 6\textsuperscript{to} lugar (4.0\%).\\
+\textbf{Validación}: Teoría del Aprendizaje Social (Bandura) + \textit{Health Belief Model}.
+\end{frame}
+
+% ── Slide 4: SHAP summary ──
+\begin{frame}
+\frametitle{SHAP summary plot — dirección e intensidad por individuo}
+\centering
+\includegraphics[height=0.78\textheight,keepaspectratio]{../figures/shap_summary_16feat.png}
+\end{frame}
+
+% ── Slide 5: Dependencia edad ──
+\begin{frame}
+\frametitle{Dependencia parcial SHAP — Edad}
+\centering
+\includegraphics[height=0.65\textheight,keepaspectratio]{../figures/shap_dependence_edad.png}
 \\
-\vspace{0.05cm}
-\scriptsize Relación no monótona: positiva en jóvenes, decae con la edad. Por qué gana el GBM: captura mejor esta forma funcional que el lineal.
+\vspace{0.1cm}
+\scriptsize
+Relación no monótona: contribución positiva en cohortes jóvenes, decreciente con la edad.\\
+Esta forma funcional no lineal justifica el uso del RF sobre modelos lineales, y es consistente con la hipótesis de ciclo de vida del consumo.
 \end{frame}
 
+% ── Slide 6: Robustez ──
 \begin{frame}
-\frametitle{Robustez — Y alternativa estricta}
+\frametitle{Análisis de robustez — variable objetivo alternativa}
 \small
-\textbf{Motivación}: la auditoría detectó que \texttt{consumo\_12m} difiere de \texttt{K\_03} en 898 casos.
+\textbf{Motivación}: \texttt{consumo\_12m} difiere de \texttt{K\_03} en 898 casos (22.6\% de los consumidores declarados).
 
 \vspace{0.2cm}
-\textbf{Test}: reentrenar el GBM tuneado con $Y_{\text{alt}}=\mathbb{1}\{K\_03=1\}$.
+\textbf{Hallazgo}: en la especificación de 4 variables (GBM Tuneado), reentrenar con $Y_{\text{alt}} = \mathbb{1}\{K\_03 = 1\}$ produce:
 
 \vspace{0.2cm}
 \centering
@@ -58,12 +103,14 @@ Con 16 features: se espera que \texttt{amigos\_consumen}, \texttt{probaria\_sust
 \toprule
 Métrica & Y original & Y estricta & $\Delta$ \\
 \midrule
-AUC-ROC (test)        & 0.7182 & 0.6870 & $-0.031$ \\
-CV AUC-10fold (mean)  & 0.6685 & 0.6951 & $+0.027$ \\
+AUC-ROC (prueba)      & 0.6959 & 0.6870 & $-0.009$ \\
+CV AUC-5fold (media)  & 0.6714 & 0.6951 & $+0.027$ \\
 \bottomrule
 \end{tabular}
+
 \vspace{0.25cm}
-\\
 \flushleft
-\scriptsize\textbf{Conclusión}: las relaciones estructurales se mantienen; la discrepancia no domina el resultado.
+\scriptsize
+\textbf{Conclusión}: el CV AUC \textit{mejora} con la Y estricta ($+0.027$), señal de que una operacionalización más limpia del objetivo mejora la generalización. Las relaciones estructurales son estables ante la elección de Y.\\
+\textbf{Próximo paso}: reconciliar las 898 discrepancias y re-estimar el RF Tuneado con $Y_{\text{alt}}$.
 \end{frame}

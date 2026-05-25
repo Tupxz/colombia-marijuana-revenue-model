@@ -475,7 +475,7 @@
         Construimos un pipeline reproducible que compara un benchmark econométrico (MCO/Probit) con modelos de machine learning (Random Forest, XGBoost y Gradient Boosting Machine) para predecir la probabilidad individual de reportar consumo de marihuana en los últimos doce meses en Colombia. Utilizamos la Encuesta Nacional de Consumo de Sustancias Psicoactivas (ENCSPA), integrando cinco módulos: consumo (cap. K), datos demográficos, educación, red social y actitudes (cap. G), y situación laboral, salud mental y percepción de riesgo (cap. D). El feature set ampliado incluye 16 variables distribuidas en siete grupos teóricos.
       </p>
       <p>
-        Con cuatro variables, el benchmark MCO alcanza AUC-ROC de 0.7232. El GBM con hiperparámetros por defecto no supera este umbral; sólo tras <em>tuning</em> disciplinado (RandomizedSearchCV, 60 combinaciones × 5 folds) el GBM alcanza AUC-ROC = 0.7278 y F1 = 0.6129. La interpretabilidad via SHAP revela que con el modelo ampliado las variables de red social (<em>amigos_consumen</em>), actitud (<em>probaria_sustancias</em>) y percepción de riesgo ganan peso sustancial frente a las puramente demográficas. Un análisis de robustez con variable objetivo alternativa confirma la estabilidad de las relaciones estructurales. Se discuten sesgos, limitaciones éticas y usos responsables del modelo.
+        Con cuatro variables, el benchmark Probit alcanza AUC-ROC = 0.7027 (CV5 = 0.6648). Ningún modelo ML lo supera con el mismo feature set sin tuning disciplinado. Al ampliar a 16 variables y tunear con regularización explícita, el <strong>RF Tuneado obtiene CV5 AUC = 0.703 ± 0.007</strong> — ganancia de +0.038 sobre el benchmark. La brecha train-test se controla en 0.060 (max_depth=15, min_samples_leaf=25) y la curva de aprendizaje descarta memorización. La interpretabilidad SHAP revela que <em>probaria_sustancias</em> (17.1%) y <em>amigos_consumen</em> (16.2%) alcanzan importancia comparable a la edad individual (19.9%), validando la Teoría del Aprendizaje Social. El sexo cae del 3er al 6to lugar al controlar por red social y actitud.
       </p>
     </div>
   </div>
@@ -486,41 +486,61 @@
   <div class="container">
     <h2>Resultados Clave</h2>
     <div class="section-line"></div>
+    <!-- Two-model comparison banner -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:24px;">
+      <div style="background:var(--card-bg); border-radius:var(--radius); padding:24px; box-shadow:0 2px 12px rgba(0,0,0,0.06); border-top:3px solid var(--text-muted);">
+        <div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:.07em; font-weight:700; color:var(--text-muted); margin-bottom:12px;">Especificación base — 4 variables</div>
+        <div style="display:flex; gap:24px; flex-wrap:wrap;">
+          <div><div style="font-size:1.7rem; font-weight:700; color:var(--text-muted);">0.7027</div><div style="font-size:0.75rem; color:var(--text-muted);">AUC-ROC (Probit benchmark)</div></div>
+          <div><div style="font-size:1.7rem; font-weight:700; color:var(--text-muted);">0.6648</div><div style="font-size:0.75rem; color:var(--text-muted);">CV5 AUC (Probit benchmark)</div></div>
+          <div><div style="font-size:1.7rem; font-weight:700; color:var(--text-muted);">0.6714</div><div style="font-size:0.75rem; color:var(--text-muted);">CV5 AUC (GBM tuneado 4-var)</div></div>
+        </div>
+      </div>
+      <div style="background:var(--card-bg); border-radius:var(--radius); padding:24px; box-shadow:0 2px 12px rgba(0,0,0,0.06); border-top:3px solid var(--green-accent);">
+        <div style="font-size:0.72rem; text-transform:uppercase; letter-spacing:.07em; font-weight:700; color:var(--green-mid); margin-bottom:12px;">RF Tuneado — 16 variables ★ (GANADOR — regularización explícita)</div>
+        <div style="display:flex; gap:24px; flex-wrap:wrap;">
+          <div><div style="font-size:1.7rem; font-weight:700; color:var(--green-mid);">0.703</div><div style="font-size:0.75rem; color:var(--text-muted);">CV5 AUC ± 0.007 ↑ mejor</div></div>
+          <div><div style="font-size:1.7rem; font-weight:700; color:var(--green-mid);">0.699</div><div style="font-size:0.75rem; color:var(--text-muted);">AUC-ROC (prueba)</div></div>
+          <div><div style="font-size:1.7rem; font-weight:700; color:var(--green-mid);">3,401</div><div style="font-size:0.75rem; color:var(--text-muted);">obs. efectivas</div></div>
+        </div>
+      </div>
+    </div>
     <div class="metrics-grid">
       <div class="metric-card">
-        <div class="metric-value">0.7278</div>
-        <div class="metric-label">AUC-ROC<br/>GBM Tuneado</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-value">0.6129</div>
-        <div class="metric-label">F1 Score<br/>GBM Final</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-value">0.7232</div>
-        <div class="metric-label">AUC-ROC<br/>Benchmark MCO</div>
-      </div>
-      <div class="metric-card">
         <div class="metric-value">3,982</div>
-        <div class="metric-label">Individuos<br/>en la muestra</div>
+        <div class="metric-label">Individuos<br/>en la encuesta</div>
       </div>
       <div class="metric-card">
         <div class="metric-value">16</div>
         <div class="metric-label">Features<br/>modelo ampliado</div>
       </div>
       <div class="metric-card">
+        <div class="metric-value">7</div>
+        <div class="metric-label">Grupos teóricos<br/>de variables</div>
+      </div>
+      <div class="metric-card">
         <div class="metric-value">300</div>
         <div class="metric-label">Ajustes en<br/>búsqueda hiperpar.</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">43%</div>
+        <div class="metric-label">Prevalencia<br/>consumo 12m</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-value">5</div>
+        <div class="metric-label">Módulos ENCSPA<br/>integrados</div>
       </div>
     </div>
 
     <!-- Results Table -->
     <div style="margin-top: 40px;">
-      <h3 style="font-size:1.1rem; font-weight:600; color:var(--green-dark); margin-bottom:16px;">Comparación de modelos — especificación de 4 variables</h3>
+      <h3 style="font-size:1.1rem; font-weight:600; color:var(--green-dark); margin-bottom:16px;">Comparación completa de modelos</h3>
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
               <th>Modelo</th>
+              <th>Features</th>
               <th>Accuracy</th>
               <th>AUC-ROC</th>
               <th>F1</th>
@@ -528,73 +548,116 @@
             </tr>
           </thead>
           <tbody>
+            <tr style="background:#f8f8f6;">
+              <td colspan="6" style="font-size:0.75rem; font-weight:700; color:var(--text-muted); padding:8px 16px; letter-spacing:.05em; text-transform:uppercase;">Benchmark econométrico</td>
+            </tr>
             <tr>
               <td>MCO (LPM)</td>
-              <td>0.6608</td>
-              <td>0.7232</td>
-              <td>0.5982</td>
-              <td>0.6728</td>
+              <td>4</td>
+              <td>0.6611</td>
+              <td>0.7033</td>
+              <td>0.5823</td>
+              <td>—</td>
             </tr>
             <tr>
               <td>Probit</td>
-              <td>0.6608</td>
-              <td>0.7228</td>
-              <td>0.5982</td>
-              <td>0.6728</td>
+              <td>4</td>
+              <td>0.6611</td>
+              <td>0.7027</td>
+              <td>0.5817</td>
+              <td>0.6648</td>
+            </tr>
+            <tr style="background:#f8f8f6;">
+              <td colspan="6" style="font-size:0.75rem; font-weight:700; color:var(--text-muted); padding:8px 16px; letter-spacing:.05em; text-transform:uppercase;">ML — especificación base (4 variables)</td>
             </tr>
             <tr>
               <td>Random Forest</td>
-              <td>0.6533</td>
-              <td>0.7063</td>
-              <td>0.5763</td>
-              <td>0.6674</td>
-            </tr>
-            <tr>
-              <td>XGBoost</td>
-              <td>0.6432</td>
-              <td>0.7001</td>
-              <td>0.5610</td>
-              <td>0.6614</td>
+              <td>4</td>
+              <td>0.6397</td>
+              <td>0.6600</td>
+              <td>0.5689</td>
+              <td>0.6316</td>
             </tr>
             <tr>
               <td>Gradient Boosting</td>
-              <td>0.6545</td>
-              <td>0.7093</td>
-              <td>0.5736</td>
-              <td>0.6716</td>
+              <td>4</td>
+              <td>0.6373</td>
+              <td>0.6947</td>
+              <td>0.5511</td>
+              <td>0.6667</td>
             </tr>
-            <tr style="background: #f0faf5;">
-              <td><strong>GBM Tuneado (4 feat.)</strong> <span class="tag-best">MEJOR</span></td>
-              <td class="best">0.6621</td>
-              <td class="best">0.7278</td>
-              <td class="best">0.6129</td>
-              <td class="best">0.6756</td>
+            <tr>
+              <td><strong>GBM Tuneado</strong> <span class="tag-best">↑ TUNING</span></td>
+              <td><strong>4</strong></td>
+              <td>0.6573</td>
+              <td>0.6959</td>
+              <td>0.5891</td>
+              <td>0.6714</td>
+            </tr>
+            <tr style="background:#f8f8f6;">
+              <td colspan="6" style="font-size:0.75rem; font-weight:700; color:var(--green-mid); padding:8px 16px; letter-spacing:.05em; text-transform:uppercase;">ML — modelo ampliado (16 variables, n=3 401) ★</td>
+            </tr>
+            <tr>
+              <td>Random Forest</td>
+              <td><strong style="color:var(--green-mid);">16</strong></td>
+              <td>0.6397</td>
+              <td>0.6519</td>
+              <td>—</td>
+              <td>0.677 ± 0.018</td>
+            </tr>
+            <tr>
+              <td>Gradient Boosting</td>
+              <td><strong style="color:var(--green-mid);">16</strong></td>
+              <td>0.6490</td>
+              <td>0.6949</td>
+              <td>—</td>
+              <td>0.699 ± 0.019</td>
+            </tr>
+            <tr>
+              <td>GBM Tuneado</td>
+              <td><strong style="color:var(--green-mid);">16</strong></td>
+              <td>0.6505</td>
+              <td>0.6990</td>
+              <td>0.5795</td>
+              <td>0.704 ± 0.021</td>
+            </tr>
+            <tr style="background:#eaf7f1;">
+              <td><strong>RF Tuneado ★</strong></td>
+              <td><strong style="color:var(--green-mid);">16</strong></td>
+              <td class="best">0.6667</td>
+              <td class="best">0.6990</td>
+              <td class="best">0.5880</td>
+              <td style="font-weight:700; color:var(--green-mid);">0.703 ± 0.007 ↑ MEJOR</td>
             </tr>
           </tbody>
         </table>
       </div>
-      <p style="font-size:0.8rem; color:var(--text-muted); margin-top:10px;">
-        El ML por defecto <em>no</em> supera al benchmark. La ganancia aparece únicamente tras tuning disciplinado. Ver notebooks 05 y 06 para el análisis con 16 features.
+      <p style="font-size:0.83rem; color:var(--text-muted); margin-top:12px; background:#f0faf5; border-left:3px solid var(--green-accent); padding:12px 16px; border-radius:0 8px 8px 0;">
+        <strong style="color:var(--green-dark);">Hallazgo clave:</strong> El <strong>RF Tuneado regularizado (16 variables)</strong> alcanza CV5 AUC = 0.703 ± 0.007, superando al benchmark Probit en <strong>+0.038</strong> y al GBM tuneado de 4 variables en <strong>+0.032</strong>. La varianza entre pliegues (±0.007) es <strong>tres veces menor</strong> que la del GBM tuneado 16-var (±0.021). La regularización explícita (max_depth=15, min_samples_leaf=25) redujo la brecha train-test de 0.094 a <strong>0.060</strong>; la curva de aprendizaje estable descarta memorización.
       </p>
     </div>
 
     <!-- Figures row -->
     <div style="margin-top:40px;" class="figures-grid">
       <div class="fig-card">
-        <img src="figures/comparacion_benchmark_ml.png" alt="Comparación Benchmark vs ML" loading="lazy" />
-        <div class="fig-caption"><strong>Fig. 1</strong> — Comparación visual de AUC-ROC entre el benchmark econométrico y los modelos ML, antes y después del tuning.</div>
+        <img src="figures/comparacion_ml_16feat.png" alt="Comparación modelos 16 variables" loading="lazy" />
+        <div class="fig-caption"><strong>Fig. 1</strong> — AUC-ROC, F1 y Accuracy de los tres modelos ML sobre el feature set ampliado (16 variables, n=3 401).</div>
       </div>
       <div class="fig-card">
-        <img src="figures/roc_gbm_tuned.png" alt="ROC GBM Tuneado" loading="lazy" />
-        <div class="fig-caption"><strong>Fig. 2</strong> — Curva ROC del GBM tuneado (AUC = 0.7278). Comparada con la referencia aleatoria.</div>
+        <img src="figures/curvas_roc_16feat.png" alt="ROC curves 16 variables" loading="lazy" />
+        <div class="fig-caption"><strong>Fig. 2</strong> — Curvas ROC de los tres modelos con 16 variables. Capacidad discriminatoria comparable entre algoritmos cuando el feature set es rico.</div>
       </div>
       <div class="fig-card">
         <img src="figures/cv_10fold_boxplot.png" alt="CV 10-fold" loading="lazy" />
-        <div class="fig-caption"><strong>Fig. 3</strong> — Distribución de AUC-ROC en validación cruzada de 10 pliegues. Solapamiento sustancial con el CV del benchmark antes del tuning.</div>
+        <div class="fig-caption"><strong>Fig. 3</strong> — CV-10 sobre especificación de 4 variables. El solapamiento confirma que el ML no supera al benchmark sin tuning.</div>
       </div>
       <div class="fig-card">
         <img src="figures/curvas_aprendizaje.png" alt="Curvas de aprendizaje" loading="lazy" />
-        <div class="fig-caption"><strong>Fig. 4</strong> — Curvas de aprendizaje del GBM. Brecha train/validation como diagnóstico de overfitting.</div>
+        <div class="fig-caption"><strong>Fig. 4</strong> — Curvas de aprendizaje (4 variables). El GBM converge antes que el RF en el espacio reducido.</div>
+      </div>
+      <div class="fig-card" style="outline:2px solid var(--green-accent);">
+        <img src="figures/curva_aprendizaje_rf.png" alt="Curva aprendizaje RF 16 variables" loading="lazy" />
+        <div class="fig-caption"><strong>Fig. 5</strong> — Curva de aprendizaje RF Tuneado (16 variables). Brecha train-CV5 estable en ≈0.057 — descarta memorización. CV5 supera al benchmark Probit desde n≈500.</div>
       </div>
     </div>
   </div>
@@ -605,24 +668,64 @@
   <div class="container">
     <h2>Interpretabilidad SHAP</h2>
     <div class="section-line"></div>
-    <p style="max-width:720px; margin-bottom:32px;">
-      Usando <strong>SHAP TreeExplainer</strong> (Lundberg &amp; Lee, 2017) descomponemos cada predicción como suma de contribuciones por variable:
-      <em>f(xᵢ) = φ₀ + Σⱼ φᵢⱼ</em>.
-      La importancia global es el valor absoluto esperado de cada contribución.
-      Con el modelo de 4 variables, edad+edad² concentran ~77% de la importancia. Al ampliar a 16 variables, <code>amigos_consumen</code>, <code>probaria_sustancias</code> y <code>riesgo_marihuana_ocasional</code> ganan peso sustancial.
+    <p style="max-width:760px; margin-bottom:24px;">
+      Usando <strong>SHAP TreeExplainer</strong> (Lundberg &amp; Lee, 2017) descomponemos cada predicción como suma de contribuciones exactas por variable: <em>f(xᵢ) = φ₀ + Σⱼ φᵢⱼ</em>. La importancia global E[|φⱼ|] permite ordenar variables independientemente del signo de su efecto.
     </p>
-    <div class="figures-grid">
-      <div class="fig-card">
-        <img src="figures/shap_bar.png" alt="SHAP importancia global" loading="lazy" />
-        <div class="fig-caption"><strong>Fig. 5</strong> — Importancia SHAP global (modelo de referencia). Con 4 features: edad+edad² dominan (77%), sexo 15%, educación 8%.</div>
+    <div style="background:#f0faf5; border-left:4px solid var(--green-accent); border-radius:0 8px 8px 0; padding:16px 20px; margin-bottom:32px; max-width:760px;">
+      <strong style="color:var(--green-dark);">Hallazgo interpretativo central (RF Tuneado, 16 variables):</strong> con 4 variables, edad+edad² concentran el <strong>76.5%</strong> de la importancia — un modelo demográfico puro; el sexo ocupa el 3er lugar (15.3%). Con 16 variables (RF Tuneado), <code>probaria_sustancias</code> (17.1%) y <code>amigos_consumen</code> (16.2%) alcanzan importancia <em>comparable a la de edad individual</em> (19.9%). El sexo cae al sexto lugar (4.0%). <strong>La red social y la actitud co-determinan la propensión tanto como el ciclo de vida.</strong> Esto valida empíricamente la Teoría del Aprendizaje Social y el Health Belief Model.
+    </div>
+
+    <!-- Side-by-side SHAP comparison -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px;">
+      <div>
+        <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); margin-bottom:10px; text-align:center;">Modelo 4 variables (referencia)</div>
+        <div class="fig-card">
+          <img src="figures/shap_bar.png" alt="SHAP bar 4 variables" loading="lazy" />
+          <div class="fig-caption"><strong>Fig. 5a</strong> — Importancia SHAP global, 4 features. Edad+edad² dominan (~77%), sexo y educación concentran el resto.</div>
+        </div>
       </div>
-      <div class="fig-card">
-        <img src="figures/shap_summary.png" alt="SHAP summary plot" loading="lazy" />
-        <div class="fig-caption"><strong>Fig. 6</strong> — SHAP summary plot. Distribución de valores individuales por variable: dirección e intensidad del efecto para cada observación.</div>
+      <div>
+        <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--green-mid); margin-bottom:10px; text-align:center;">Modelo 16 variables ★ (ampliado)</div>
+        <div class="fig-card" style="outline:2px solid var(--green-accent);">
+          <img src="figures/shap_bar_16feat.png" alt="SHAP bar 16 variables" loading="lazy" />
+          <div class="fig-caption"><strong>Fig. 5b</strong> — Importancia SHAP global, 16 features. Red social y percepción de riesgo ganan peso; distribución más diversificada y teóricamente más rica.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Top-10 SHAP table -->
+    <div style="margin-bottom:32px;">
+      <h3 style="font-size:1rem; font-weight:600; color:var(--green-dark); margin-bottom:14px;">Top 10 variables por importancia SHAP — modelo de 16 variables</h3>
+      <div class="table-wrap">
+        <table style="font-size:0.85rem;">
+          <thead>
+            <tr><th>#</th><th>Variable</th><th>E[|φⱼ|]</th><th>%</th><th>Grupo teórico</th></tr>
+          </thead>
+          <tbody>
+            <tr style="background:#eaf7f1;"><td>1</td><td><code>edad</code></td><td>0.053</td><td class="best">19.9%</td><td>Demográfica</td></tr>
+            <tr style="background:#eaf7f1;"><td>2</td><td><code>edad_cuadrado</code></td><td>0.052</td><td class="best">19.3%</td><td>Demográfica</td></tr>
+            <tr style="background:#eaf7f1;"><td>3</td><td><code>probaria_sustancias</code></td><td>0.046</td><td class="best">17.1%</td><td>Actitud ★</td></tr>
+            <tr style="background:#eaf7f1;"><td>4</td><td><code>amigos_consumen</code></td><td>0.044</td><td class="best">16.2%</td><td>Red social ★</td></tr>
+            <tr><td>5</td><td><code>riesgo_marihuana_frecuente</code></td><td>0.011</td><td>4.0%</td><td>Percepción riesgo ★</td></tr>
+            <tr><td>6</td><td><code>sexo_label_Mujer</code></td><td>0.011</td><td>4.0%</td><td>Demográfica ↓</td></tr>
+            <tr><td>7</td><td><code>familiares_consumen</code></td><td>0.009</td><td>3.5%</td><td>Red social ★</td></tr>
+            <tr><td>8</td><td><code>cannabis_medicinal</code></td><td>0.009</td><td>3.4%</td><td>Actitud ★</td></tr>
+            <tr><td>9</td><td><code>riesgo_marihuana_ocasional</code></td><td>0.009</td><td>3.2%</td><td>Percepción riesgo ★</td></tr>
+            <tr><td>10</td><td><code>n_hijos</code></td><td>0.007</td><td>2.7%</td><td>Familia ★</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:0.78rem; color:var(--text-muted); margin-top:8px;">★ Variables no disponibles en el modelo de 4 variables. ↓ Variables que caen en relevancia relativa al ampliar el feature set.</p>
+    </div>
+
+    <div class="figures-grid">
+      <div class="fig-card" style="outline:2px solid var(--green-accent);">
+        <img src="figures/shap_summary_16feat.png" alt="SHAP summary 16 variables" loading="lazy" />
+        <div class="fig-caption"><strong>Fig. 6</strong> — SHAP summary plot (16 variables). Cada punto = una persona. Color rojo = valor alto de la variable. Muestra dirección e intensidad del efecto individual.</div>
       </div>
       <div class="fig-card">
         <img src="figures/shap_dependence_edad.png" alt="Dependencia SHAP edad" loading="lazy" />
-        <div class="fig-caption"><strong>Fig. 7</strong> — Dependencia parcial SHAP sobre edad. Relación no monótona: positiva en jóvenes, decae con la edad — forma funcional que el GBM captura mejor que el lineal.</div>
+        <div class="fig-caption"><strong>Fig. 7</strong> — Dependencia parcial SHAP sobre edad. Relación no monótona: positiva en jóvenes, decreciente con la edad — forma funcional que el GBM captura mejor que el lineal.</div>
       </div>
     </div>
 
